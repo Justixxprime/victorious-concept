@@ -1,0 +1,12 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-cream: #fbf3e7;
+  --color-espresso: #3a2318;
+  --color-gold: #c58b52;
+  --color-gold-light: #e8c490;
+  --font-display: "Fraunces", serif;
+  --font-sans: "Inter", sans-serif;
+  --font-sans: "Inter", sans-serif;
+}

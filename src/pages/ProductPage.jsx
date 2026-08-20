@@ -1,0 +1,87 @@
+import { useParams, Link } from 'react-router-dom'
+import { Heart, ShoppingBag, Truck, RefreshCw } from 'lucide-react'
+import { products } from '../data/products'
+import { formatPrice } from '../utils/formatPrice'
+import { useCart } from '../context/CartContext'
+import { useWishlist } from '../context/WishlistContext'
+
+function ProductPage() {
+  const { id } = useParams()
+  const product = products.find((p) => p.id === id)
+  const { addToCart } = useCart()
+  const { toggleWishlist, isWishlisted } = useWishlist()
+
+  if (!product) {
+    return (
+      <div className="min-h-screen bg-cream dark:bg-espresso flex flex-col items-center justify-center gap-4 px-6 text-center">
+        <h1 className="font-display italic text-3xl text-espresso dark:text-cream">
+          Product not found
+        </h1>
+        <Link to="/shop" className="text-gold hover:underline">
+          Back to Shop
+        </Link>
+      </div>
+    )
+  }
+
+  const saved = isWishlisted(product.id)
+
+  return (
+    <section className="bg-cream dark:bg-espresso transition-colors py-12 px-6 min-h-screen">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
+        <div className="aspect-square rounded-2xl bg-gold/10 flex items-center justify-center">
+          <span className="font-sans text-sm text-espresso/40 dark:text-cream/40 uppercase tracking-wide">
+            Image coming soon
+          </span>
+        </div>
+
+        <div className="flex flex-col gap-6">
+          <div>
+            <p className="font-sans text-xs uppercase tracking-widest text-gold mb-2">
+              {product.category}
+            </p>
+            <h1 className="font-display italic font-semibold text-3xl md:text-4xl text-espresso dark:text-cream">
+              {product.name}
+            </h1>
+            <p className="font-sans text-xl text-gold mt-3">
+              {formatPrice(product.price)}
+            </p>
+          </div>
+
+          <p className="font-sans text-sm text-espresso/70 dark:text-cream/70 leading-relaxed">
+            PLACEHOLDER description. Full product details, materials, and styling notes will be added once available.
+          </p>
+
+          <div className="flex gap-3">
+            <button
+              onClick={() => addToCart(product)}
+              className="flex-1 bg-gold text-espresso font-sans font-medium px-8 py-4 rounded-full flex items-center justify-center gap-2 hover:bg-gold-light transition-colors"
+            >
+              <ShoppingBag className="w-4 h-4" /> Add to Cart
+            </button>
+            <button
+              onClick={() => toggleWishlist(product)}
+              className="w-14 h-14 rounded-full border border-gold/30 flex items-center justify-center hover:border-gold transition-colors"
+              aria-label="Add to wishlist"
+            >
+              <Heart className={`w-5 h-5 ${saved ? 'fill-gold text-gold' : 'text-espresso dark:text-cream'}`} />
+            </button>
+          </div>
+
+          <div className="flex flex-col gap-3 pt-4 border-t border-gold/20">
+            <div className="flex items-center gap-3 text-sm font-sans text-espresso/70 dark:text-cream/70">
+              <Truck className="w-4 h-4 text-gold" />
+              Nationwide delivery available
+            </div>
+            <div className="flex items-center gap-3 text-sm font-sans text-espresso/70 dark:text-cream/70">
+              <RefreshCw className="w-4 h-4 text-gold" />
+              Returns policy to be confirmed
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+export default ProductPage
