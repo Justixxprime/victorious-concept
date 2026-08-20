@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import SEO from '../components/SEO'
 import { products } from '../data/products'
 import { categories } from '../data/categories'
 import ProductCard from '../components/ProductCard'
@@ -18,6 +19,7 @@ function Shop() {
 
   return (
     <section className="bg-cream dark:bg-espresso transition-colors py-12 px-6 min-h-screen">
+      <SEO title="Shop All" description="Browse the full Victorious Concept collection." />
       <div className="max-w-7xl mx-auto">
         <h1 className="font-display italic font-semibold text-4xl text-espresso dark:text-cream mb-8">
           Shop All

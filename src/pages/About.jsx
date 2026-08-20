@@ -1,3 +1,5 @@
+import SEO from '../components/SEO'
+
 function About() {
   const timeline = [
     { label: 'University', text: 'PLACEHOLDER: where and what she studied.' },
@@ -10,6 +12,7 @@ function About() {
 
   return (
     <section className="bg-cream dark:bg-espresso transition-colors">
+     <SEO title="About" description="The Victorious Concept story, from university to the next chapter." />   
       <div className="max-w-4xl mx-auto px-6 py-20">
         <p className="font-sans text-xs uppercase tracking-widest text-gold mb-4">
           Our Story

@@ -4,6 +4,7 @@ import { products } from '../data/products'
 import { formatPrice } from '../utils/formatPrice'
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
+import SEO from '../components/SEO'
 
 function ProductPage() {
   const { id } = useParams()
@@ -28,6 +29,7 @@ function ProductPage() {
 
   return (
     <section className="bg-cream dark:bg-espresso transition-colors py-12 px-6 min-h-screen">
+      <SEO title={product.name} description={`${product.name}, available now at Victorious Concept.`} />
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
         <div className="aspect-square rounded-2xl bg-gold/10 flex items-center justify-center">
           <span className="font-sans text-sm text-espresso/40 dark:text-cream/40 uppercase tracking-wide">
