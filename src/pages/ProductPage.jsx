@@ -8,6 +8,7 @@ import { useEffect } from 'react'
 import { useProducts } from '../hooks/useProducts'
 import { useRecentlyViewed } from '../hooks/useRecentlyViewed'
 import ProductCard from '../components/ProductCard'
+import Reviews from '../components/Reviews'
 
 function ProductPage() {
   const { id } = useParams()
@@ -123,6 +124,9 @@ function ProductPage() {
           </div>
         )
       })()}
+
+      {/* Reviews */}
+      {product && <Reviews productId={product.id} />}
 
       {/* Mobile sticky bottom bar */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-cream dark:bg-espresso border-t border-gold/20 px-4 py-3 flex items-center justify-between gap-3 z-40">

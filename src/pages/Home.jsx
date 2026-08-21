@@ -5,6 +5,7 @@ import CategoryGrid from '../components/CategoryGrid'
 import FounderTeaser from '../components/FounderTeaser'
 import FeaturedProducts from '../components/FeaturedProducts'
 import SourceTeaser from '../components/SourceTeaser'
+import Newsletter from '../components/Newsletter'
 
 function Home() {
   return (
@@ -19,6 +20,7 @@ function Home() {
       <FounderTeaser />
       <FeaturedProducts />
       <SourceTeaser />
+      <Newsletter />
     </>
   )
 }
