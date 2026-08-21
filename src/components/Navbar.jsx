@@ -12,7 +12,7 @@ const links = [
   { label: 'New In', to: '/' },
   { label: 'Shop', to: '/shop' },
   { label: 'Collections', to: '/shop' },
-  { label: 'Lookbook', to: '/shop' },
+  { label: 'Lookbook', to: '/lookbook' },
   { label: 'About', to: '/about' },
 ]
 

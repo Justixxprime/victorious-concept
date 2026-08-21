@@ -15,6 +15,8 @@ import Contact from './pages/Contact'
 import FAQ from './pages/FAQ'
 import Delivery from './pages/Delivery'
 import Returns from './pages/Returns'
+import Lookbook from './pages/Lookbook'
+
 
 function App() {
   return (
@@ -30,8 +32,10 @@ function App() {
               <Route path="/cart" element={<Cart />} />
               <Route path="/wishlist" element={<Wishlist />} />
               <Route path="/about" element={<About />} />
+              <Route path="/lookbook" element={<Lookbook />} />
               <Route path="/category/:categoryId" element={<CategoryPage />} />
               <Route path="/contact" element={<Contact />} />
+              
 <Route path="/faq" element={<FAQ />} />
 <Route path="/delivery" element={<Delivery />} />
 <Route path="/returns" element={<Returns />} />

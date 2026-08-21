@@ -8,5 +8,21 @@
   --color-gold-light: #e8c490;
   --font-display: "Fraunces", serif;
   --font-sans: "Inter", sans-serif;
-  --font-sans: "Inter", sans-serif;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #c58b52;
+  outline-offset: 2px;
 }
