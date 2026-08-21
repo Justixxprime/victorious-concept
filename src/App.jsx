@@ -16,6 +16,7 @@ import FAQ from './pages/FAQ'
 import Delivery from './pages/Delivery'
 import Returns from './pages/Returns'
 import Lookbook from './pages/Lookbook'
+import Journal from './pages/Journal'
 
 
 function App() {
@@ -35,6 +36,7 @@ function App() {
               <Route path="/lookbook" element={<Lookbook />} />
               <Route path="/category/:categoryId" element={<CategoryPage />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/journal" element={<Journal />} />
               
 <Route path="/faq" element={<FAQ />} />
 <Route path="/delivery" element={<Delivery />} />

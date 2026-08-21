@@ -1,12 +1,19 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import SEO from '../components/SEO'
 import { products } from '../data/products'
 import { categories } from '../data/categories'
 import ProductCard from '../components/ProductCard'
+import ProductCardSkeleton from '../components/ProductCardSkeleton'
 
 function Shop() {
   const [activeCategory, setActiveCategory] = useState('all')
   const [sortBy, setSortBy] = useState('featured')
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 400)
+    return () => clearTimeout(timer)
+  }, [])
 
   let filtered =
     activeCategory === 'all'
@@ -63,7 +70,13 @@ function Shop() {
           </select>
         </div>
 
-        {sorted.length === 0 ? (
+        {loading ? (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <ProductCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : sorted.length === 0 ? (
           <p className="font-sans text-sm text-espresso/60 dark:text-cream/60 text-center py-20">
             No products match this filter yet.
           </p>
