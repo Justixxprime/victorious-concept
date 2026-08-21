@@ -31,10 +31,12 @@ function ProductPage() {
     <section className="bg-cream dark:bg-espresso transition-colors py-12 px-6 min-h-screen">
       <SEO title={product.name} description={`${product.name}, available now at Victorious Concept.`} />
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
-        <div className="aspect-square rounded-2xl bg-gold/10 flex items-center justify-center">
-          <span className="font-sans text-sm text-espresso/40 dark:text-cream/40 uppercase tracking-wide">
-            Image coming soon
-          </span>
+        <div className="aspect-square rounded-2xl bg-gold/10 overflow-hidden">
+          <img
+            src={product.image}
+            alt={product.name}
+            className="w-full h-full object-cover"
+          />
         </div>
 
         <div className="flex flex-col gap-6">

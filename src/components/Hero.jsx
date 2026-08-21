@@ -1,9 +1,11 @@
 import { ArrowRight } from 'lucide-react'
+import AnimatedLogo from './AnimatedLogo'
 
 function Hero() {
   return (
     <section className="relative bg-espresso text-cream overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 py-32 md:py-44 flex flex-col items-start gap-8">
+        <AnimatedLogo className="w-24 md:w-28" />
         <span className="font-sans uppercase tracking-[0.3em] text-xs text-gold-light">
           The Next Chapter
         </span>

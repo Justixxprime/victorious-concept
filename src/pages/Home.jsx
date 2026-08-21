@@ -4,6 +4,7 @@ import NewArrivals from '../components/NewArrivals'
 import CategoryGrid from '../components/CategoryGrid'
 import FounderTeaser from '../components/FounderTeaser'
 import FeaturedProducts from '../components/FeaturedProducts'
+import SourceTeaser from '../components/SourceTeaser'
 
 function Home() {
   return (
@@ -17,6 +18,7 @@ function Home() {
       <CategoryGrid />
       <FounderTeaser />
       <FeaturedProducts />
+      <SourceTeaser />
     </>
   )
 }

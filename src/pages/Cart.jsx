@@ -91,7 +91,10 @@ function Cart() {
           </span>
         </div>
 
-        <button className="w-full mt-6 bg-gold text-espresso font-sans font-medium px-8 py-4 rounded-full hover:bg-gold-light transition-colors">
+        <button
+          onClick={() => navigate('/checkout')}
+          className="w-full mt-6 bg-gold text-espresso font-sans font-medium px-8 py-4 rounded-full hover:bg-gold-light transition-colors"
+        >
           Checkout
         </button>
       </div>

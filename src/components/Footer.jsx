@@ -48,8 +48,12 @@ function Footer() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto border-t border-cream/10 mt-12 pt-6 font-sans text-xs text-cream/50">
-        © 2026 Victorious Concept. All rights reserved.
+      <div className="max-w-7xl mx-auto border-t border-cream/10 mt-12 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 font-sans text-xs text-cream/50">
+        <span>© 2026 Victorious Concept. All rights reserved.</span>
+        <span className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-gold" />
+          Shipping to Nigeria, Naira (₦)
+        </span>
       </div>
     </footer>
   )

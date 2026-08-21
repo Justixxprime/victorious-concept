@@ -17,7 +17,8 @@ import Delivery from './pages/Delivery'
 import Returns from './pages/Returns'
 import Lookbook from './pages/Lookbook'
 import Journal from './pages/Journal'
-
+import SourceRequest from './pages/SourceRequest'
+import Checkout from './pages/Checkout'
 
 function App() {
   return (
@@ -37,6 +38,8 @@ function App() {
               <Route path="/category/:categoryId" element={<CategoryPage />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/journal" element={<Journal />} />
+              <Route path="/source" element={<SourceRequest />} />
+              <Route path="/checkout" element={<Checkout />} />
               
 <Route path="/faq" element={<FAQ />} />
 <Route path="/delivery" element={<Delivery />} />

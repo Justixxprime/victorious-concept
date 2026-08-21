@@ -10,10 +10,12 @@ function ProductCard({ product }) {
   return (
     <div className="group relative">
       <Link to={`/product/${product.id}`}>
-        <div className="relative aspect-[3/4] rounded-2xl bg-gold/10 overflow-hidden flex items-center justify-center">
-          <span className="font-sans text-xs text-espresso/40 dark:text-cream/40 uppercase tracking-wide">
-            Image coming soon
-          </span>
+        <div className="relative aspect-[3/4] rounded-2xl bg-gold/10 overflow-hidden">
+          <img
+            src={product.image}
+            alt={product.name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
 
           {product.isNew && (
             <span className="absolute top-3 left-3 bg-espresso text-cream text-xs font-sans px-3 py-1 rounded-full">

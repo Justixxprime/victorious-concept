@@ -13,6 +13,7 @@ const links = [
   { label: 'Shop', to: '/shop' },
   { label: 'Collections', to: '/shop' },
   { label: 'Lookbook', to: '/lookbook' },
+  { label: 'Source It', to: '/source' },
   { label: 'About', to: '/about' },
 ]
 
@@ -30,7 +31,7 @@ function Navbar() {
           <img src={isDark ? logoCream : logoDark} alt="Victorious Concept" className="h-16 w-auto" />
         </Link>
 
-        <nav className="hidden md:flex items-center gap-8 font-sans text-sm uppercase tracking-wide text-espresso dark:text-cream">
+        <nav className="hidden md:flex items-center gap-6 font-sans text-sm uppercase tracking-wide text-espresso dark:text-cream">
           {links.map((link) => (
             <Link key={link.label} to={link.to} className="hover:text-gold transition-colors">
               {link.label}
