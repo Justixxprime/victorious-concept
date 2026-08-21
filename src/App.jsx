@@ -23,6 +23,7 @@ import Checkout from './pages/Checkout'
 import { AuthProvider } from './context/AuthContext'
 import Account from './pages/Account'
 import OrderHistory from './pages/OrderHistory'
+import Admin from './pages/Admin'
 
 function App() {
   return (
@@ -47,6 +48,7 @@ function App() {
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/account" element={<Account />} />
                 <Route path="/orders" element={<OrderHistory />} />
+                <Route path="/admin" element={<Admin />} />
 
                 <Route path="/faq" element={<FAQ />} />
                 <Route path="/delivery" element={<Delivery />} />
