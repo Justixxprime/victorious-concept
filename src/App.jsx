@@ -24,6 +24,7 @@ import { AuthProvider } from './context/AuthContext'
 import Account from './pages/Account'
 import OrderHistory from './pages/OrderHistory'
 import Admin from './pages/Admin'
+import WhatsAppButton from './components/WhatsAppButton'
 
 function App() {
   return (
@@ -56,6 +57,7 @@ function App() {
                 <Route path="*" element={<NotFound />} />
               </Routes>
               <Footer />
+              <WhatsAppButton />
             </div>
           </WishlistProvider>
         </CartProvider>
