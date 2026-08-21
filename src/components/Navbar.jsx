@@ -54,7 +54,9 @@ function Navbar() {
             onClick={() => setSearchOpen(true)}
             className="hidden sm:block w-5 h-5 cursor-pointer hover:text-gold transition-colors"
           />
-          <User className="hidden sm:block w-5 h-5 cursor-pointer hover:text-gold transition-colors" />
+          <Link to="/account">
+            <User className="hidden sm:block w-5 h-5 cursor-pointer hover:text-gold transition-colors" />
+          </Link>
           <Link to="/wishlist">
             <Heart className="w-5 h-5 cursor-pointer hover:text-gold transition-colors" />
           </Link>

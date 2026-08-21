@@ -20,37 +20,42 @@ import Lookbook from './pages/Lookbook'
 import Journal from './pages/Journal'
 import SourceRequest from './pages/SourceRequest'
 import Checkout from './pages/Checkout'
+import { AuthProvider } from './context/AuthContext'
+import Account from './pages/Account'
 
 function App() {
   return (
     <BrowserRouter>
-      <CartProvider>
-        <WishlistProvider>
-          <div className="min-h-screen bg-cream dark:bg-espresso transition-colors">
-            <Navbar />
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/shop" element={<Shop />} />
-              <Route path="/product/:id" element={<ProductPage />} />
-              <Route path="/cart" element={<Cart />} />
-              <Route path="/wishlist" element={<Wishlist />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/lookbook" element={<Lookbook />} />
-              <Route path="/category/:categoryId" element={<CategoryPage />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/journal" element={<Journal />} />
-              <Route path="/source" element={<SourceRequest />} />
-              <Route path="/checkout" element={<Checkout />} />
-              
-<Route path="/faq" element={<FAQ />} />
-<Route path="/delivery" element={<Delivery />} />
-<Route path="/returns" element={<Returns />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <Footer />
-          </div>
-        </WishlistProvider>
-      </CartProvider>
+      <AuthProvider>
+        <CartProvider>
+          <WishlistProvider>
+            <div className="min-h-screen bg-cream dark:bg-espresso transition-colors">
+              <Navbar />
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/shop" element={<Shop />} />
+                <Route path="/product/:id" element={<ProductPage />} />
+                <Route path="/cart" element={<Cart />} />
+                <Route path="/wishlist" element={<Wishlist />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/lookbook" element={<Lookbook />} />
+                <Route path="/category/:categoryId" element={<CategoryPage />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/journal" element={<Journal />} />
+                <Route path="/source" element={<SourceRequest />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/account" element={<Account />} />
+
+                <Route path="/faq" element={<FAQ />} />
+                <Route path="/delivery" element={<Delivery />} />
+                <Route path="/returns" element={<Returns />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              <Footer />
+            </div>
+          </WishlistProvider>
+        </CartProvider>
+      </AuthProvider>
     </BrowserRouter>
   )
 }
