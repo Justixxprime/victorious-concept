@@ -13,7 +13,7 @@ import Reviews from '../components/Reviews'
 function ProductPage() {
   const { id } = useParams()
   const { products } = useProducts()
-  const product = products.find((p) => p.id === id)
+ const product = products.find((p) => String(p.id) === id)
   const { addToCart } = useCart()
   const { toggleWishlist, isWishlisted } = useWishlist()
   const { viewed, addViewed } = useRecentlyViewed()
