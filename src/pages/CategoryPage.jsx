@@ -17,6 +17,11 @@ function CategoryPage() {
           alt={category ? category.name : 'Category'}
           className="w-full aspect-[21/6] rounded-2xl mb-8"
         />
+                <RevealImage
+          src={`https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=1600&q=80`}
+          alt={category ? category.name : 'Category'}
+          className="w-full aspect-[21/6] rounded-2xl mb-8"
+        />
         <h1 className="font-display italic font-semibold text-4xl text-espresso dark:text-cream mb-2">
           {category ? category.name : 'Category'}
         </h1>
