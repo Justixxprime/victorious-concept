@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom'
-import { products } from '../data/products'
+import { useProducts } from '../hooks/useProducts'
 import ProductCard from './ProductCard'
 
 function NewArrivals() {
+  const { products } = useProducts()
   const newItems = products.filter((p) => p.isNew)
 
   if (newItems.length === 0) return null

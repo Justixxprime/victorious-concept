@@ -1,10 +1,11 @@
 import SEO from '../components/SEO'
 import { Link } from 'react-router-dom'
-import { products } from '../data/products'
+import { useProducts } from '../hooks/useProducts'
 import { formatPrice } from '../utils/formatPrice'
 import RevealImage from '../components/RevealImage'
 
 function Lookbook() {
+  const { products } = useProducts()
   return (
     <section className="bg-cream dark:bg-espresso transition-colors py-16 px-6 min-h-screen">
       <SEO title="Lookbook" description="Editorial styling from Victorious Concept." />

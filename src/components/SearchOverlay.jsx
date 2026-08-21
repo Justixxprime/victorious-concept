@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { X, Search as SearchIcon } from 'lucide-react'
-import { products } from '../data/products'
+import { useProducts } from '../hooks/useProducts'
 import { formatPrice } from '../utils/formatPrice'
 
 function SearchOverlay({ onClose }) {
+  const { products } = useProducts()
   const [query, setQuery] = useState('')
 
   const results = query.trim()

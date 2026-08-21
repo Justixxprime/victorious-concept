@@ -1,11 +1,12 @@
 import { useParams, Link } from 'react-router-dom'
-import { products } from '../data/products'
+import { useProducts } from '../hooks/useProducts'
 import { categories } from '../data/categories'
 import ProductCard from '../components/ProductCard'
 import RevealImage from '../components/RevealImage'
 
 function CategoryPage() {
   const { categoryId } = useParams()
+  const { products } = useProducts()
   const category = categories.find((c) => c.id === categoryId)
   const categoryProducts = products.filter((p) => p.category === categoryId)
 

@@ -1,7 +1,8 @@
-import { products } from '../data/products'
+import { useProducts } from '../hooks/useProducts'
 import ProductCard from './ProductCard'
 
 function FeaturedProducts() {
+  const { products } = useProducts()
   const featured = products.filter((p) => p.isFeatured)
 
   return (

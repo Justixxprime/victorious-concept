@@ -12,8 +12,8 @@ import { motion } from 'framer-motion'
 const links = [
   { label: 'New In', to: '/' },
   { label: 'Shop', to: '/shop' },
-  { label: 'Collections', to: '/shop' },
   { label: 'Lookbook', to: '/lookbook' },
+  { label: 'Journal', to: '/journal' },
   { label: 'Source It', to: '/source' },
   { label: 'About', to: '/about' },
 ]
