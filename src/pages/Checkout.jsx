@@ -7,7 +7,7 @@ import Receipt from '../components/Receipt'
 import { Printer } from 'lucide-react'
 
 function Checkout() {
-  const { items, totalPrice } = useCart()
+  const { items, totalPrice, clearCart } = useCart()
   const navigate = useNavigate()
   const [order, setOrder] = useState(null)
   const [form, setForm] = useState({ name: '', phone: '', address: '' })
@@ -26,6 +26,7 @@ function Checkout() {
       customer: form,
     }
     setOrder(newOrder)
+    clearCart()
   }
 
   function handlePrint() {
