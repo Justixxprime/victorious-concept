@@ -1,9 +1,11 @@
+import { useNavigate } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import { Trash2, Minus, Plus } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import { formatPrice } from '../utils/formatPrice'
 
 function Cart() {
+  const navigate = useNavigate()
   const { items, removeFromCart, updateQuantity, totalPrice } = useCart()
 
   if (items.length === 0) {

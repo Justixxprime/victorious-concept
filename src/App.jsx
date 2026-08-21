@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { CartProvider } from './context/CartContext'
 import Navbar from './components/Navbar'
