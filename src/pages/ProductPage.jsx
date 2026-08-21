@@ -28,7 +28,7 @@ function ProductPage() {
   const saved = isWishlisted(product.id)
 
   return (
-    <section className="bg-cream dark:bg-espresso transition-colors py-12 px-6 min-h-screen">
+    <section className="bg-cream dark:bg-espresso transition-colors py-12 px-6 pb-24 md:pb-12 min-h-screen">
       <SEO title={product.name} description={`${product.name}, available now at Victorious Concept.`} />
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
         <div className="aspect-square rounded-2xl bg-gold/10 overflow-hidden">
@@ -82,7 +82,22 @@ function ProductPage() {
               Returns policy to be confirmed
             </div>
           </div>
+                </div>
+      </div>
+
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-cream dark:bg-espresso border-t border-gold/20 px-4 py-3 flex items-center justify-between gap-3 z-40">
+        <div>
+          <p className="font-sans text-xs text-espresso/50 dark:text-cream/50">{product.name}</p>
+          <p className="font-display italic font-semibold text-lg text-espresso dark:text-cream">
+            {formatPrice(product.price)}
+          </p>
         </div>
+        <button
+          onClick={() => addToCart(product)}
+          className="bg-gold text-espresso font-sans font-medium px-6 py-3 rounded-full flex items-center gap-2 hover:bg-gold-light transition-colors flex-shrink-0"
+        >
+          <ShoppingBag className="w-4 h-4" /> Add to Cart
+        </button>
       </div>
     </section>
   )
