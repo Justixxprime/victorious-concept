@@ -203,7 +203,7 @@ function About() {
         />
       </div>
 
-      <      <div className="grid grid-cols-2 gap-2 max-w-5xl mx-auto px-6 pt-16">
+         <div className="grid grid-cols-2 gap-2 max-w-5xl mx-auto px-6 pt-16">
 
         <RevealImage
 
