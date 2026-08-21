@@ -5,9 +5,12 @@ import { useCart } from '../context/CartContext'
 import { generateOrderId } from '../utils/generateOrderId'
 import Receipt from '../components/Receipt'
 import { Printer } from 'lucide-react'
+import { supabase } from '../lib/supabaseClient'
+import { useAuth } from '../context/AuthContext'
 
 function Checkout() {
   const { items, totalPrice, clearCart } = useCart()
+  const { user } = useAuth()
   const navigate = useNavigate()
   const [order, setOrder] = useState(null)
   const [form, setForm] = useState({ name: '', phone: '', address: '' })
@@ -17,14 +20,28 @@ function Checkout() {
     setForm((prev) => ({ ...prev, [field]: value }))
   }
 
-  function placeOrder() {
+  async function placeOrder() {
+    const orderNumber = generateOrderId()
     const newOrder = {
-      id: generateOrderId(),
+      id: orderNumber,
       date: new Date().toLocaleDateString('en-NG', { day: 'numeric', month: 'long', year: 'numeric' }),
       items,
       total: totalPrice,
       customer: form,
     }
+
+    if (user) {
+      await supabase.from('orders').insert({
+        user_id: user.id,
+        order_number: orderNumber,
+        items: items,
+        total: totalPrice,
+        customer_name: form.name,
+        customer_phone: form.phone,
+        customer_address: form.address,
+      })
+    }
+
     setOrder(newOrder)
     clearCart()
   }

@@ -22,6 +22,7 @@ import SourceRequest from './pages/SourceRequest'
 import Checkout from './pages/Checkout'
 import { AuthProvider } from './context/AuthContext'
 import Account from './pages/Account'
+import OrderHistory from './pages/OrderHistory'
 
 function App() {
   return (
@@ -45,6 +46,7 @@ function App() {
                 <Route path="/source" element={<SourceRequest />} />
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/account" element={<Account />} />
+                <Route path="/orders" element={<OrderHistory />} />
 
                 <Route path="/faq" element={<FAQ />} />
                 <Route path="/delivery" element={<Delivery />} />

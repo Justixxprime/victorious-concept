@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import SEO from '../components/SEO'
 import { useAuth } from '../context/AuthContext'
 import { Mail, Lock } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 function Account() {
   const { user, signUp, signIn, signOut } = useAuth()
@@ -40,12 +41,20 @@ function Account() {
           <p className="font-sans text-sm text-espresso/60 dark:text-cream/60 mb-8">
             Signed in as {user.email}
           </p>
-          <button
-            onClick={signOut}
-            className="bg-gold text-espresso font-sans font-medium px-8 py-3 rounded-full hover:bg-gold-light transition-colors"
-          >
-            Sign Out
-          </button>
+          <div className="flex flex-col gap-3">
+            <Link
+              to="/orders"
+              className="bg-gold text-espresso font-sans font-medium px-8 py-3 rounded-full hover:bg-gold-light transition-colors text-center"
+            >
+              View My Orders
+            </Link>
+            <button
+              onClick={signOut}
+              className="border border-gold/30 text-espresso dark:text-cream font-sans font-medium px-8 py-3 rounded-full hover:border-gold transition-colors"
+            >
+              Sign Out
+            </button>
+          </div>
         </div>
       </section>
     )
