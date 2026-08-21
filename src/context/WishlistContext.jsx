@@ -14,16 +14,16 @@ export function WishlistProvider({ children }) {
 
   function toggleWishlist(product) {
     setItems((prev) => {
-      const exists = prev.find((item) => item.id === product.id)
+      const exists = prev.find((item) => String(item.id) === String(product.id))
       if (exists) {
-        return prev.filter((item) => item.id !== product.id)
+        return prev.filter((item) => String(item.id) !== String(product.id))
       }
       return [...prev, product]
     })
   }
 
   function isWishlisted(id) {
-    return items.some((item) => item.id === id)
+    return items.some((item) => String(item.id) === String(id))
   }
 
   return (

@@ -12,12 +12,12 @@ export function CartProvider({ children }) {
     localStorage.setItem('vc-cart', JSON.stringify(items))
   }, [items])
 
-  function addToCart(product) {
+function addToCart(product) {
     setItems((prev) => {
-      const existing = prev.find((item) => item.id === product.id)
+      const existing = prev.find((item) => String(item.id) === String(product.id))
       if (existing) {
         return prev.map((item) =>
-          item.id === product.id
+          String(item.id) === String(product.id)
             ? { ...item, quantity: item.quantity + 1 }
             : item
         )
@@ -27,13 +27,13 @@ export function CartProvider({ children }) {
   }
 
   function removeFromCart(id) {
-    setItems((prev) => prev.filter((item) => item.id !== id))
+    setItems((prev) => prev.filter((item) => String(item.id) !== String(id)))
   }
 
   function updateQuantity(id, quantity) {
     if (quantity < 1) return
     setItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, quantity } : item))
+      prev.map((item) => (String(item.id) === String(id) ? { ...item, quantity } : item))
     )
   }
 
