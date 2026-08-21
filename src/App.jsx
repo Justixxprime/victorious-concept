@@ -22,7 +22,7 @@ import Checkout from './pages/Checkout'
 
 function App() {
   return (
-    <BrowserRouter basename="/victorious-concept/">
+    <BrowserRouter>
       <CartProvider>
         <WishlistProvider>
           <div className="min-h-screen bg-cream dark:bg-espresso transition-colors">
