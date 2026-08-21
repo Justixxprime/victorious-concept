@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { Heart } from 'lucide-react'
 import { formatPrice } from '../utils/formatPrice'
 import { useWishlist } from '../context/WishlistContext'
+import RevealImage from './RevealImage'
 
 function ProductCard({ product }) {
   const { toggleWishlist, isWishlisted } = useWishlist()
@@ -11,11 +12,7 @@ function ProductCard({ product }) {
     <div className="group relative">
       <Link to={`/product/${product.id}`}>
         <div className="relative aspect-[3/4] rounded-2xl bg-gold/10 overflow-hidden">
-          <img
-            src={product.image}
-            alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          />
+        <RevealImage src={product.image} alt={product.name} className="w-full h-full group-hover:scale-105 transition-transform duration-500" />
 
           {product.isNew && (
             <span className="absolute top-3 left-3 bg-espresso text-cream text-xs font-sans px-3 py-1 rounded-full">

@@ -4,7 +4,16 @@ import AnimatedLogo from './AnimatedLogo'
 function Hero() {
   return (
     <section className="relative bg-espresso text-cream overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6 py-32 md:py-44 flex flex-col items-start gap-8">
+      <div className="absolute inset-0">
+        <img
+          src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=2000&q=80"
+          alt=""
+          className="w-full h-full object-cover opacity-30"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-espresso via-espresso/80 to-espresso/40" />
+      </div>
+
+      <div className="relative max-w-7xl mx-auto px-6 py-32 md:py-44 flex flex-col items-start gap-8">
         <AnimatedLogo className="w-24 md:w-28" />
         <span className="font-sans uppercase tracking-[0.3em] text-xs text-gold-light">
           The Next Chapter

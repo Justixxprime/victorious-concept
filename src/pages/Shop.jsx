@@ -1,19 +1,14 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import SEO from '../components/SEO'
-import { products } from '../data/products'
+import { useProducts } from '../hooks/useProducts'
 import { categories } from '../data/categories'
 import ProductCard from '../components/ProductCard'
 import ProductCardSkeleton from '../components/ProductCardSkeleton'
 
 function Shop() {
+  const { products, loading, error } = useProducts()
   const [activeCategory, setActiveCategory] = useState('all')
   const [sortBy, setSortBy] = useState('featured')
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 400)
-    return () => clearTimeout(timer)
-  }, [])
 
   let filtered =
     activeCategory === 'all'
@@ -69,6 +64,12 @@ function Shop() {
             <option value="price-high">Price: High to Low</option>
           </select>
         </div>
+
+        {error && (
+          <p className="font-sans text-sm text-red-500 text-center py-10">
+            Something went wrong loading products: {error}
+          </p>
+        )}
 
         {loading ? (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">

@@ -7,6 +7,7 @@ import logoCream from '../assets/logo/logo-cream-text.png'
 import { Search, Heart, ShoppingBag, User, Menu, X } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 import SearchOverlay from './SearchOverlay'
+import { motion } from 'framer-motion'
 
 const links = [
   { label: 'New In', to: '/' },
@@ -27,8 +28,17 @@ function Navbar() {
   return (
     <header className="w-full bg-cream dark:bg-espresso border-b border-gold/20 transition-colors sticky top-0 z-50">
       <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-3">
-        <Link to="/">
-          <img src={isDark ? logoCream : logoDark} alt="Victorious Concept" className="h-16 w-auto" />
+        <Link to="/" className="relative group">
+          <div className="absolute -inset-3 bg-gold/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <motion.img
+            src={isDark ? logoCream : logoDark}
+            alt="Victorious Concept"
+            className="relative h-20 w-auto"
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            whileHover={{ scale: 1.03 }}
+          />
         </Link>
 
         <nav className="hidden md:flex items-center gap-6 font-sans text-sm uppercase tracking-wide text-espresso dark:text-cream">
