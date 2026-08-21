@@ -1,4 +1,5 @@
 import SEO from '../components/SEO'
+import RevealImage from '../components/RevealImage'
 
 const timeline = [
   { label: 'University', text: 'Studied History and International Relations at Federal University Otuoke, Bayelsa State.' },
@@ -101,6 +102,12 @@ function About() {
         </div>
       </div>
 
+      <RevealImage
+        src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=2000&q=80"
+        alt="Lagos Island market, the origin of Victorious Concept"
+        className="w-full aspect-[21/9]"
+      />
+
       <div className="bg-espresso dark:bg-cream/5 text-cream dark:text-espresso py-16 px-6">
         <div className="max-w-3xl mx-auto text-center">
           <p className="font-sans text-xs uppercase tracking-widest text-gold-light dark:text-gold mb-4">
@@ -144,9 +151,88 @@ function About() {
         </div>
       </div>
 
+      <div className="grid grid-cols-2 gap-2 max-w-5xl mx-auto px-6 pt-16">
+        <RevealImage
+          src="https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=1000&q=80"
+          alt="Fashion detail"
+          className="aspect-[3/4]"
+        />
+        <RevealImage
+          src="https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?auto=format&fit=crop&w=1000&q=80"
+          alt="Fashion detail"
+          className="aspect-[3/4] mt-8"
+        />
+      </div>
+
+            <div className="grid grid-cols-2 gap-2 max-w-5xl mx-auto px-6 pt-16">
+        <RevealImage
+          src="https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=1000&q=80"
+          alt="Fashion detail"
+          className="aspect-[3/4]"
+        />
+        <RevealImage
+          src="https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?auto=format&fit=crop&w=1000&q=80"
+          alt="Fashion detail"
+          className="aspect-[3/4] mt-8"
+        />
+      </div>
+
+            <div className="grid grid-cols-2 gap-2 max-w-5xl mx-auto px-6 pt-16">
+        <RevealImage
+          src="https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=1000&q=80"
+          alt="Fashion detail"
+          className="aspect-[3/4]"
+        />
+        <RevealImage
+          src="https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?auto=format&fit=crop&w=1000&q=80"
+          alt="Fashion detail"
+          className="aspect-[3/4] mt-8"
+        />
+      </div>
+
+            <div className="grid grid-cols-2 gap-2 max-w-5xl mx-auto px-6 pt-16">
+        <RevealImage
+          src="https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=1000&q=80"
+          alt="Fashion detail"
+          className="aspect-[3/4]"
+        />
+        <RevealImage
+          src="https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?auto=format&fit=crop&w=1000&q=80"
+          alt="Fashion detail"
+          className="aspect-[3/4] mt-8"
+        />
+      </div>
+
+      <      <div className="grid grid-cols-2 gap-2 max-w-5xl mx-auto px-6 pt-16">
+
+        <RevealImage
+
+          src="https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=1000&q=80"
+
+          alt="Fashion detail"
+
+          className="aspect-[3/4]"
+
+        />
+
+        <RevealImage
+
+          src="https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?auto=format&fit=crop&w=1000&q=80"
+
+          alt="Fashion detail"
+
+          className="aspect-[3/4] mt-8"
+
+        />
+
+      </div>
+
       <div className="max-w-5xl mx-auto px-6 py-20 border-t border-gold/20">
+
         <p className="font-sans text-xs uppercase tracking-widest text-gold mb-2 text-center">
+
           Before The Website, There Was Us
+
         </p>
         <p className="font-sans text-sm text-espresso/60 dark:text-cream/60 text-center mb-12 max-w-xl mx-auto">
           A few honest words from the people who watched Victorious Concept happen in real time.
