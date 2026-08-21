@@ -1,16 +1,25 @@
 import { useParams, Link } from 'react-router-dom'
 import { Heart, ShoppingBag, Truck, RefreshCw } from 'lucide-react'
-import { products } from '../data/products'
 import { formatPrice } from '../utils/formatPrice'
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
 import SEO from '../components/SEO'
+import { useEffect } from 'react'
+import { useProducts } from '../hooks/useProducts'
+import { useRecentlyViewed } from '../hooks/useRecentlyViewed'
+import ProductCard from '../components/ProductCard'
 
 function ProductPage() {
   const { id } = useParams()
+  const { products } = useProducts()
   const product = products.find((p) => p.id === id)
   const { addToCart } = useCart()
   const { toggleWishlist, isWishlisted } = useWishlist()
+  const { viewed, addViewed } = useRecentlyViewed()
+
+  useEffect(() => {
+    if (product) addViewed(product)
+  }, [product])
 
   if (!product) {
     return (
@@ -82,9 +91,40 @@ function ProductPage() {
               Returns policy to be confirmed
             </div>
           </div>
-                </div>
+        </div>
       </div>
 
+      {/* Related Products + Recently Viewed */}
+      {product && (() => {
+        const related = products.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 4)
+        const recentlyViewed = viewed.filter((p) => p.id !== product.id).slice(0, 4)
+        return (
+          <div className="max-w-7xl mx-auto px-6 pb-16 flex flex-col gap-16">
+            {related.length > 0 && (
+              <div>
+                <h2 className="font-display italic font-semibold text-2xl text-espresso dark:text-cream mb-6">
+                  You might also like
+                </h2>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                  {related.map((p) => <ProductCard key={p.id} product={p} />)}
+                </div>
+              </div>
+            )}
+            {recentlyViewed.length > 0 && (
+              <div>
+                <h2 className="font-display italic font-semibold text-2xl text-espresso dark:text-cream mb-6">
+                  Recently Viewed
+                </h2>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                  {recentlyViewed.map((p) => <ProductCard key={p.id} product={p} />)}
+                </div>
+              </div>
+            )}
+          </div>
+        )
+      })()}
+
+      {/* Mobile sticky bottom bar */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-cream dark:bg-espresso border-t border-gold/20 px-4 py-3 flex items-center justify-between gap-3 z-40">
         <div>
           <p className="font-sans text-xs text-espresso/50 dark:text-cream/50">{product.name}</p>
