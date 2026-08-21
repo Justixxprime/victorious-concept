@@ -25,6 +25,7 @@ import Account from './pages/Account'
 import OrderHistory from './pages/OrderHistory'
 import Admin from './pages/Admin'
 import NotFound from './pages/NotFound'
+import ScrollToTop from './components/ScrollToTop'
 
 function AnimatedRoutes() {
   const location = useLocation()
@@ -71,6 +72,7 @@ function App() {
         <CartProvider>
           <WishlistProvider>
             <div className="min-h-screen bg-cream dark:bg-espresso transition-colors">
+              <ScrollToTop />
               <Navbar />
               <AnimatedRoutes />
               <Footer />
