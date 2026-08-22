@@ -1,12 +1,13 @@
 import { MessageCircle, Mail, Phone } from 'lucide-react'
 import RevealImage from '../components/RevealImage'
+import { siteImages } from '../data/siteImages'
 
 function Contact() {
   return (
     <section className="bg-cream dark:bg-espresso transition-colors min-h-screen py-20 px-6">
             <div className="max-w-2xl mx-auto">
         <RevealImage
-          src="https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?auto=format&fit=crop&w=1400&q=80"
+          src={siteImages.contactBanner}
           alt="Victorious Concept"
           className="w-full aspect-[16/7] rounded-2xl mb-10"
         />

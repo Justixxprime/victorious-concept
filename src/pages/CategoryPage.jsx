@@ -3,6 +3,7 @@ import { useProducts } from '../hooks/useProducts'
 import { categories } from '../data/categories'
 import ProductCard from '../components/ProductCard'
 import RevealImage from '../components/RevealImage'
+import { siteImages } from '../data/siteImages'
 
 function CategoryPage() {
   const { categoryId } = useParams()
@@ -14,12 +15,12 @@ function CategoryPage() {
     <section className="bg-cream dark:bg-espresso transition-colors py-12 px-6 min-h-screen">
       <div className="max-w-7xl mx-auto">
                 <RevealImage
-          src={`https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=1600&q=80`}
+         src={siteImages.categoryBanner}
           alt={category ? category.name : 'Category'}
           className="w-full aspect-[21/6] rounded-2xl mb-8"
         />
                 <RevealImage
-          src={`https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=1600&q=80`}
+          src={siteImages.categoryBanner}
           alt={category ? category.name : 'Category'}
           className="w-full aspect-[21/6] rounded-2xl mb-8"
         />

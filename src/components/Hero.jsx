@@ -1,12 +1,13 @@
 import { ArrowRight } from 'lucide-react'
 import AnimatedLogo from './AnimatedLogo'
+import { siteImages } from '../data/siteImages'
 
 function Hero() {
   return (
     <section className="relative bg-espresso text-cream overflow-hidden">
       <div className="absolute inset-0">
         <img
-          src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=2000&q=80"
+         src={siteImages.heroBackdrop}
           alt=""
           className="w-full h-full object-cover opacity-30"
         />

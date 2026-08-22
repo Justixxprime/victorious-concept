@@ -1,5 +1,6 @@
 import SEO from '../components/SEO'
 import RevealImage from '../components/RevealImage'
+import { siteImages } from '../data/siteImages'
 
 const timeline = [
   { label: 'University', text: 'Studied History and International Relations at Federal University Otuoke, Bayelsa State.' },
@@ -103,7 +104,7 @@ function About() {
       </div>
 
       <RevealImage
-        src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=2000&q=80"
+        src={siteImages.aboutStory}
         alt="Lagos Island market, the origin of Victorious Concept"
         className="w-full aspect-[21/9]"
       />
@@ -153,12 +154,12 @@ function About() {
 
       <div className="grid grid-cols-2 gap-2 max-w-5xl mx-auto px-6 pt-16">
         <RevealImage
-          src="https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=1000&q=80"
+         src={siteImages.aboutMosaic1}
           alt="Fashion detail"
           className="aspect-[3/4]"
         />
         <RevealImage
-          src="https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?auto=format&fit=crop&w=1000&q=80"
+          src={siteImages.aboutMosaic2}
           alt="Fashion detail"
           className="aspect-[3/4] mt-8"
         />

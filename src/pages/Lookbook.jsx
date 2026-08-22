@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useProducts } from '../hooks/useProducts'
 import { formatPrice } from '../utils/formatPrice'
 import RevealImage from '../components/RevealImage'
+import { siteImages } from '../data/siteImages'
 
 function Lookbook() {
   const { products } = useProducts()
@@ -15,8 +16,7 @@ function Lookbook() {
           The Lookbook
         </h1>
         <RevealImage
-          src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=2000&q=80"
-          alt="Victorious Concept editorial"
+          src={siteImages.lookbookHero}
           className="w-full aspect-[21/9] rounded-2xl"
         />
       </div>
