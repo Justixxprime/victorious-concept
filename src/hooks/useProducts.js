@@ -22,6 +22,7 @@ export function useProducts() {
           price: p.price,
           category: p.category,
           image: p.image,
+          images: p.images && p.images.length > 0 ? p.images : [p.image],
           isNew: p.is_new,
           isFeatured: p.is_featured,
         }))

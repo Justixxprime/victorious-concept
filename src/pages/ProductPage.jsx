@@ -9,6 +9,7 @@ import { useProducts } from '../hooks/useProducts'
 import { useRecentlyViewed } from '../hooks/useRecentlyViewed'
 import ProductCard from '../components/ProductCard'
 import Reviews from '../components/Reviews'
+import ProductGallery from '../components/ProductGallery'
 
 function ProductPage() {
   const { id } = useParams()
@@ -40,14 +41,7 @@ function ProductPage() {
   return (
     <section className="bg-cream dark:bg-espresso transition-colors py-12 px-6 pb-24 md:pb-12 min-h-screen">
       <SEO title={product.name} description={`${product.name}, available now at Victorious Concept.`} />
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
-        <div className="aspect-square rounded-2xl bg-gold/10 overflow-hidden">
-          <img
-            src={product.image}
-            alt={product.name}
-            className="w-full h-full object-cover"
-          />
-        </div>
+      <ProductGallery images={product.images} alt={product.name} />
 
         <div className="flex flex-col gap-6">
           <div>
