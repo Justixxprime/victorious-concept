@@ -6,6 +6,13 @@ import { useAuth } from '../context/AuthContext'
 import { formatPrice } from '../utils/formatPrice'
 import { Package } from 'lucide-react'
 
+const statusStyles = {
+  pending: 'bg-gold/20 text-gold',
+  confirmed: 'bg-blue-500/10 text-blue-500',
+  shipped: 'bg-purple-500/10 text-purple-500',
+  delivered: 'bg-green-500/10 text-green-500',
+}
+
 function OrderHistory() {
   const { user, loading: authLoading } = useAuth()
   const [orders, setOrders] = useState([])
@@ -78,6 +85,9 @@ function OrderHistory() {
                     {new Date(order.created_at).toLocaleDateString('en-NG', { day: 'numeric', month: 'long', year: 'numeric' })}
                   </span>
                 </div>
+                <span className={`inline-block font-sans text-xs px-3 py-1 rounded-full mb-3 capitalize ${statusStyles[order.status] || statusStyles.pending}`}>
+                  {order.status || 'pending'}
+                </span>
                 <div className="flex flex-col gap-1 mb-4">
                   {order.items.map((item) => (
                     <div key={item.id} className="flex justify-between font-sans text-sm text-espresso/70 dark:text-cream/70">

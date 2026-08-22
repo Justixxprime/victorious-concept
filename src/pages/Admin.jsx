@@ -149,13 +149,22 @@ function Admin() {
                                             {order.order_number}
                                         </span>
                                         <span className="font-sans text-xs text-espresso/50 dark:text-cream/50">
-                                            {new Date(order.created_at).toLocaleDateString('en-NG', {
-                                                day: 'numeric',
-                                                month: 'long',
-                                                year: 'numeric',
-                                            })}
+                                            {new Date(order.created_at).toLocaleDateString('en-NG', { day: 'numeric', month: 'long', year: 'numeric' })}
                                         </span>
                                     </div>
+                                    <select
+                                        value={order.status || 'pending'}
+                                        onChange={async (e) => {
+                                            await supabase.from('orders').update({ status: e.target.value }).eq('id', order.id)
+                                            setOrders((prev) => prev.map((o) => o.id === order.id ? { ...o, status: e.target.value } : o))
+                                        }}
+                                        className="bg-transparent border border-gold/30 rounded-full px-3 py-1 font-sans text-xs text-espresso dark:text-cream outline-none focus:border-gold mb-3"
+                                    >
+                                        <option value="pending">Pending</option>
+                                        <option value="confirmed">Confirmed</option>
+                                        <option value="shipped">Shipped</option>
+                                        <option value="delivered">Delivered</option>
+                                    </select>
                                     <p className="font-sans text-sm text-espresso/70 dark:text-cream/70 mb-1">
                                         {order.customer_name} · {order.customer_phone}
                                     </p>
