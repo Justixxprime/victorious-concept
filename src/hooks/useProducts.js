@@ -23,6 +23,7 @@ export function useProducts() {
           category: p.category,
           image: p.image,
           images: p.images && p.images.length > 0 ? p.images : [p.image],
+          sizes: p.sizes || null,
           isNew: p.is_new,
           isFeatured: p.is_featured,
         }))

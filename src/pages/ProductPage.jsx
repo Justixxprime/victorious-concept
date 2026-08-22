@@ -4,20 +4,33 @@ import { formatPrice } from '../utils/formatPrice'
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
 import SEO from '../components/SEO'
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useProducts } from '../hooks/useProducts'
 import { useRecentlyViewed } from '../hooks/useRecentlyViewed'
 import ProductCard from '../components/ProductCard'
 import Reviews from '../components/Reviews'
 import ProductGallery from '../components/ProductGallery'
 
+function getDescription(product) {
+  const descriptions = {
+    bags: `Sourced directly from Lagos Island for someone who treats an outfit like a full sentence, not an afterthought. The ${product.name} carries the kind of structure that holds its shape through a long day and still looks composed by evening.`,
+    shoes: `Sourced for the days that ask more of you. The ${product.name} is built for real movement, real weather, and real Lagos pavement, without giving up an inch of presence.`,
+    slippers: `Off duty does not mean off style. The ${product.name} is the pair you reach for when comfort matters just as much as looking like you tried.`,
+    clothing: `A piece chosen the way Victoria chooses everything, with an eye for what actually gets worn, not just what looks good hanging up.`,
+    perfumes: `A scent sourced with the same instinct that built this whole business, something that says more about you before you've said a word.`,
+    accessories: `The small detail that changes the whole look. Sourced because the finishing touch was never actually optional.`,
+  }
+  return descriptions[product.category] || `Sourced with intention by Victorious Concept.`
+}
+
 function ProductPage() {
   const { id } = useParams()
   const { products } = useProducts()
- const product = products.find((p) => String(p.id) === id)
+  const product = products.find((p) => String(p.id) === id)
   const { addToCart } = useCart()
   const { toggleWishlist, isWishlisted } = useWishlist()
   const { viewed, addViewed } = useRecentlyViewed()
+  const [selectedSize, setSelectedSize] = useState(null)
 
   useEffect(() => {
     if (product) addViewed(product)
@@ -41,7 +54,8 @@ function ProductPage() {
   return (
     <section className="bg-cream dark:bg-espresso transition-colors py-12 px-6 pb-24 md:pb-12 min-h-screen">
       <SEO title={product.name} description={`${product.name}, available now at Victorious Concept.`} />
-      <ProductGallery images={product.images} alt={product.name} />
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
+        <ProductGallery images={product.images} alt={product.name} />
 
         <div className="flex flex-col gap-6">
           <div>
@@ -57,13 +71,37 @@ function ProductPage() {
           </div>
 
           <p className="font-sans text-sm text-espresso/70 dark:text-cream/70 leading-relaxed">
-            PLACEHOLDER description. Full product details, materials, and styling notes will be added once available.
+            {getDescription(product)}
           </p>
+
+          {product.sizes && product.sizes.length > 0 && (
+            <div>
+              <p className="font-sans text-xs uppercase tracking-widest text-espresso/60 dark:text-cream/60 mb-3">
+                Select Size
+              </p>
+              <div className="flex gap-2 flex-wrap">
+                {product.sizes.map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => setSelectedSize(size)}
+                    className={`w-12 h-12 rounded-full border font-sans text-sm transition-colors ${
+                      selectedSize === size
+                        ? 'bg-gold border-gold text-espresso'
+                        : 'border-gold/30 text-espresso dark:text-cream hover:border-gold'
+                    }`}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="flex gap-3">
             <button
-              onClick={() => addToCart(product)}
-              className="flex-1 bg-gold text-espresso font-sans font-medium px-8 py-4 rounded-full flex items-center justify-center gap-2 hover:bg-gold-light transition-colors"
+              onClick={() => addToCart({ ...product, size: selectedSize })}
+              disabled={product.sizes && product.sizes.length > 0 && !selectedSize}
+              className="flex-1 bg-gold text-espresso font-sans font-medium px-8 py-4 rounded-full flex items-center justify-center gap-2 hover:bg-gold-light transition-colors disabled:opacity-40"
             >
               <ShoppingBag className="w-4 h-4" /> Add to Cart
             </button>

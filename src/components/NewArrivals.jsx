@@ -1,12 +1,13 @@
 import { Link } from 'react-router-dom'
 import { useProducts } from '../hooks/useProducts'
 import ProductCard from './ProductCard'
+import ProductCardSkeleton from './ProductCardSkeleton'
 
 function NewArrivals() {
-  const { products } = useProducts()
+  const { products, loading } = useProducts()
   const newItems = products.filter((p) => p.isNew)
 
-  if (newItems.length === 0) return null
+  if (!loading && newItems.length === 0) return null
 
   return (
     <section className="bg-cream dark:bg-espresso transition-colors py-20 px-6">
@@ -24,9 +25,9 @@ function NewArrivals() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {newItems.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+          {loading
+            ? Array.from({ length: 4 }).map((_, i) => <ProductCardSkeleton key={i} />)
+            : newItems.map((product) => <ProductCard key={product.id} product={product} />)}
         </div>
       </div>
     </section>

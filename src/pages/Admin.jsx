@@ -15,6 +15,10 @@ function Admin() {
     const [tab, setTab] = useState('products')
     const [orders, setOrders] = useState([])
     const [ordersLoading, setOrdersLoading] = useState(true)
+    const [form, setForm] = useState({
+        name: '', price: '', category: 'bags', image: '', imagesText: '', is_new: false, is_featured: false,
+    })
+    const [saving, setSaving] = useState(false)
 
     useEffect(() => {
         async function fetchAllOrders() {
@@ -49,6 +53,7 @@ function Admin() {
             price: product.price,
             category: product.category,
             image: product.image,
+            imagesText: (product.images || [product.image]).join(', '),
             is_new: product.isNew,
             is_featured: product.isFeatured,
         })
@@ -56,15 +61,27 @@ function Admin() {
 
     function resetForm() {
         setEditing(null)
-        setForm({ name: '', price: '', category: 'bags', image: '', is_new: false, is_featured: false })
+        setForm({ name: '', price: '', category: 'bags', image: '', imagesText: '', is_new: false, is_featured: false })
     }
 
     async function handleSave() {
         setSaving(true)
+        const imagesArray = form.imagesText
+            ? form.imagesText.split(',').map((s) => s.trim()).filter(Boolean)
+            : [form.image]
+        const payload = {
+            name: form.name,
+            price: form.price,
+            category: form.category,
+            image: form.image,
+            images: imagesArray,
+            is_new: form.is_new,
+            is_featured: form.is_featured,
+        }
         if (editing) {
-            await supabase.from('products').update(form).eq('id', editing)
+            await supabase.from('products').update(payload).eq('id', editing)
         } else {
-            await supabase.from('products').insert(form)
+            await supabase.from('products').insert(payload)
         }
         setSaving(false)
         resetForm()
@@ -198,12 +215,19 @@ function Admin() {
                                 </select>
                                 <input
                                     type="text"
-                                    placeholder="Image URL"
+                                    placeholder="Main Image URL"
                                     value={form.image}
                                     onChange={(e) => update('image', e.target.value)}
                                     className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
                                 />
                             </div>
+                            <textarea
+                                placeholder="All image URLs, separated by commas (leave blank to just use the main image above)"
+                                rows={2}
+                                value={form.imagesText}
+                                onChange={(e) => update('imagesText', e.target.value)}
+                                className="w-full bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold resize-none mb-4"
+                            />
                             <div className="flex gap-6 mb-4">
                                 <label className="flex items-center gap-2 font-sans text-sm text-espresso dark:text-cream">
                                     <input type="checkbox" checked={form.is_new} onChange={(e) => update('is_new', e.target.checked)} />

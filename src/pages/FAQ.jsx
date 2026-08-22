@@ -2,11 +2,26 @@ import { useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 
 const faqs = [
-  { q: 'How do I place an order?', a: 'PLACEHOLDER: explain the ordering process.' },
-  { q: 'What payment methods are accepted?', a: 'PLACEHOLDER: confirm actual payment options once decided.' },
-  { q: 'How long does delivery take?', a: 'PLACEHOLDER: confirm real delivery timelines.' },
-  { q: 'Can I return or exchange an item?', a: 'PLACEHOLDER: confirm the real returns policy.' },
-  { q: 'Are your products authentic?', a: 'PLACEHOLDER: confirm sourcing and authenticity details.' },
+  {
+    q: 'How do I place an order?',
+    a: 'Browse the shop, add whatever you love to your cart, and check out directly on the site. You can also use "Source It For Me" if you want something specific found for you.',
+  },
+  {
+    q: 'What payment methods are accepted?',
+    a: 'We accept bank transfer, WhatsApp arranged payment, and card payments. Whatever is easiest for you, we will work with it.',
+  },
+  {
+    q: 'How long does delivery take?',
+    a: 'We deliver nationwide across Nigeria and internationally. Exact timelines depend on your location, we confirm this directly with you once your order is placed.',
+  },
+  {
+    q: 'Can I return or exchange an item?',
+    a: 'Yes. You have 7 days from delivery to request a return or exchange, as long as the item is unused and in its original condition. See our full Returns page for details.',
+  },
+  {
+    q: 'Are your products authentic?',
+    a: 'Every product is personally sourced by Victoria, the same eye for quality that started this business at Lagos Island market is still behind every item we sell today.',
+  },
 ]
 
 function FAQ() {

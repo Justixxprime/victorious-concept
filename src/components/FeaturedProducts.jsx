@@ -1,8 +1,9 @@
 import { useProducts } from '../hooks/useProducts'
 import ProductCard from './ProductCard'
+import ProductCardSkeleton from './ProductCardSkeleton'
 
 function FeaturedProducts() {
-  const { products } = useProducts()
+  const { products, loading } = useProducts()
   const featured = products.filter((p) => p.isFeatured)
 
   return (
@@ -13,9 +14,9 @@ function FeaturedProducts() {
         </h2>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {featured.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+          {loading
+            ? Array.from({ length: 4 }).map((_, i) => <ProductCardSkeleton key={i} />)
+            : featured.map((product) => <ProductCard key={product.id} product={product} />)}
         </div>
       </div>
     </section>

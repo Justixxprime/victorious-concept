@@ -1,12 +1,30 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Link } from 'react-router-dom'
-import { Trash2, Minus, Plus } from 'lucide-react'
+import { Trash2, Minus, Plus, Tag, X } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import { formatPrice } from '../utils/formatPrice'
 
 function Cart() {
   const navigate = useNavigate()
-  const { items, removeFromCart, updateQuantity, totalPrice } = useCart()
+  const {
+    items,
+    removeFromCart,
+    updateQuantity,
+    subtotal,
+    discount,
+    totalPrice,
+    coupon,
+    applyCoupon,
+    removeCoupon,
+    couponError,
+  } = useCart()
+  const [code, setCode] = useState('')
+
+  function handleApply(e) {
+    e.preventDefault()
+    applyCoupon(code)
+  }
 
   if (items.length === 0) {
     return (
@@ -48,7 +66,12 @@ function Cart() {
 
               <div className="flex-1">
                 <h3 className="font-sans text-sm text-espresso dark:text-cream">
-                  {item.name}
+                  {item.name}{' '}
+                  {item.size && (
+                    <span className="text-espresso/50 dark:text-cream/50">
+                      · Size {item.size}
+                    </span>
+                  )}
                 </h3>
                 <p className="font-sans text-sm text-gold mt-1">
                   {formatPrice(item.price)}
@@ -84,13 +107,51 @@ function Cart() {
           ))}
         </div>
 
-        <div className="flex justify-between items-center mt-10 pt-6 border-t border-gold/20">
-          <span className="font-sans text-lg text-espresso dark:text-cream">
-            Subtotal
-          </span>
-          <span className="font-display italic font-semibold text-2xl text-espresso dark:text-cream">
-            {formatPrice(totalPrice)}
-          </span>
+        <div className="mt-10 pt-6 border-t border-gold/20">
+          {coupon ? (
+            <div className="flex items-center justify-between bg-gold/10 rounded-xl px-4 py-3 mb-4">
+              <span className="flex items-center gap-2 font-sans text-sm text-espresso dark:text-cream">
+                <Tag className="w-4 h-4 text-gold" /> {coupon.code} applied ({coupon.percent_off}% off)
+              </span>
+              <button onClick={removeCoupon} aria-label="Remove coupon">
+                <X className="w-4 h-4 text-espresso/50 dark:text-cream/50 hover:text-gold" />
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleApply} className="flex gap-2 mb-4">
+              <input
+                type="text"
+                placeholder="Discount code"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                className="flex-1 bg-transparent border border-gold/30 rounded-full px-4 py-2 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
+              />
+              <button
+                type="submit"
+                className="border border-gold/30 text-espresso dark:text-cream font-sans text-sm px-5 py-2 rounded-full hover:border-gold transition-colors"
+              >
+                Apply
+              </button>
+            </form>
+          )}
+          {couponError && (
+            <p className="font-sans text-xs text-red-500 mb-4">{couponError}</p>
+          )}
+
+          <div className="flex justify-between font-sans text-sm text-espresso/70 dark:text-cream/70 mb-2">
+            <span>Subtotal</span>
+            <span>{formatPrice(subtotal)}</span>
+          </div>
+          {discount > 0 && (
+            <div className="flex justify-between font-sans text-sm text-gold mb-2">
+              <span>Discount</span>
+              <span>-{formatPrice(discount)}</span>
+            </div>
+          )}
+          <div className="flex justify-between font-display italic font-semibold text-2xl text-espresso dark:text-cream">
+            <span>Total</span>
+            <span>{formatPrice(totalPrice)}</span>
+          </div>
         </div>
 
         <button
