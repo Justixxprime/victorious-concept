@@ -6,8 +6,13 @@ import FounderTeaser from '../components/FounderTeaser'
 import FeaturedProducts from '../components/FeaturedProducts'
 import SourceTeaser from '../components/SourceTeaser'
 import Newsletter from '../components/Newsletter'
+import ShopTheLook from '../components/ShopTheLook'
+import { useProducts } from '../hooks/useProducts'
 
 function Home() {
+  const { products } = useProducts()
+  const lookProducts = products.slice(0, 3)
+
   return (
     <>
       <SEO
@@ -19,6 +24,7 @@ function Home() {
       <CategoryGrid />
       <FounderTeaser />
       <FeaturedProducts />
+      <ShopTheLook products={lookProducts} />
       <SourceTeaser />
       <Newsletter />
     </>
