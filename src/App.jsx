@@ -26,6 +26,7 @@ import OrderHistory from './pages/OrderHistory'
 import Admin from './pages/Admin'
 import NotFound from './pages/NotFound'
 import ScrollToTop from './components/ScrollToTop'
+import { ToastProvider } from './context/ToastContext'
 
 function AnimatedRoutes() {
   const location = useLocation()
@@ -71,6 +72,7 @@ function App() {
       <AuthProvider>
         <CartProvider>
           <WishlistProvider>
+            <ToastProvider>
             <div className="min-h-screen bg-cream dark:bg-espresso transition-colors">
               <ScrollToTop />
               <Navbar />
@@ -78,6 +80,7 @@ function App() {
               <Footer />
               <WhatsAppButton />
             </div>
+          </ToastProvider>
           </WishlistProvider>
         </CartProvider>
       </AuthProvider>
