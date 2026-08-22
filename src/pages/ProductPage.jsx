@@ -100,10 +100,10 @@ function ProductPage() {
           <div className="flex gap-3">
             <button
               onClick={() => addToCart({ ...product, size: selectedSize })}
-              disabled={product.sizes && product.sizes.length > 0 && !selectedSize}
+              disabled={product.stock <= 0 || (product.sizes && product.sizes.length > 0 && !selectedSize)}
               className="flex-1 bg-gold text-espresso font-sans font-medium px-8 py-4 rounded-full flex items-center justify-center gap-2 hover:bg-gold-light transition-colors disabled:opacity-40"
             >
-              <ShoppingBag className="w-4 h-4" /> Add to Cart
+              <ShoppingBag className="w-4 h-4" /> {product.stock <= 0 ? 'Out of Stock' : 'Add to Cart'}
             </button>
             <button
               onClick={() => toggleWishlist(product)}
@@ -170,9 +170,10 @@ function ProductPage() {
         </div>
         <button
           onClick={() => addToCart(product)}
-          className="bg-gold text-espresso font-sans font-medium px-6 py-3 rounded-full flex items-center gap-2 hover:bg-gold-light transition-colors flex-shrink-0"
+          disabled={product.stock <= 0}
+          className="bg-gold text-espresso font-sans font-medium px-6 py-3 rounded-full flex items-center gap-2 hover:bg-gold-light transition-colors flex-shrink-0 disabled:opacity-40"
         >
-          <ShoppingBag className="w-4 h-4" /> Add to Cart
+          <ShoppingBag className="w-4 h-4" /> {product.stock <= 0 ? 'Out of Stock' : 'Add to Cart'}
         </button>
       </div>
     </section>

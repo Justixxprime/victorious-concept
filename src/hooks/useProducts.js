@@ -24,6 +24,7 @@ export function useProducts() {
           image: p.image,
           images: p.images && p.images.length > 0 ? p.images : [p.image],
           sizes: p.sizes || null,
+          stock: p.stock ?? 0,
           isNew: p.is_new,
           isFeatured: p.is_featured,
         }))

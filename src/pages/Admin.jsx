@@ -16,8 +16,9 @@ function Admin() {
     const [orders, setOrders] = useState([])
     const [ordersLoading, setOrdersLoading] = useState(true)
     const [form, setForm] = useState({
-        name: '', price: '', category: 'bags', image: '', imagesText: '', is_new: false, is_featured: false,
+        name: '', price: '', category: 'bags', image: '', imagesText: '', stock: 5, is_new: false, is_featured: false,
     })
+
     const [saving, setSaving] = useState(false)
 
     useEffect(() => {
@@ -54,6 +55,7 @@ function Admin() {
             category: product.category,
             image: product.image,
             imagesText: (product.images || [product.image]).join(', '),
+            stock: product.stock,
             is_new: product.isNew,
             is_featured: product.isFeatured,
         })
@@ -75,6 +77,7 @@ function Admin() {
             category: form.category,
             image: form.image,
             images: imagesArray,
+            stock: form.stock,
             is_new: form.is_new,
             is_featured: form.is_featured,
         }
@@ -107,8 +110,8 @@ function Admin() {
                     <button
                         onClick={() => setTab('products')}
                         className={`px-5 py-2 rounded-full text-xs font-sans uppercase tracking-wide border transition-colors ${tab === 'products'
-                                ? 'bg-gold text-espresso border-gold'
-                                : 'border-gold/30 text-espresso dark:text-cream'
+                            ? 'bg-gold text-espresso border-gold'
+                            : 'border-gold/30 text-espresso dark:text-cream'
                             }`}
                     >
                         Products
@@ -116,8 +119,8 @@ function Admin() {
                     <button
                         onClick={() => setTab('orders')}
                         className={`px-5 py-2 rounded-full text-xs font-sans uppercase tracking-wide border transition-colors ${tab === 'orders'
-                                ? 'bg-gold text-espresso border-gold'
-                                : 'border-gold/30 text-espresso dark:text-cream'
+                            ? 'bg-gold text-espresso border-gold'
+                            : 'border-gold/30 text-espresso dark:text-cream'
                             }`}
                     >
                         Orders ({orders.length})
@@ -202,6 +205,14 @@ function Admin() {
                                     placeholder="Price (Naira)"
                                     value={form.price}
                                     onChange={(e) => update('price', e.target.value)}
+                                    className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
+                                />
+
+                                <input
+                                    type="number"
+                                    placeholder="Stock quantity"
+                                    value={form.stock}
+                                    onChange={(e) => update('stock', e.target.value)}
                                     className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
                                 />
                                 <select

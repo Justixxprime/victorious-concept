@@ -20,9 +20,12 @@ function ProductCard({ product }) {
     showToast(saved ? 'Removed from wishlist' : 'Added to wishlist', 'wishlist')
   }
 
+  const outOfStock = product.stock <= 0
+
   function handleAddToCart(e) {
     e.preventDefault()
     e.stopPropagation()
+    if (outOfStock) return
     addToCart(product)
     showToast(`${product.name} added to cart`, 'cart')
   }
@@ -37,9 +40,19 @@ function ProductCard({ product }) {
             className="w-full h-full group-hover:scale-105 transition-transform duration-500"
           />
 
-          {product.isNew && (
+          {product.isNew && !outOfStock && (
             <span className="absolute top-3 left-3 bg-espresso text-cream text-xs font-sans px-3 py-1 rounded-full">
               New
+            </span>
+          )}
+          {outOfStock && (
+            <span className="absolute top-3 left-3 bg-espresso/80 text-cream text-xs font-sans px-3 py-1 rounded-full">
+              Out of Stock
+            </span>
+          )}
+          {!outOfStock && product.stock <= 2 && (
+            <span className="absolute top-3 left-3 bg-gold text-espresso text-xs font-sans px-3 py-1 rounded-full">
+              Only {product.stock} left
             </span>
           )}
         </div>
@@ -61,14 +74,16 @@ function ProductCard({ product }) {
         </motion.div>
       </motion.button>
 
-      <motion.button
-        onClick={handleAddToCart}
-        whileTap={{ scale: 0.92 }}
-        className="absolute bottom-3 right-3 w-10 h-10 rounded-full bg-espresso text-cream flex items-center justify-center opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 hover:bg-gold hover:text-espresso"
-        aria-label="Quick add to cart"
-      >
-        <ShoppingBag className="w-4 h-4" />
-      </motion.button>
+      {!outOfStock && (
+        <motion.button
+          onClick={handleAddToCart}
+          whileTap={{ scale: 0.92 }}
+          className="absolute bottom-3 right-3 w-10 h-10 rounded-full bg-espresso text-cream flex items-center justify-center opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 hover:bg-gold hover:text-espresso"
+          aria-label="Quick add to cart"
+        >
+          <ShoppingBag className="w-4 h-4" />
+        </motion.button>
+      )}
 
       <Link to={`/product/${product.id}`} className="block pt-4">
         <h3 className="font-sans text-sm text-espresso dark:text-cream">
