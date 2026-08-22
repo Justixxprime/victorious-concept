@@ -7,11 +7,19 @@ import Receipt from '../components/Receipt'
 import { Printer } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../context/AuthContext'
+import { usePaystackPayment } from 'react-paystack'
 
 function Checkout() {
   const { items, totalPrice, clearCart } = useCart()
   const { user } = useAuth()
   const navigate = useNavigate()
+  const paystackConfig = {
+    reference: new Date().getTime().toString(),
+    email: user?.email || `${Date.now()}@guest.victoriousconcept.com`,
+    amount: totalPrice * 100,
+    publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
+  }
+  const initializePayment = usePaystackPayment(paystackConfig)
   const [order, setOrder] = useState(null)
   const [form, setForm] = useState({ name: '', phone: '', address: '' })
   const receiptRef = useRef(null)
@@ -20,7 +28,11 @@ function Checkout() {
     setForm((prev) => ({ ...prev, [field]: value }))
   }
 
-  async function placeOrder() {
+  function handlePaystackSuccess(reference) {
+    placeOrder(reference.reference)
+  }
+
+  async function placeOrder(paymentReference = null) {
     const orderNumber = generateOrderId()
     const newOrder = {
       id: orderNumber,
@@ -39,6 +51,7 @@ function Checkout() {
         customer_name: form.name,
         customer_phone: form.phone,
         customer_address: form.address,
+        payment_reference: paymentReference,
       })
     }
 
@@ -133,15 +146,15 @@ function Checkout() {
         </div>
 
         <button
-          onClick={placeOrder}
+          onClick={() => initializePayment({ onSuccess: handlePaystackSuccess, onClose: () => {} })}
           disabled={!form.name || !form.phone || !form.address}
           className="w-full bg-gold text-espresso font-sans font-medium px-8 py-4 rounded-full hover:bg-gold-light transition-colors disabled:opacity-40"
         >
-          Place Order
+          Pay {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 }).format(totalPrice)}
         </button>
 
         <p className="font-sans text-xs text-espresso/40 dark:text-cream/40 text-center mt-4">
-          Payment integration is coming soon. Placing an order now confirms your details and generates your receipt.
+          Secure payment powered by Paystack. Your card details are never stored on our servers.
         </p>
       </div>
     </section>
