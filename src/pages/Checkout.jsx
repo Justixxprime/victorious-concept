@@ -1,18 +1,26 @@
 import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { usePaystackPayment } from 'react-paystack'
 import SEO from '../components/SEO'
 import { useCart } from '../context/CartContext'
-import { generateOrderId } from '../utils/generateOrderId'
-import Receipt from '../components/Receipt'
-import { Printer } from 'lucide-react'
-import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../context/AuthContext'
-import { usePaystackPayment } from 'react-paystack'
+import { supabase } from '../lib/supabaseClient'
+import { generateOrderId } from '../utils/generateOrderId'
+import { formatPrice } from '../utils/formatPrice'
+import { bankDetails } from '../data/paymentInfo'
+import Receipt from '../components/Receipt'
+import { Printer, CreditCard, Landmark, MessageCircle, Copy, Check } from 'lucide-react'
 
 function Checkout() {
   const { items, totalPrice, clearCart } = useCart()
   const { user } = useAuth()
   const navigate = useNavigate()
+  const [order, setOrder] = useState(null)
+  const [form, setForm] = useState({ name: '', phone: '', address: '' })
+  const [method, setMethod] = useState('card')
+  const [copied, setCopied] = useState(false)
+  const receiptRef = useRef(null)
+
   const paystackConfig = {
     reference: new Date().getTime().toString(),
     email: user?.email || `${Date.now()}@guest.victoriousconcept.com`,
@@ -20,19 +28,12 @@ function Checkout() {
     publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
   }
   const initializePayment = usePaystackPayment(paystackConfig)
-  const [order, setOrder] = useState(null)
-  const [form, setForm] = useState({ name: '', phone: '', address: '' })
-  const receiptRef = useRef(null)
 
   function update(field, value) {
     setForm((prev) => ({ ...prev, [field]: value }))
   }
 
-  function handlePaystackSuccess(reference) {
-    placeOrder(reference.reference)
-  }
-
-  async function placeOrder(paymentReference = null) {
+  async function placeOrder(paymentReference = null, paymentMethod = method) {
     const orderNumber = generateOrderId()
     const newOrder = {
       id: orderNumber,
@@ -52,6 +53,7 @@ function Checkout() {
         customer_phone: form.phone,
         customer_address: form.address,
         payment_reference: paymentReference,
+        payment_method: paymentMethod,
       })
     }
 
@@ -59,9 +61,44 @@ function Checkout() {
     clearCart()
   }
 
+  function handlePaystackSuccess(reference) {
+    placeOrder(reference.reference, 'card')
+  }
+
+  function handleBankTransferConfirm() {
+    placeOrder(null, 'bank_transfer')
+  }
+
+  function handleWhatsAppOrder() {
+    const orderNumber = generateOrderId()
+    const lines = [
+      `Hi Victorious Concept, I'd like to arrange payment for an order.`,
+      ``,
+      `Order Reference: ${orderNumber}`,
+      `Name: ${form.name}`,
+      `Phone: ${form.phone}`,
+      `Address: ${form.address}`,
+      ``,
+      `Items:`,
+      ...items.map((i) => `${i.name} x${i.quantity} — ${formatPrice(i.price * i.quantity)}`),
+      ``,
+      `Total: ${formatPrice(totalPrice)}`,
+    ]
+    window.open(`https://wa.me/2348122470435?text=${encodeURIComponent(lines.join('\n'))}`, '_blank')
+    placeOrder(null, 'whatsapp')
+  }
+
+  function copyAccount() {
+    navigator.clipboard.writeText(bankDetails.accountNumber)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
   function handlePrint() {
     window.print()
   }
+
+  const canProceed = form.name && form.phone && form.address
 
   if (items.length === 0 && !order) {
     return (
@@ -141,21 +178,95 @@ function Checkout() {
         <div className="flex justify-between items-center border-t border-gold/20 pt-4 mb-6">
           <span className="font-sans text-espresso dark:text-cream">Total</span>
           <span className="font-display italic font-semibold text-xl text-espresso dark:text-cream">
-            {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 }).format(totalPrice)}
+            {formatPrice(totalPrice)}
           </span>
         </div>
 
-        <button
-          onClick={() => initializePayment({ onSuccess: handlePaystackSuccess, onClose: () => {} })}
-          disabled={!form.name || !form.phone || !form.address}
-          className="w-full bg-gold text-espresso font-sans font-medium px-8 py-4 rounded-full hover:bg-gold-light transition-colors disabled:opacity-40"
-        >
-          Pay {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 }).format(totalPrice)}
-        </button>
-
-        <p className="font-sans text-xs text-espresso/40 dark:text-cream/40 text-center mt-4">
-          Secure payment powered by Paystack. Your card details are never stored on our servers.
+        <p className="font-sans text-xs uppercase tracking-widest text-gold mb-3">
+          Payment Method
         </p>
+        <div className="grid grid-cols-3 gap-2 mb-6">
+          <button
+            onClick={() => setMethod('card')}
+            className={`flex flex-col items-center gap-2 py-4 rounded-xl border transition-colors ${
+              method === 'card' ? 'bg-gold border-gold text-espresso' : 'border-gold/30 text-espresso dark:text-cream'
+            }`}
+          >
+            <CreditCard className="w-5 h-5" />
+            <span className="font-sans text-xs">Card</span>
+          </button>
+          <button
+            onClick={() => setMethod('bank')}
+            className={`flex flex-col items-center gap-2 py-4 rounded-xl border transition-colors ${
+              method === 'bank' ? 'bg-gold border-gold text-espresso' : 'border-gold/30 text-espresso dark:text-cream'
+            }`}
+          >
+            <Landmark className="w-5 h-5" />
+            <span className="font-sans text-xs">Bank</span>
+          </button>
+          <button
+            onClick={() => setMethod('whatsapp')}
+            className={`flex flex-col items-center gap-2 py-4 rounded-xl border transition-colors ${
+              method === 'whatsapp' ? 'bg-gold border-gold text-espresso' : 'border-gold/30 text-espresso dark:text-cream'
+            }`}
+          >
+            <MessageCircle className="w-5 h-5" />
+            <span className="font-sans text-xs">WhatsApp</span>
+          </button>
+        </div>
+
+        {method === 'card' && (
+          <button
+            onClick={() => canProceed && initializePayment({ onSuccess: handlePaystackSuccess, onClose: () => {} })}
+            disabled={!canProceed}
+            className="w-full bg-gold text-espresso font-sans font-medium px-8 py-4 rounded-full hover:bg-gold-light transition-colors disabled:opacity-40"
+          >
+            Pay {formatPrice(totalPrice)}
+          </button>
+        )}
+
+        {method === 'bank' && (
+          <div className="flex flex-col gap-4">
+            <div className="bg-gold/5 rounded-2xl p-5 flex flex-col gap-2">
+              <p className="font-sans text-xs text-espresso/50 dark:text-cream/50">Account Name</p>
+              <p className="font-sans text-sm text-espresso dark:text-cream">{bankDetails.accountName}</p>
+              <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 mt-2">Account Number</p>
+              <div className="flex items-center justify-between">
+                <p className="font-sans text-sm text-espresso dark:text-cream">{bankDetails.accountNumber}</p>
+                <button onClick={copyAccount} className="text-gold" aria-label="Copy account number">
+                  {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                </button>
+              </div>
+              <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 mt-2">Bank</p>
+              <p className="font-sans text-sm text-espresso dark:text-cream">{bankDetails.bankName}</p>
+            </div>
+            <button
+              onClick={handleBankTransferConfirm}
+              disabled={!canProceed}
+              className="w-full bg-gold text-espresso font-sans font-medium px-8 py-4 rounded-full hover:bg-gold-light transition-colors disabled:opacity-40"
+            >
+              I've Made the Transfer
+            </button>
+            <p className="font-sans text-xs text-espresso/40 dark:text-cream/40 text-center">
+              Your order is confirmed once payment is verified on our end.
+            </p>
+          </div>
+        )}
+
+        {method === 'whatsapp' && (
+          <div className="flex flex-col gap-4">
+            <p className="font-sans text-sm text-espresso/70 dark:text-cream/70">
+              Confirm your order and finish arranging payment directly with us on WhatsApp.
+            </p>
+            <button
+              onClick={() => canProceed && handleWhatsAppOrder()}
+              disabled={!canProceed}
+              className="w-full bg-gold text-espresso font-sans font-medium px-8 py-4 rounded-full hover:bg-gold-light transition-colors disabled:opacity-40"
+            >
+              Continue on WhatsApp
+            </button>
+          </div>
+        )}
       </div>
     </section>
   )
