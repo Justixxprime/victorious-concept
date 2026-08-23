@@ -1,11 +1,20 @@
 import { useParams, Link } from 'react-router-dom'
 import { useProducts } from '../hooks/useProducts'
-import { categories } from '../data/categories'
+import { useCategories } from '../hooks/useCategories'
 import ProductCard from '../components/ProductCard'
 import RevealImage from '../components/RevealImage'
 import Breadcrumbs from '../components/Breadcrumbs'
 import { siteImages } from '../data/siteImages'
-import { useCategories } from '../hooks/useCategories'
+import { ShoppingBag, Footprints, Shirt, Droplet, Gem, Tag } from 'lucide-react'
+
+const iconMap = {
+  bags: ShoppingBag,
+  shoes: Footprints,
+  slippers: Footprints,
+  clothing: Shirt,
+  perfumes: Droplet,
+  accessories: Gem,
+}
 
 function CategoryPage() {
   const { categoryId } = useParams()
@@ -30,6 +39,10 @@ function CategoryPage() {
           className="w-full aspect-[21/6] rounded-2xl mb-8"
         />
 
+        {(() => {
+          const Icon = iconMap[categoryId] || Tag
+          return <Icon className="w-8 h-8 text-gold mb-3" />
+        })()}
         <h1 className="font-display italic font-semibold text-4xl text-espresso dark:text-cream mb-2">
           {category ? category.name : 'Category'}
         </h1>
@@ -58,7 +71,8 @@ function CategoryPage() {
             ))}
           </div>
         )}
-      {relatedCategories.length > 0 && (
+
+        {relatedCategories.length > 0 && (
           <div className="mt-16 pt-10 border-t border-gold/20">
             <p className="font-sans text-xs uppercase tracking-widest text-gold mb-4">
               Explore More

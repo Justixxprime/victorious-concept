@@ -26,7 +26,7 @@ function getDescription(product) {
 
 function ProductPage() {
   const { id } = useParams()
-  const { products } = useProducts()
+  const { products, loading: productsLoading } = useProducts()
   const product = products.find((p) => String(p.id) === id)
   const { addToCart } = useCart()
   const { toggleWishlist, isWishlisted } = useWishlist()
@@ -36,6 +36,14 @@ function ProductPage() {
   useEffect(() => {
     if (product) addViewed(product)
   }, [product])
+
+  if (productsLoading) {
+    return (
+      <div className="min-h-screen bg-cream dark:bg-espresso flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-gold border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
+  }
 
   if (!product) {
     return (
