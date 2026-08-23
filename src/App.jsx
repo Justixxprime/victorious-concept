@@ -11,6 +11,7 @@ import WhatsAppButton from './components/WhatsAppButton'
 import ScrollToTop from './components/ScrollToTop'
 import { useEffect } from 'react'
 import { useToast } from './context/ToastContext'
+import CartReminder from './components/CartReminder'
 
 const Home = lazy(() => import('./pages/Home'))
 const Shop = lazy(() => import('./pages/Shop'))
@@ -109,6 +110,7 @@ function App() {
                 <AnimatedRoutes />
                 <Footer />
                 <WhatsAppButton />
+              <CartReminder />
               </div>
             </ToastProvider>
           </WishlistProvider>
