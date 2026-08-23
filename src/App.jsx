@@ -9,6 +9,8 @@ import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import WhatsAppButton from './components/WhatsAppButton'
 import ScrollToTop from './components/ScrollToTop'
+import { useEffect } from 'react'
+import { useToast } from './context/ToastContext'
 
 const Home = lazy(() => import('./pages/Home'))
 const Shop = lazy(() => import('./pages/Shop'))
@@ -76,6 +78,23 @@ function AnimatedRoutes() {
   )
 }
 
+function WelcomeNudge() {
+  const { showToast } = useToast()
+
+  useEffect(() => {
+    const seen = localStorage.getItem('vc-welcome-seen')
+    if (!seen) {
+      const timer = setTimeout(() => {
+        showToast('Welcome! Use code WELCOME10 for 10% off your first order', 'success')
+        localStorage.setItem('vc-welcome-seen', 'true')
+      }, 2000)
+      return () => clearTimeout(timer)
+    }
+  }, [])
+
+  return null
+}
+
 function App() {
   return (
     <BrowserRouter>
@@ -84,8 +103,9 @@ function App() {
           <WishlistProvider>
             <ToastProvider>
               <div className="min-h-screen bg-cream dark:bg-espresso transition-colors">
-                <ScrollToTop />
-                <Navbar />
+              <ScrollToTop />
+              <WelcomeNudge />
+              <Navbar />
                 <AnimatedRoutes />
                 <Footer />
                 <WhatsAppButton />
