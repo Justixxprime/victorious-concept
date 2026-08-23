@@ -11,7 +11,7 @@ import ThemeToggle from './ThemeToggle'
 import SearchOverlay from './SearchOverlay'
 
 const links = [
-  { label: 'New In', to: '/' },
+  { label: 'New In', to: '/shop?new=true' },
   { label: 'Shop', to: '/shop' },
   { label: 'Lookbook', to: '/lookbook' },
   { label: 'Journal', to: '/journal' },
