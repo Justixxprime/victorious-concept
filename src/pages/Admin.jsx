@@ -3,6 +3,7 @@ import SEO from '../components/SEO'
 import { useIsAdmin } from '../hooks/useIsAdmin'
 import { useProducts } from '../hooks/useProducts'
 import { useCategories } from '../hooks/useCategories'
+import { useSiteSettings } from '../hooks/useSiteSettings'
 import { supabase } from '../lib/supabaseClient'
 import { formatPrice } from '../utils/formatPrice'
 import { Trash2, Pencil, Plus, Package, Upload, Tag as TagIcon, Trash2 as TrashIcon, Plus as PlusIcon } from 'lucide-react'
@@ -12,6 +13,8 @@ function Admin() {
     const isAdmin = useIsAdmin()
     const { products, loading, error } = useProducts()
     const { categories } = useCategories()
+    const { value: heroValue, updateSetting: updateHero } = useSiteSettings('hero')
+    const [heroForm, setHeroForm] = useState(null)
     const [refreshKey, setRefreshKey] = useState(0)
     const [editing, setEditing] = useState(null)
     const [tab, setTab] = useState('products')
@@ -34,6 +37,10 @@ function Admin() {
         }
         if (isAdmin) fetchAllOrders()
     }, [isAdmin])
+
+    useEffect(() => {
+        if (heroValue && !heroForm) setHeroForm(heroValue)
+    }, [heroValue])
 
     if (!isAdmin) {
         return (
@@ -167,6 +174,14 @@ function Admin() {
                         Orders ({orders.length})
                     </button>
                     <button
+                        onClick={() => setTab('content')}
+                        className={`px-5 py-2 rounded-full text-xs font-sans uppercase tracking-wide border transition-colors ${
+                            tab === 'content' ? 'bg-gold text-espresso border-gold' : 'border-gold/30 text-espresso dark:text-cream'
+                        }`}
+                    >
+                        Homepage
+                    </button>
+                    <button
                         onClick={() => setTab('categories')}
                         className={`px-5 py-2 rounded-full text-xs font-sans uppercase tracking-wide border transition-colors ${
                             tab === 'categories' ? 'bg-gold text-espresso border-gold' : 'border-gold/30 text-espresso dark:text-cream'
@@ -248,6 +263,49 @@ function Admin() {
                         </div>
                     )
                 })()}
+
+                {/* ========== HOMEPAGE / CONTENT TAB ========== */}
+                {tab === 'content' && heroForm && (
+                    <div className="max-w-lg flex flex-col gap-4">
+                        <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-2">
+                            Hero Section
+                        </h2>
+                        <input
+                            type="text"
+                            placeholder="Small label (e.g. The Next Chapter)"
+                            value={heroForm.label}
+                            onChange={(e) => setHeroForm({ ...heroForm, label: e.target.value })}
+                            className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
+                        />
+                        <textarea
+                            placeholder="Headline"
+                            rows={2}
+                            value={heroForm.headline}
+                            onChange={(e) => setHeroForm({ ...heroForm, headline: e.target.value })}
+                            className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold resize-none"
+                        />
+                        <textarea
+                            placeholder="Supporting text"
+                            rows={2}
+                            value={heroForm.subtext}
+                            onChange={(e) => setHeroForm({ ...heroForm, subtext: e.target.value })}
+                            className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold resize-none"
+                        />
+                        <input
+                            type="text"
+                            placeholder="Backdrop image URL"
+                            value={heroForm.backdropImage}
+                            onChange={(e) => setHeroForm({ ...heroForm, backdropImage: e.target.value })}
+                            className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
+                        />
+                        <button
+                            onClick={() => updateHero(heroForm)}
+                            className="bg-gold text-espresso font-sans font-medium px-6 py-3 rounded-full hover:bg-gold-light transition-colors self-start"
+                        >
+                            Save Homepage Hero
+                        </button>
+                    </div>
+                )}
 
                 {/* ========== CATEGORIES TAB ========== */}
                 {tab === 'categories' && (

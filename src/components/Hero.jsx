@@ -1,14 +1,25 @@
 import { ArrowRight } from 'lucide-react'
-import AnimatedLogo from './AnimatedLogo'
-import { siteImages } from '../data/siteImages'
 import { Link } from 'react-router-dom'
+import AnimatedLogo from './AnimatedLogo'
+import { useSiteSettings } from '../hooks/useSiteSettings'
+import { siteImages } from '../data/siteImages'
+
+const defaults = {
+  label: 'The Next Chapter',
+  headline: "Victorious isn't a size. It's a state of mind.",
+  subtext: 'Sourced with intention, worn with confidence. Bags, shoes, clothing and accessories for the next chapter.',
+  backdropImage: siteImages.heroBackdrop,
+}
 
 function Hero() {
+  const { value } = useSiteSettings('hero')
+  const hero = value || defaults
+
   return (
     <section className="relative bg-espresso text-cream overflow-hidden">
       <div className="absolute inset-0">
         <img
-         src={siteImages.heroBackdrop}
+          src={hero.backdropImage}
           alt=""
           className="w-full h-full object-cover opacity-30"
         />
@@ -18,16 +29,15 @@ function Hero() {
       <div className="relative max-w-7xl mx-auto px-6 py-32 md:py-44 flex flex-col items-start gap-8">
         <AnimatedLogo className="w-24 md:w-28" />
         <span className="font-sans uppercase tracking-[0.3em] text-xs text-gold-light">
-          The Next Chapter
+          {hero.label}
         </span>
 
         <h1 className="font-display italic font-semibold text-5xl md:text-7xl leading-tight max-w-3xl">
-          Victorious isn't a size. It's a state of mind.
+          {hero.headline}
         </h1>
 
         <p className="font-sans text-cream/80 max-w-xl text-base md:text-lg">
-          Sourced with intention, worn with confidence. Bags, shoes, clothing
-          and accessories for the next chapter.
+          {hero.subtext}
         </p>
 
         <div className="flex gap-4 pt-4">
