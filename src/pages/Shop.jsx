@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import SEO from '../components/SEO'
 import { useProducts } from '../hooks/useProducts'
-import { categories } from '../data/categories'
+import { useCategories } from '../hooks/useCategories'
 import ProductCard from '../components/ProductCard'
 import ProductCardSkeleton from '../components/ProductCardSkeleton'
 import Breadcrumbs from '../components/Breadcrumbs'
@@ -9,6 +9,7 @@ import { useSearchParams } from 'react-router-dom'
 
 function Shop() {
   const { products, loading, error } = useProducts()
+  const { categories } = useCategories()
   const [searchParams, setSearchParams] = useSearchParams()
   const newOnly = searchParams.get('new') === 'true'
   const [activeCategory, setActiveCategory] = useState('all')

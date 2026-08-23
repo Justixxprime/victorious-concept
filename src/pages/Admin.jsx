@@ -2,15 +2,16 @@ import { useState, useEffect } from 'react'
 import SEO from '../components/SEO'
 import { useIsAdmin } from '../hooks/useIsAdmin'
 import { useProducts } from '../hooks/useProducts'
+import { useCategories } from '../hooks/useCategories'
 import { supabase } from '../lib/supabaseClient'
-import { categories } from '../data/categories'
 import { formatPrice } from '../utils/formatPrice'
-import { Trash2, Pencil, Plus, Package, Upload } from 'lucide-react'
+import { Trash2, Pencil, Plus, Package, Upload, Tag as TagIcon, Trash2 as TrashIcon, Plus as PlusIcon } from 'lucide-react'
 import { TrendingUp, ShoppingBag as BagIcon, AlertTriangle, DollarSign } from 'lucide-react'
 
 function Admin() {
     const isAdmin = useIsAdmin()
     const { products, loading, error } = useProducts()
+    const { categories } = useCategories()
     const [refreshKey, setRefreshKey] = useState(0)
     const [editing, setEditing] = useState(null)
     const [tab, setTab] = useState('products')
@@ -19,8 +20,8 @@ function Admin() {
     const [form, setForm] = useState({
         name: '', price: '', category: 'bags', image: '', imagesText: '', stock: 5, is_new: false, is_featured: false,
     })
-
     const [saving, setSaving] = useState(false)
+    const [newCategoryName, setNewCategoryName] = useState('')
 
     useEffect(() => {
         async function fetchAllOrders() {
@@ -126,6 +127,20 @@ function Admin() {
         window.location.reload()
     }
 
+    async function addCategory() {
+        if (!newCategoryName.trim()) return
+        const id = newCategoryName.trim().toLowerCase().replace(/\s+/g, '-')
+        await supabase.from('categories').insert({ id, name: newCategoryName.trim(), sort_order: categories.length + 1 })
+        setNewCategoryName('')
+        window.location.reload()
+    }
+
+    async function deleteCategory(id) {
+        if (!confirm('Delete this category? Products in it will keep their category tag but it will no longer appear as a filter.')) return
+        await supabase.from('categories').delete().eq('id', id)
+        window.location.reload()
+    }
+
     return (
         <section className="bg-cream dark:bg-espresso transition-colors min-h-screen py-12 px-6">
             <SEO title="Admin" description="Victorious Concept admin dashboard." />
@@ -134,13 +149,12 @@ function Admin() {
                     Admin Dashboard
                 </h1>
 
-                <div className="flex gap-2 mb-10">
+                <div className="flex gap-2 mb-10 flex-wrap">
                     <button
                         onClick={() => setTab('products')}
-                        className={`px-5 py-2 rounded-full text-xs font-sans uppercase tracking-wide border transition-colors ${tab === 'products'
-                            ? 'bg-gold text-espresso border-gold'
-                            : 'border-gold/30 text-espresso dark:text-cream'
-                            }`}
+                        className={`px-5 py-2 rounded-full text-xs font-sans uppercase tracking-wide border transition-colors ${
+                            tab === 'products' ? 'bg-gold text-espresso border-gold' : 'border-gold/30 text-espresso dark:text-cream'
+                        }`}
                     >
                         Products
                     </button>
@@ -151,6 +165,14 @@ function Admin() {
                         }`}
                     >
                         Orders ({orders.length})
+                    </button>
+                    <button
+                        onClick={() => setTab('categories')}
+                        className={`px-5 py-2 rounded-full text-xs font-sans uppercase tracking-wide border transition-colors ${
+                            tab === 'categories' ? 'bg-gold text-espresso border-gold' : 'border-gold/30 text-espresso dark:text-cream'
+                        }`}
+                    >
+                        Categories
                     </button>
                     <button
                         onClick={() => setTab('analytics')}
@@ -226,6 +248,39 @@ function Admin() {
                         </div>
                     )
                 })()}
+
+                {/* ========== CATEGORIES TAB ========== */}
+                {tab === 'categories' && (
+                    <div className="max-w-lg">
+                        <div className="flex gap-2 mb-8">
+                            <input
+                                type="text"
+                                placeholder="New category name (e.g. Sale, New In)"
+                                value={newCategoryName}
+                                onChange={(e) => setNewCategoryName(e.target.value)}
+                                className="flex-1 bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
+                            />
+                            <button
+                                onClick={addCategory}
+                                className="flex items-center gap-2 bg-gold text-espresso font-sans font-medium px-5 rounded-full hover:bg-gold-light transition-colors"
+                            >
+                                <PlusIcon className="w-4 h-4" /> Add
+                            </button>
+                        </div>
+
+                        <div className="flex flex-col gap-2">
+                            {categories.map((cat) => (
+                                <div key={cat.id} className="flex items-center gap-3 border border-gold/20 rounded-xl p-4">
+                                    <TagIcon className="w-4 h-4 text-gold flex-shrink-0" />
+                                    <span className="flex-1 font-sans text-sm text-espresso dark:text-cream">{cat.name}</span>
+                                    <button onClick={() => deleteCategory(cat.id)} aria-label="Delete category">
+                                        <TrashIcon className="w-4 h-4 text-espresso/40 dark:text-cream/40 hover:text-red-500" />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 {/* ========== ORDERS TAB ========== */}
                 {tab === 'orders' && (
@@ -316,7 +371,6 @@ function Admin() {
                                     onChange={(e) => update('price', e.target.value)}
                                     className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
                                 />
-
                                 <input
                                     type="number"
                                     placeholder="Stock quantity"
@@ -348,7 +402,6 @@ function Admin() {
                                 onChange={(e) => update('imagesText', e.target.value)}
                                 className="w-full bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold resize-none mb-3"
                             />
-
                             <label className="flex items-center gap-2 justify-center border-2 border-dashed border-gold/30 rounded-xl px-4 py-4 cursor-pointer hover:border-gold transition-colors mb-4">
                                 <Upload className="w-4 h-4 text-gold" />
                                 <span className="font-sans text-sm text-espresso dark:text-cream">
@@ -362,7 +415,6 @@ function Admin() {
                                     className="hidden"
                                 />
                             </label>
-
                             <div className="flex gap-6 mb-4">
                                 <label className="flex items-center gap-2 font-sans text-sm text-espresso dark:text-cream">
                                     <input type="checkbox" checked={form.is_new} onChange={(e) => update('is_new', e.target.checked)} />

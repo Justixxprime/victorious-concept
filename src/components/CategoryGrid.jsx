@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom'
-import { categories } from '../data/categories'
+import { useCategories } from '../hooks/useCategories'
 
 function CategoryGrid() {
+  const { categories } = useCategories()
+
   return (
     <section className="bg-cream dark:bg-espresso transition-colors py-20 px-6">
       <div className="max-w-7xl mx-auto">
