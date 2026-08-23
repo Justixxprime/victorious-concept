@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabaseClient'
 import { categories } from '../data/categories'
 import { formatPrice } from '../utils/formatPrice'
 import { Trash2, Pencil, Plus, Package } from 'lucide-react'
+import { TrendingUp, ShoppingBag as BagIcon, AlertTriangle, DollarSign } from 'lucide-react'
 
 function Admin() {
     const isAdmin = useIsAdmin()
@@ -118,14 +119,86 @@ function Admin() {
                     </button>
                     <button
                         onClick={() => setTab('orders')}
-                        className={`px-5 py-2 rounded-full text-xs font-sans uppercase tracking-wide border transition-colors ${tab === 'orders'
-                            ? 'bg-gold text-espresso border-gold'
-                            : 'border-gold/30 text-espresso dark:text-cream'
-                            }`}
+                        className={`px-5 py-2 rounded-full text-xs font-sans uppercase tracking-wide border transition-colors ${
+                            tab === 'orders' ? 'bg-gold text-espresso border-gold' : 'border-gold/30 text-espresso dark:text-cream'
+                        }`}
                     >
                         Orders ({orders.length})
                     </button>
+                    <button
+                        onClick={() => setTab('analytics')}
+                        className={`px-5 py-2 rounded-full text-xs font-sans uppercase tracking-wide border transition-colors ${
+                            tab === 'analytics' ? 'bg-gold text-espresso border-gold' : 'border-gold/30 text-espresso dark:text-cream'
+                        }`}
+                    >
+                        Analytics
+                    </button>
                 </div>
+
+                {tab === 'analytics' && (() => {
+                    const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0)
+                    const totalOrders = orders.length
+                    const lowStock = products.filter((p) => p.stock > 0 && p.stock <= 2)
+                    const outOfStock = products.filter((p) => p.stock <= 0)
+                    const avgOrderValue = totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0
+
+                    return (
+                        <div className="flex flex-col gap-8">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div className="bg-gold/5 rounded-2xl p-5">
+                                    <DollarSign className="w-5 h-5 text-gold mb-2" />
+                                    <p className="font-display italic font-semibold text-2xl text-espresso dark:text-cream">
+                                        {formatPrice(totalRevenue)}
+                                    </p>
+                                    <p className="font-sans text-xs text-espresso/50 dark:text-cream/50">Total Revenue</p>
+                                </div>
+                                <div className="bg-gold/5 rounded-2xl p-5">
+                                    <BagIcon className="w-5 h-5 text-gold mb-2" />
+                                    <p className="font-display italic font-semibold text-2xl text-espresso dark:text-cream">
+                                        {totalOrders}
+                                    </p>
+                                    <p className="font-sans text-xs text-espresso/50 dark:text-cream/50">Total Orders</p>
+                                </div>
+                                <div className="bg-gold/5 rounded-2xl p-5">
+                                    <TrendingUp className="w-5 h-5 text-gold mb-2" />
+                                    <p className="font-display italic font-semibold text-2xl text-espresso dark:text-cream">
+                                        {formatPrice(avgOrderValue)}
+                                    </p>
+                                    <p className="font-sans text-xs text-espresso/50 dark:text-cream/50">Avg Order Value</p>
+                                </div>
+                                <div className="bg-gold/5 rounded-2xl p-5">
+                                    <AlertTriangle className="w-5 h-5 text-gold mb-2" />
+                                    <p className="font-display italic font-semibold text-2xl text-espresso dark:text-cream">
+                                        {lowStock.length + outOfStock.length}
+                                    </p>
+                                    <p className="font-sans text-xs text-espresso/50 dark:text-cream/50">Stock Alerts</p>
+                                </div>
+                            </div>
+
+                            {(lowStock.length > 0 || outOfStock.length > 0) && (
+                                <div>
+                                    <h3 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">
+                                        Needs Attention
+                                    </h3>
+                                    <div className="flex flex-col gap-2">
+                                        {outOfStock.map((p) => (
+                                            <div key={p.id} className="flex justify-between items-center bg-red-500/5 rounded-xl px-4 py-3">
+                                                <span className="font-sans text-sm text-espresso dark:text-cream">{p.name}</span>
+                                                <span className="font-sans text-xs text-red-500">Out of stock</span>
+                                            </div>
+                                        ))}
+                                        {lowStock.map((p) => (
+                                            <div key={p.id} className="flex justify-between items-center bg-gold/10 rounded-xl px-4 py-3">
+                                                <span className="font-sans text-sm text-espresso dark:text-cream">{p.name}</span>
+                                                <span className="font-sans text-xs text-gold">Only {p.stock} left</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )
+                })()}
 
                 {/* ========== ORDERS TAB ========== */}
                 {tab === 'orders' && (
