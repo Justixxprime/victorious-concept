@@ -326,14 +326,25 @@ function Admin() {
                             </button>
                         </div>
 
-                        <div className="flex flex-col gap-2">
+                        <div className="flex flex-col gap-3">
                             {categories.map((cat) => (
-                                <div key={cat.id} className="flex items-center gap-3 border border-gold/20 rounded-xl p-4">
-                                    <TagIcon className="w-4 h-4 text-gold flex-shrink-0" />
-                                    <span className="flex-1 font-sans text-sm text-espresso dark:text-cream">{cat.name}</span>
-                                    <button onClick={() => deleteCategory(cat.id)} aria-label="Delete category">
-                                        <TrashIcon className="w-4 h-4 text-espresso/40 dark:text-cream/40 hover:text-red-500" />
-                                    </button>
+                                <div key={cat.id} className="border border-gold/20 rounded-xl p-4">
+                                    <div className="flex items-center gap-3 mb-2">
+                                        <TagIcon className="w-4 h-4 text-gold flex-shrink-0" />
+                                        <span className="flex-1 font-sans text-sm text-espresso dark:text-cream">{cat.name}</span>
+                                        <button onClick={() => deleteCategory(cat.id)} aria-label="Delete category">
+                                            <TrashIcon className="w-4 h-4 text-espresso/40 dark:text-cream/40 hover:text-red-500" />
+                                        </button>
+                                    </div>
+                                    <textarea
+                                        placeholder="Short introduction for this category page (optional)"
+                                        rows={2}
+                                        defaultValue={cat.description || ''}
+                                        onBlur={async (e) => {
+                                            await supabase.from('categories').update({ description: e.target.value }).eq('id', cat.id)
+                                        }}
+                                        className="w-full bg-transparent border border-gold/20 rounded-lg px-3 py-2 font-sans text-xs text-espresso dark:text-cream outline-none focus:border-gold resize-none"
+                                    />
                                 </div>
                             ))}
                         </div>

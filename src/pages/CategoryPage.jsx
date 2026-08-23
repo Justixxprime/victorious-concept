@@ -5,12 +5,15 @@ import ProductCard from '../components/ProductCard'
 import RevealImage from '../components/RevealImage'
 import Breadcrumbs from '../components/Breadcrumbs'
 import { siteImages } from '../data/siteImages'
+import { useCategories } from '../hooks/useCategories'
 
 function CategoryPage() {
   const { categoryId } = useParams()
   const { products } = useProducts()
+  const { categories } = useCategories()
   const category = categories.find((c) => c.id === categoryId)
   const categoryProducts = products.filter((p) => p.category === categoryId)
+  const relatedCategories = categories.filter((c) => c.id !== categoryId)
 
   return (
     <section className="bg-cream dark:bg-espresso transition-colors py-12 px-6 min-h-screen">
@@ -30,6 +33,11 @@ function CategoryPage() {
         <h1 className="font-display italic font-semibold text-4xl text-espresso dark:text-cream mb-2">
           {category ? category.name : 'Category'}
         </h1>
+        {category?.description && (
+          <p className="font-sans text-sm text-espresso/70 dark:text-cream/70 max-w-xl mb-3">
+            {category.description}
+          </p>
+        )}
         <p className="font-sans text-sm text-espresso/50 dark:text-cream/50 mb-10">
           {categoryProducts.length} {categoryProducts.length === 1 ? 'item' : 'items'}
         </p>
@@ -48,6 +56,24 @@ function CategoryPage() {
             {categoryProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
+          </div>
+        )}
+      {relatedCategories.length > 0 && (
+          <div className="mt-16 pt-10 border-t border-gold/20">
+            <p className="font-sans text-xs uppercase tracking-widest text-gold mb-4">
+              Explore More
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {relatedCategories.map((cat) => (
+                <Link
+                  key={cat.id}
+                  to={`/category/${cat.id}`}
+                  className="px-4 py-2 rounded-full text-xs font-sans uppercase tracking-wide border border-gold/30 text-espresso dark:text-cream hover:border-gold hover:text-gold transition-colors"
+                >
+                  {cat.name}
+                </Link>
+              ))}
+            </div>
           </div>
         )}
       </div>
