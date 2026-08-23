@@ -26,7 +26,7 @@ function Footer() {
           <h4 className="font-sans text-xs uppercase tracking-widest text-gold-light mb-4">Customer Care</h4>
           <ul className="flex flex-col gap-3 font-sans text-sm text-cream/80">
             <li><Link to="/delivery" className="hover:text-gold transition-colors">Delivery</Link></li>
-            <li><Link to="/returns" className="hover:text-gold transition-colors">Returns</Link></li>
+            <li><Link to="/track-order" className="hover:text-gold transition-colors">Track Order</Link></li>
             <li><Link to="/faq" className="hover:text-gold transition-colors">FAQ</Link></li>
             <li><Link to="/contact" className="hover:text-gold transition-colors">Contact</Link></li>
           </ul>
