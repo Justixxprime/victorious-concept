@@ -6,6 +6,7 @@ function RevealImage({ src, alt, className = '' }) {
       <motion.img
         src={src}
         alt={alt}
+        loading="lazy"
         className="w-full h-full object-cover"
         initial={{ scale: 1.15 }}
         whileInView={{ scale: 1 }}

@@ -4,6 +4,7 @@ import { usePaystackPayment } from 'react-paystack'
 import SEO from '../components/SEO'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
+import { useAddresses } from '../hooks/useAddresses'
 import { supabase } from '../lib/supabaseClient'
 import { generateOrderId } from '../utils/generateOrderId'
 import { formatPrice } from '../utils/formatPrice'
@@ -17,6 +18,7 @@ function Checkout() {
   const navigate = useNavigate()
   const [order, setOrder] = useState(null)
   const [form, setForm] = useState({ name: '', phone: '', address: '' })
+  const { addresses } = useAddresses()
   const [method, setMethod] = useState('card')
   const [copied, setCopied] = useState(false)
   const receiptRef = useRef(null)
@@ -150,6 +152,25 @@ function Checkout() {
         <h1 className="font-display italic font-semibold text-3xl text-espresso dark:text-cream mb-8">
           Checkout
         </h1>
+
+        {addresses.length > 0 && (
+          <div className="mb-6">
+            <p className="font-sans text-xs uppercase tracking-widest text-gold mb-3">
+              Use a saved address
+            </p>
+            <div className="flex flex-col gap-2">
+              {addresses.map((addr) => (
+                <button
+                  key={addr.id}
+                  onClick={() => setForm({ name: addr.full_name, phone: addr.phone, address: addr.address })}
+                  className="text-left border border-gold/20 hover:border-gold rounded-xl p-3 font-sans text-xs text-espresso/70 dark:text-cream/70 transition-colors"
+                >
+                  {addr.label ? `${addr.label}: ` : ''}{addr.full_name}, {addr.address}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="flex flex-col gap-4 mb-8">
           <input
