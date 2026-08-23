@@ -5,7 +5,7 @@ import { useProducts } from '../hooks/useProducts'
 import { supabase } from '../lib/supabaseClient'
 import { categories } from '../data/categories'
 import { formatPrice } from '../utils/formatPrice'
-import { Trash2, Pencil, Plus, Package } from 'lucide-react'
+import { Trash2, Pencil, Plus, Package, Upload } from 'lucide-react'
 import { TrendingUp, ShoppingBag as BagIcon, AlertTriangle, DollarSign } from 'lucide-react'
 
 function Admin() {
@@ -65,6 +65,33 @@ function Admin() {
     function resetForm() {
         setEditing(null)
         setForm({ name: '', price: '', category: 'bags', image: '', imagesText: '', is_new: false, is_featured: false })
+    }
+
+    async function handleFileUpload(e) {
+        const files = Array.from(e.target.files)
+        if (files.length === 0) return
+
+        const uploadedUrls = []
+        for (const file of files) {
+            const fileName = `${Date.now()}-${file.name}`
+            const { error } = await supabase.storage
+                .from('product-images')
+                .upload(fileName, file)
+
+            if (!error) {
+                const { data } = supabase.storage
+                    .from('product-images')
+                    .getPublicUrl(fileName)
+                uploadedUrls.push(data.publicUrl)
+            }
+        }
+
+        if (uploadedUrls.length > 0) {
+            const existing = form.imagesText ? form.imagesText.split(',').map((s) => s.trim()).filter(Boolean) : []
+            const combined = [...existing, ...uploadedUrls]
+            update('imagesText', combined.join(', '))
+            if (!form.image) update('image', combined[0])
+        }
     }
 
     async function handleSave() {
@@ -319,8 +346,23 @@ function Admin() {
                                 rows={2}
                                 value={form.imagesText}
                                 onChange={(e) => update('imagesText', e.target.value)}
-                                className="w-full bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold resize-none mb-4"
+                                className="w-full bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold resize-none mb-3"
                             />
+
+                            <label className="flex items-center gap-2 justify-center border-2 border-dashed border-gold/30 rounded-xl px-4 py-4 cursor-pointer hover:border-gold transition-colors mb-4">
+                                <Upload className="w-4 h-4 text-gold" />
+                                <span className="font-sans text-sm text-espresso dark:text-cream">
+                                    Or upload photos directly from your phone or computer
+                                </span>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    multiple
+                                    onChange={handleFileUpload}
+                                    className="hidden"
+                                />
+                            </label>
+
                             <div className="flex gap-6 mb-4">
                                 <label className="flex items-center gap-2 font-sans text-sm text-espresso dark:text-cream">
                                     <input type="checkbox" checked={form.is_new} onChange={(e) => update('is_new', e.target.checked)} />
