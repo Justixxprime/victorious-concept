@@ -33,6 +33,8 @@ const OrderHistory = lazy(() => import('./pages/OrderHistory'))
 const Admin = lazy(() => import('./pages/Admin'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 const TrackOrder = lazy(() => import('./pages/TrackOrder'))
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'))
+const TermsOfService = lazy(() => import('./pages/TermsOfService'))
 
 function AnimatedRoutes() {
   const location = useLocation()
@@ -71,6 +73,8 @@ function AnimatedRoutes() {
             <Route path="/orders" element={<OrderHistory />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/track-order" element={<TrackOrder />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+<Route path="/terms" element={<TermsOfService />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
