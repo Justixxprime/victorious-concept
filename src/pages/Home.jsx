@@ -15,10 +15,25 @@ function Home() {
 
   return (
     <>
-      <SEO
+     <SEO
         title="Home"
         description="Sourced with intention. Worn with confidence. Shop bags, shoes, clothing, perfumes and accessories."
       />
+      <script type="application/ld+json">
+        {JSON.stringify({
+          '@context': 'https://schema.org/',
+          '@type': 'Organization',
+          name: 'Victorious Concept',
+          url: 'https://victorious-concept.vercel.app',
+          logo: 'https://victorious-concept.vercel.app/favicon.png',
+          sameAs: [],
+          contactPoint: {
+            '@type': 'ContactPoint',
+            telephone: '+2348122470435',
+            contactType: 'customer service',
+          },
+        })}
+      </script>
       <Hero />
       <NewArrivals />
       <CategoryGrid />

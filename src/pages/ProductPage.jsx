@@ -54,6 +54,24 @@ function ProductPage() {
   return (
     <section className="bg-cream dark:bg-espresso transition-colors py-12 px-6 pb-24 md:pb-12 min-h-screen">
       <SEO title={product.name} description={`${product.name}, available now at Victorious Concept.`} />
+      <script type="application/ld+json">
+        {JSON.stringify({
+          '@context': 'https://schema.org/',
+          '@type': 'Product',
+          name: product.name,
+          image: product.images,
+          description: getDescription(product),
+          offers: {
+            '@type': 'Offer',
+            priceCurrency: 'NGN',
+            price: product.price,
+            availability: product.stock > 0
+              ? 'https://schema.org/InStock'
+              : 'https://schema.org/OutOfStock',
+          },
+        })}
+      </script>
+
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
         <ProductGallery images={product.images} alt={product.name} />
 

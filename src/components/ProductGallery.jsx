@@ -24,6 +24,7 @@ function ProductGallery({ images, alt }) {
             key={active}
             src={images[active]}
             alt={alt}
+            loading="lazy"
             className="w-full h-full object-cover"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
