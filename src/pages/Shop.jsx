@@ -4,6 +4,7 @@ import { useProducts } from '../hooks/useProducts'
 import { categories } from '../data/categories'
 import ProductCard from '../components/ProductCard'
 import ProductCardSkeleton from '../components/ProductCardSkeleton'
+import Breadcrumbs from '../components/Breadcrumbs'
 
 function Shop() {
   const { products, loading, error } = useProducts()
@@ -23,10 +24,10 @@ function Shop() {
     <section className="bg-cream dark:bg-espresso transition-colors py-12 px-6 min-h-screen">
       <SEO title="Shop All" description="Browse the full Victorious Concept collection." />
       <div className="max-w-7xl mx-auto">
+        <Breadcrumbs items={[{ label: 'Home', to: '/' }, { label: 'Shop' }]} />
         <h1 className="font-display italic font-semibold text-4xl text-espresso dark:text-cream mb-8">
           Shop All
         </h1>
-
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-10">
           <div className="flex flex-wrap gap-2">
             <button

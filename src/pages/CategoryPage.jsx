@@ -3,6 +3,7 @@ import { useProducts } from '../hooks/useProducts'
 import { categories } from '../data/categories'
 import ProductCard from '../components/ProductCard'
 import RevealImage from '../components/RevealImage'
+import Breadcrumbs from '../components/Breadcrumbs'
 import { siteImages } from '../data/siteImages'
 
 function CategoryPage() {
@@ -14,16 +15,18 @@ function CategoryPage() {
   return (
     <section className="bg-cream dark:bg-espresso transition-colors py-12 px-6 min-h-screen">
       <div className="max-w-7xl mx-auto">
-                <RevealImage
-         src={siteImages.categoryBanner}
-          alt={category ? category.name : 'Category'}
-          className="w-full aspect-[21/6] rounded-2xl mb-8"
-        />
-                <RevealImage
+        <Breadcrumbs items={[
+          { label: 'Home', to: '/' },
+          { label: 'Shop', to: '/shop' },
+          { label: category ? category.name : 'Category' }
+        ]} />
+
+        <RevealImage
           src={siteImages.categoryBanner}
           alt={category ? category.name : 'Category'}
           className="w-full aspect-[21/6] rounded-2xl mb-8"
         />
+
         <h1 className="font-display italic font-semibold text-4xl text-espresso dark:text-cream mb-2">
           {category ? category.name : 'Category'}
         </h1>

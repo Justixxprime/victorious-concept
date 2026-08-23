@@ -10,6 +10,7 @@ import { useRecentlyViewed } from '../hooks/useRecentlyViewed'
 import ProductCard from '../components/ProductCard'
 import Reviews from '../components/Reviews'
 import ProductGallery from '../components/ProductGallery'
+import Breadcrumbs from '../components/Breadcrumbs'
 
 function getDescription(product) {
   const descriptions = {
@@ -71,6 +72,17 @@ function ProductPage() {
           },
         })}
       </script>
+
+      <div className="max-w-7xl mx-auto mb-2 px-0">
+        <Breadcrumbs
+          items={[
+            { label: 'Home', to: '/' },
+            { label: 'Shop', to: '/shop' },
+            { label: product.category, to: `/category/${product.category}` },
+            { label: product.name },
+          ]}
+        />
+      </div>
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
         <ProductGallery images={product.images} alt={product.name} />
