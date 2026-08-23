@@ -1,6 +1,7 @@
 import { ArrowRight } from 'lucide-react'
 import AnimatedLogo from './AnimatedLogo'
 import { siteImages } from '../data/siteImages'
+import { Link } from 'react-router-dom'
 
 function Hero() {
   return (
@@ -30,12 +31,18 @@ function Hero() {
         </p>
 
         <div className="flex gap-4 pt-4">
-          <button className="bg-gold text-espresso font-sans font-medium px-8 py-3 rounded-full flex items-center gap-2 hover:bg-gold-light transition-colors">
+          <Link
+            to="/shop"
+            className="bg-gold text-espresso font-sans font-medium px-8 py-3 rounded-full flex items-center gap-2 hover:bg-gold-light transition-colors"
+          >
             Shop Now <ArrowRight className="w-4 h-4" />
-          </button>
-          <button className="border border-cream/40 text-cream font-sans font-medium px-8 py-3 rounded-full hover:border-cream transition-colors">
+          </Link>
+          <Link
+            to="/lookbook"
+            className="border border-cream/40 text-cream font-sans font-medium px-8 py-3 rounded-full hover:border-cream transition-colors"
+          >
             Explore
-          </button>
+          </Link>
         </div>
       </div>
     </section>
