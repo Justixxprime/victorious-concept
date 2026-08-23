@@ -1,17 +1,23 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabaseClient'
 
-export function useProducts() {
+export function useProducts({ includeHidden = false } = {}) {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   useEffect(() => {
     async function fetchProducts() {
-      const { data, error } = await supabase
+      let query = supabase
         .from('products')
         .select('*')
         .order('created_at', { ascending: false })
+
+      if (!includeHidden) {
+        query = query.neq('status', 'hidden')
+      }
+
+      const { data, error } = await query
 
       if (error) {
         setError(error.message)
@@ -25,6 +31,7 @@ export function useProducts() {
           images: p.images && p.images.length > 0 ? p.images : [p.image],
           sizes: p.sizes || null,
           stock: p.stock ?? 0,
+          status: p.status || 'active',
           isNew: p.is_new,
           isFeatured: p.is_featured,
         }))
@@ -34,7 +41,7 @@ export function useProducts() {
     }
 
     fetchProducts()
-  }, [])
+  }, [includeHidden])
 
   return { products, loading, error }
 }

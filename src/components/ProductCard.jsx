@@ -20,7 +20,8 @@ function ProductCard({ product }) {
     showToast(saved ? 'Removed from wishlist' : 'Added to wishlist', 'wishlist')
   }
 
-  const outOfStock = product.stock <= 0
+  const isPreorder = product.status === 'preorder'
+  const outOfStock = product.stock <= 0 && !isPreorder
 
   function handleAddToCart(e) {
     e.preventDefault()
@@ -48,6 +49,11 @@ function ProductCard({ product }) {
           {outOfStock && (
             <span className="absolute top-3 left-3 bg-espresso/80 text-cream text-xs font-sans px-3 py-1 rounded-full">
               Out of Stock
+            </span>
+          )}
+          {isPreorder && (
+            <span className="absolute top-3 left-3 bg-gold text-espresso text-xs font-sans px-3 py-1 rounded-full">
+              Preorder
             </span>
           )}
           {!outOfStock && product.stock <= 2 && (

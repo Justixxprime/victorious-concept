@@ -11,7 +11,7 @@ import { TrendingUp, ShoppingBag as BagIcon, AlertTriangle, DollarSign } from 'l
 
 function Admin() {
     const isAdmin = useIsAdmin()
-    const { products, loading, error } = useProducts()
+    const { products, loading, error } = useProducts({ includeHidden: true })
     const { categories } = useCategories()
     const { value: heroValue, updateSetting: updateHero } = useSiteSettings('hero')
     const [heroForm, setHeroForm] = useState(null)
@@ -21,7 +21,7 @@ function Admin() {
     const [orders, setOrders] = useState([])
     const [ordersLoading, setOrdersLoading] = useState(true)
     const [form, setForm] = useState({
-        name: '', price: '', category: 'bags', image: '', imagesText: '', stock: 5, is_new: false, is_featured: false,
+        name: '', price: '', category: 'bags', image: '', imagesText: '', stock: 5, status: 'active', is_new: false, is_featured: false,
     })
     const [saving, setSaving] = useState(false)
     const [newCategoryName, setNewCategoryName] = useState('')
@@ -65,6 +65,7 @@ function Admin() {
             image: product.image,
             imagesText: (product.images || [product.image]).join(', '),
             stock: product.stock,
+            status: product.status || 'active',
             is_new: product.isNew,
             is_featured: product.isFeatured,
         })
@@ -72,7 +73,7 @@ function Admin() {
 
     function resetForm() {
         setEditing(null)
-        setForm({ name: '', price: '', category: 'bags', image: '', imagesText: '', is_new: false, is_featured: false })
+        setForm({ name: '', price: '', category: 'bags', image: '', imagesText: '', stock: 5, status: 'active', is_new: false, is_featured: false })
     }
 
     async function handleFileUpload(e) {
@@ -114,6 +115,7 @@ function Admin() {
             image: form.image,
             images: imagesArray,
             stock: form.stock,
+            status: form.status,
             is_new: form.is_new,
             is_featured: form.is_featured,
         }
@@ -448,6 +450,15 @@ function Admin() {
                                     className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
                                 />
                                 <select
+                                    value={form.status}
+                                    onChange={(e) => update('status', e.target.value)}
+                                    className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
+                                >
+                                    <option value="active">Active (visible, normal sale)</option>
+                                    <option value="preorder">Preorder (visible, orderable even at 0 stock)</option>
+                                    <option value="hidden">Hidden (not shown anywhere on the site)</option>
+                                </select>
+                                <select
                                     value={form.category}
                                     onChange={(e) => update('category', e.target.value)}
                                     className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
@@ -525,7 +536,14 @@ function Admin() {
                                         <img src={product.image} alt={product.name} className="w-14 h-14 rounded-lg object-cover flex-shrink-0" />
                                         <div className="flex-1">
                                             <p className="font-sans text-sm text-espresso dark:text-cream">{product.name}</p>
-                                            <p className="font-sans text-xs text-gold">{formatPrice(product.price)} · {product.category}</p>
+                                            <p className="font-sans text-xs text-gold">
+                                                {formatPrice(product.price)} · {product.category}
+                                                {product.status && product.status !== 'active' && (
+                                                    <span className="ml-2 uppercase tracking-wide text-[10px] opacity-70">
+                                                        · {product.status}
+                                                    </span>
+                                                )}
+                                            </p>
                                         </div>
                                         <button onClick={() => startEdit(product)} aria-label="Edit">
                                             <Pencil className="w-4 h-4 text-espresso/50 dark:text-cream/50 hover:text-gold" />

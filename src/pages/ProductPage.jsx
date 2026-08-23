@@ -114,11 +114,10 @@ function ProductPage() {
                   <button
                     key={size}
                     onClick={() => setSelectedSize(size)}
-                    className={`w-12 h-12 rounded-full border font-sans text-sm transition-colors ${
-                      selectedSize === size
+                    className={`w-12 h-12 rounded-full border font-sans text-sm transition-colors ${selectedSize === size
                         ? 'bg-gold border-gold text-espresso'
                         : 'border-gold/30 text-espresso dark:text-cream hover:border-gold'
-                    }`}
+                      }`}
                   >
                     {size}
                   </button>
@@ -130,10 +129,10 @@ function ProductPage() {
           <div className="flex gap-3">
             <button
               onClick={() => addToCart({ ...product, size: selectedSize })}
-              disabled={product.stock <= 0 || (product.sizes && product.sizes.length > 0 && !selectedSize)}
+              disabled={(product.stock <= 0 && product.status !== 'preorder') || (product.sizes && product.sizes.length > 0 && !selectedSize)}
               className="flex-1 bg-gold text-espresso font-sans font-medium px-8 py-4 rounded-full flex items-center justify-center gap-2 hover:bg-gold-light transition-colors disabled:opacity-40"
             >
-              <ShoppingBag className="w-4 h-4" /> {product.stock <= 0 ? 'Out of Stock' : 'Add to Cart'}
+              <ShoppingBag className="w-4 h-4" /> {product.status === 'preorder' ? 'Preorder' : product.stock <= 0 ? 'Out of Stock' : 'Add to Cart'}
             </button>
             <button
               onClick={() => toggleWishlist(product)}
