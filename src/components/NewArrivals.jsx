@@ -17,7 +17,7 @@ function NewArrivals() {
             New In
           </h2>
           <Link
-            to="/shop"
+            to="/shop?new=true"
             className="font-sans text-xs uppercase tracking-widest text-gold hover:underline"
           >
             View All
