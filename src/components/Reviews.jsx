@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Star } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useReviews } from '../hooks/useReviews'
+import { BadgeCheck } from 'lucide-react'
 
 function Reviews({ productId }) {
   const { user } = useAuth()
@@ -100,6 +101,11 @@ function Reviews({ productId }) {
                 <span className="font-sans text-xs text-espresso/50 dark:text-cream/50">
                   {r.customer_name}
                 </span>
+                {r.verified_purchase && (
+                  <span className="flex items-center gap-1 font-sans text-xs text-gold">
+                    <BadgeCheck className="w-3 h-3" /> Verified Purchase
+                  </span>
+                )}
               </div>
               <p className="font-sans text-sm text-espresso/80 dark:text-cream/80">{r.comment}</p>
             </div>

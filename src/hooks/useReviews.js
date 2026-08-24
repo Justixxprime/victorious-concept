@@ -20,12 +20,22 @@ export function useReviews(productId) {
   }, [productId])
 
   async function submitReview({ userId, customerName, rating, comment }) {
+    const { data: userOrders } = await supabase
+      .from('orders')
+      .select('items')
+      .eq('user_id', userId)
+
+    const purchased = (userOrders || []).some((order) =>
+      order.items.some((item) => String(item.id) === String(productId))
+    )
+
     const { error } = await supabase.from('reviews').insert({
       product_id: productId,
       user_id: userId,
       customer_name: customerName,
       rating,
       comment,
+      verified_purchase: purchased,
     })
     if (!error) fetchReviews()
     return { error }
