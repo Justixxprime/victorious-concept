@@ -1,14 +1,15 @@
 import SEO from '../components/SEO'
 import RevealImage from '../components/RevealImage'
 import { siteImages } from '../data/siteImages'
+import { GraduationCap, MapPin, Users, TrendingUp, Award, Sparkles } from 'lucide-react'
 
 const timeline = [
-  { label: 'University', text: 'Studied History and International Relations at Federal University Otuoke, Bayelsa State.' },
-  { label: 'First Products', text: 'Started sourcing bags and shoes from Lagos Island market, drawing on her own Lagos roots.' },
-  { label: 'First Customers', text: 'Friends and classmates on campus became her first customers, one WhatsApp order at a time.' },
-  { label: 'Growing Business', text: 'Word spread beyond her immediate circle as the orders, and the trust, kept growing.' },
-  { label: 'Graduation', text: 'Graduated from Federal University Otuoke with her degree in hand.' },
-  { label: 'The Next Chapter', text: 'Now building Victorious Concept into a full, modern fashion and lifestyle brand.' },
+  { label: 'University', icon: GraduationCap, text: 'Studied History and International Relations at Federal University Otuoke, Bayelsa State.' },
+  { label: 'First Products', icon: MapPin, text: 'Started sourcing bags and shoes from Lagos Island market, drawing on her own Lagos roots.' },
+  { label: 'First Customers', icon: Users, text: 'Friends and classmates on campus became her first customers, one WhatsApp order at a time.' },
+  { label: 'Growing Business', icon: TrendingUp, text: 'Word spread beyond her immediate circle as the orders, and the trust, kept growing.' },
+  { label: 'Graduation', icon: Award, text: 'Graduated from Federal University Otuoke with her degree in hand.' },
+  { label: 'The Next Chapter', icon: Sparkles, text: 'Now building Victorious Concept into a full, modern fashion and lifestyle brand.' },
 ]
 
 const testimonials = [
@@ -60,6 +61,8 @@ const values = [
 function About() {
   return (
     <section className="bg-cream dark:bg-espresso transition-colors">
+      <SEO title="About" description="The story of Victorious Concept, from Lagos Island market runs to a full fashion brand." />
+
       <div className="max-w-3xl mx-auto px-6 py-20">
         <p className="font-sans text-xs uppercase tracking-widest text-gold mb-4">
           Our Story
@@ -134,7 +137,9 @@ function About() {
           {timeline.map((step, i) => (
             <div key={step.label} className="flex gap-6">
               <div className="flex flex-col items-center">
-                <div className="w-3 h-3 rounded-full bg-gold flex-shrink-0" />
+                <div className="w-8 h-8 rounded-full bg-gold/10 flex items-center justify-center flex-shrink-0">
+                  <step.icon className="w-4 h-4 text-gold" />
+                </div>
                 {i !== timeline.length - 1 && (
                   <div className="w-px flex-1 bg-gold/30 mt-2" />
                 )}
@@ -154,7 +159,7 @@ function About() {
 
       <div className="grid grid-cols-2 gap-2 max-w-5xl mx-auto px-6 pt-16">
         <RevealImage
-         src={siteImages.aboutMosaic1}
+          src={siteImages.aboutMosaic1}
           alt="Fashion detail"
           className="aspect-[3/4]"
         />
@@ -165,75 +170,9 @@ function About() {
         />
       </div>
 
-            <div className="grid grid-cols-2 gap-2 max-w-5xl mx-auto px-6 pt-16">
-        <RevealImage
-          src="https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=1000&q=80"
-          alt="Fashion detail"
-          className="aspect-[3/4]"
-        />
-        <RevealImage
-          src="https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?auto=format&fit=crop&w=1000&q=80"
-          alt="Fashion detail"
-          className="aspect-[3/4] mt-8"
-        />
-      </div>
-
-            <div className="grid grid-cols-2 gap-2 max-w-5xl mx-auto px-6 pt-16">
-        <RevealImage
-          src="https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=1000&q=80"
-          alt="Fashion detail"
-          className="aspect-[3/4]"
-        />
-        <RevealImage
-          src="https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?auto=format&fit=crop&w=1000&q=80"
-          alt="Fashion detail"
-          className="aspect-[3/4] mt-8"
-        />
-      </div>
-
-            <div className="grid grid-cols-2 gap-2 max-w-5xl mx-auto px-6 pt-16">
-        <RevealImage
-          src="https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=1000&q=80"
-          alt="Fashion detail"
-          className="aspect-[3/4]"
-        />
-        <RevealImage
-          src="https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?auto=format&fit=crop&w=1000&q=80"
-          alt="Fashion detail"
-          className="aspect-[3/4] mt-8"
-        />
-      </div>
-
-         <div className="grid grid-cols-2 gap-2 max-w-5xl mx-auto px-6 pt-16">
-
-        <RevealImage
-
-          src="https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=1000&q=80"
-
-          alt="Fashion detail"
-
-          className="aspect-[3/4]"
-
-        />
-
-        <RevealImage
-
-          src="https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?auto=format&fit=crop&w=1000&q=80"
-
-          alt="Fashion detail"
-
-          className="aspect-[3/4] mt-8"
-
-        />
-
-      </div>
-
       <div className="max-w-5xl mx-auto px-6 py-20 border-t border-gold/20">
-
         <p className="font-sans text-xs uppercase tracking-widest text-gold mb-2 text-center">
-
           Before The Website, There Was Us
-
         </p>
         <p className="font-sans text-sm text-espresso/60 dark:text-cream/60 text-center mb-12 max-w-xl mx-auto">
           A few honest words from the people who watched Victorious Concept happen in real time.
