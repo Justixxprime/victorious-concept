@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useWishlist } from '../context/WishlistContext'
 import ProductCard from '../components/ProductCard'
+import { Heart } from 'lucide-react'
 
 function Wishlist() {
   const { items } = useWishlist()
@@ -8,6 +9,7 @@ function Wishlist() {
   if (items.length === 0) {
     return (
       <div className="min-h-screen bg-cream dark:bg-espresso flex flex-col items-center justify-center gap-4 px-6 text-center">
+        <Heart className="w-10 h-10 text-gold" />
         <h1 className="font-display italic text-3xl text-espresso dark:text-cream">
           Your wishlist is empty
         </h1>

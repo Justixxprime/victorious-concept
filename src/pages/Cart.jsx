@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { Trash2, Minus, Plus, Tag, X } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import { formatPrice } from '../utils/formatPrice'
+import { ShoppingBag } from 'lucide-react'
 
 function Cart() {
   const navigate = useNavigate()
@@ -29,6 +30,7 @@ function Cart() {
   if (items.length === 0) {
     return (
       <div className="min-h-screen bg-cream dark:bg-espresso flex flex-col items-center justify-center gap-4 px-6 text-center">
+        <ShoppingBag className="w-10 h-10 text-gold" />
         <h1 className="font-display italic text-3xl text-espresso dark:text-cream">
           Your cart is empty
         </h1>
