@@ -12,6 +12,7 @@ import ProductCard from '../components/ProductCard'
 import Reviews from '../components/Reviews'
 import ProductGallery from '../components/ProductGallery'
 import Breadcrumbs from '../components/Breadcrumbs'
+import { Heart, ShoppingBag, Truck, RefreshCw, ShieldCheck } from 'lucide-react'
 
 function getDescription(product) {
   const descriptions = {
@@ -174,15 +175,43 @@ function ProductPage() {
             </button>
           </div>
 
-          <div className="flex flex-col gap-3 pt-4 border-t border-gold/20">
+         <div className="flex flex-col gap-3 pt-4 border-t border-gold/20">
             <div className="flex items-center gap-3 text-sm font-sans text-espresso/70 dark:text-cream/70">
-              <Truck className="w-4 h-4 text-gold" />
-              Nationwide delivery available
+              <Truck className="w-4 h-4 text-gold flex-shrink-0" />
+              Nationwide and international delivery, coordinated directly with you after checkout
             </div>
             <div className="flex items-center gap-3 text-sm font-sans text-espresso/70 dark:text-cream/70">
-              <RefreshCw className="w-4 h-4 text-gold" />
-              Returns policy to be confirmed
+              <RefreshCw className="w-4 h-4 text-gold flex-shrink-0" />
+              Free returns and exchanges within 7 days of delivery
             </div>
+            <div className="flex items-center gap-3 text-sm font-sans text-espresso/70 dark:text-cream/70">
+              <ShieldCheck className="w-4 h-4 text-gold flex-shrink-0" />
+              Personally sourced and checked by Victoria before it ships
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gold/20">
+            <div>
+              <p className="font-sans text-xs uppercase tracking-widest text-gold mb-2">Category</p>
+              <p className="font-sans text-sm text-espresso dark:text-cream capitalize">{product.category}</p>
+            </div>
+            <div>
+              <p className="font-sans text-xs uppercase tracking-widest text-gold mb-2">Availability</p>
+              <p className="font-sans text-sm text-espresso dark:text-cream">
+                {product.status === 'preorder' ? 'Available for preorder' : product.stock > 0 ? 'In stock, ready to ship' : 'Currently unavailable'}
+              </p>
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-gold/20">
+            <p className="font-sans text-xs uppercase tracking-widest text-gold mb-3">
+              Care & Handling
+            </p>
+            <p className="font-sans text-sm text-espresso/70 dark:text-cream/70 leading-relaxed">
+              Keep away from prolonged direct sunlight and moisture. Store in a cool, dry place
+              when not in use, ideally in a dust bag or soft cloth. Wipe clean with a soft, dry
+              cloth, avoid harsh chemicals or solvents. A little care goes a long way.
+            </p>
           </div>
         </div>
       </div>

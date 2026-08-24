@@ -26,7 +26,6 @@ function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false)
   const { totalItems } = useCart()
   const { registerCartIcon } = useFlyToCart()
-  const { registerCartIcon } = useFlyToCart()
   const { items: wishlistItems } = useWishlist()
   const isDark = document.documentElement.classList.contains('dark')
 
