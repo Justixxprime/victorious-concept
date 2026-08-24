@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import SEO from '../components/SEO'
 import { useAuth } from '../context/AuthContext'
 import { useAddresses } from '../hooks/useAddresses'
+import { supabase } from '../lib/supabaseClient'
 import { Mail, Lock, MapPin, Trash2, Plus } from 'lucide-react'
 
 function Account() {
@@ -18,7 +19,6 @@ function Account() {
     e.preventDefault()
     setError('')
     setInfo('')
-
     if (mode === 'signup') {
       const { error } = await signUp(email, password)
       if (error) setError(error.message)
@@ -44,7 +44,6 @@ function Account() {
         <p className="font-sans text-sm text-espresso/60 dark:text-cream/60 text-center mb-8">
           {mode === 'signin' ? 'Sign in to continue' : 'Create your account'}
         </p>
-
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex items-center gap-3 border border-gold/30 rounded-xl px-4 py-3">
             <Mail className="w-4 h-4 text-gold" />
@@ -69,10 +68,8 @@ function Account() {
               className="flex-1 bg-transparent font-sans text-sm text-espresso dark:text-cream placeholder:text-espresso/40 dark:placeholder:text-cream/40 outline-none"
             />
           </div>
-
           {error && <p className="font-sans text-xs text-red-500">{error}</p>}
           {info && <p className="font-sans text-xs text-gold">{info}</p>}
-
           <button
             type="submit"
             className="bg-gold text-espresso font-sans font-medium px-8 py-3 rounded-full hover:bg-gold-light transition-colors mt-2"
@@ -80,7 +77,6 @@ function Account() {
             {mode === 'signin' ? 'Sign In' : 'Create Account'}
           </button>
         </form>
-
         <button
           onClick={() => setMode(mode === 'signin' ? 'signup' : 'signin')}
           className="w-full text-center font-sans text-sm text-gold hover:underline mt-6"
@@ -96,6 +92,12 @@ function LoggedInAccount({ user, signOut }) {
   const { addresses, loading, addAddress, deleteAddress } = useAddresses()
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState({ label: '', full_name: '', phone: '', address: '' })
+  const [profileForm, setProfileForm] = useState({
+    full_name: user.user_metadata?.full_name || '',
+    phone: user.user_metadata?.phone || '',
+  })
+  const [savingProfile, setSavingProfile] = useState(false)
+  const [profileSaved, setProfileSaved] = useState(false)
 
   function update(field, value) {
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -108,19 +110,57 @@ function LoggedInAccount({ user, signOut }) {
     setShowForm(false)
   }
 
+  async function handleProfileSave(e) {
+    e.preventDefault()
+    setSavingProfile(true)
+    await supabase.auth.updateUser({
+      data: { full_name: profileForm.full_name, phone: profileForm.phone },
+    })
+    setSavingProfile(false)
+    setProfileSaved(true)
+    setTimeout(() => setProfileSaved(false), 2000)
+  }
+
   return (
     <section className="bg-cream dark:bg-espresso transition-colors min-h-screen py-20 px-6">
       <SEO title="My Account" description="Manage your Victorious Concept account." />
       <div className="max-w-md mx-auto">
         <div className="text-center mb-10">
           <h1 className="font-display italic font-semibold text-3xl text-espresso dark:text-cream mb-2">
-            Welcome back
+            Welcome back{profileForm.full_name ? `, ${profileForm.full_name.split(' ')[0]}` : ''}
           </h1>
           <p className="font-sans text-sm text-espresso/60 dark:text-cream/60">
             Signed in as {user.email}
           </p>
         </div>
-
+        <div className="mb-10">
+          <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">
+            Profile
+          </h2>
+          <form onSubmit={handleProfileSave} className="bg-gold/5 rounded-2xl p-5 flex flex-col gap-3">
+            <input
+              type="text"
+              placeholder="Full name"
+              value={profileForm.full_name}
+              onChange={(e) => setProfileForm({ ...profileForm, full_name: e.target.value })}
+              className="bg-transparent border border-gold/30 rounded-xl px-4 py-2 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
+            />
+            <input
+              type="text"
+              placeholder="Phone number"
+              value={profileForm.phone}
+              onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
+              className="bg-transparent border border-gold/30 rounded-xl px-4 py-2 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
+            />
+            <button
+              type="submit"
+              disabled={savingProfile}
+              className="bg-gold text-espresso font-sans text-sm font-medium px-6 py-2 rounded-full hover:bg-gold-light transition-colors self-start disabled:opacity-50"
+            >
+              {profileSaved ? 'Saved!' : 'Save Profile'}
+            </button>
+          </form>
+        </div>
         <div className="flex flex-col gap-3 mb-10">
           <Link
             to="/orders"
@@ -135,7 +175,6 @@ function LoggedInAccount({ user, signOut }) {
             Sign Out
           </button>
         </div>
-
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-sans text-sm uppercase tracking-widest text-gold">
@@ -145,7 +184,6 @@ function LoggedInAccount({ user, signOut }) {
               <Plus className="w-5 h-5" />
             </button>
           </div>
-
           {showForm && (
             <form onSubmit={handleAdd} className="bg-gold/5 rounded-2xl p-5 flex flex-col gap-3 mb-4">
               <input
@@ -187,7 +225,6 @@ function LoggedInAccount({ user, signOut }) {
               </button>
             </form>
           )}
-
           {loading ? (
             <p className="font-sans text-sm text-espresso/60 dark:text-cream/60">Loading...</p>
           ) : addresses.length === 0 ? (

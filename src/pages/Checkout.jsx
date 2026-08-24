@@ -17,7 +17,11 @@ function Checkout() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [order, setOrder] = useState(null)
-  const [form, setForm] = useState({ name: '', phone: '', address: '' })
+  const [form, setForm] = useState({
+    name: user?.user_metadata?.full_name || '',
+    phone: user?.user_metadata?.phone || '',
+    address: '',
+  })
   const { addresses } = useAddresses()
   const [method, setMethod] = useState('card')
   const [copied, setCopied] = useState(false)
