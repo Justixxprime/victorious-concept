@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Link } from 'react-router-dom'
-import { Trash2, Minus, Plus, Tag, X } from 'lucide-react'
+import { useNavigate, Link } from 'react-router-dom'
+import { Trash2, Minus, Plus, Tag, X, ShoppingBag } from 'lucide-react'
 import { useCart } from '../context/CartContext'
+import { useProducts } from '../hooks/useProducts'
 import { formatPrice } from '../utils/formatPrice'
-import { ShoppingBag } from 'lucide-react'
+import ProductCard from '../components/ProductCard'
 
 function Cart() {
   const navigate = useNavigate()
@@ -20,7 +20,11 @@ function Cart() {
     removeCoupon,
     couponError,
   } = useCart()
+  const { products } = useProducts()
   const [code, setCode] = useState('')
+
+  const cartIds = items.map((i) => String(i.id))
+  const suggestions = products.filter((p) => !cartIds.includes(String(p.id))).slice(0, 4)
 
   function handleApply(e) {
     e.preventDefault()
@@ -60,10 +64,20 @@ function Cart() {
               key={item.id}
               className="flex items-center gap-4 border-b border-gold/20 pb-6"
             >
-              <div className="w-20 h-20 rounded-xl bg-gold/10 flex items-center justify-center flex-shrink-0">
-                <span className="text-[10px] text-espresso/40 dark:text-cream/40 text-center px-1">
-                  No image
-                </span>
+              <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-gold/10">
+                {item.image ? (
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <span className="text-[10px] text-espresso/40 dark:text-cream/40 text-center px-1">
+                      No image
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div className="flex-1">
@@ -162,6 +176,19 @@ function Cart() {
         >
           Checkout
         </button>
+
+        {suggestions.length > 0 && (
+          <div className="mt-16 pt-10 border-t border-gold/20">
+            <h2 className="font-display italic font-semibold text-2xl text-espresso dark:text-cream mb-6">
+              You might also like
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {suggestions.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </section>
   )

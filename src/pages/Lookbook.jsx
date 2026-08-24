@@ -12,13 +12,25 @@ function Lookbook() {
       <SEO title="Lookbook" description="Editorial styling from Victorious Concept." />
            <div className="max-w-5xl mx-auto text-center mb-16">
         <p className="font-sans text-xs uppercase tracking-widest text-gold mb-4">Editorial</p>
-        <h1 className="font-display italic font-semibold text-4xl md:text-6xl text-espresso dark:text-cream mb-10">
+        <h1 className="font-display italic font-semibold text-4xl md:text-6xl text-espresso dark:text-cream mb-6">
           The Lookbook
         </h1>
+        <p className="font-sans text-sm md:text-base text-espresso/60 dark:text-cream/60 max-w-xl mx-auto mb-10">
+          Not just what we sell, how it actually gets worn. A visual record of every piece,
+          styled the way it's meant to be seen.
+        </p>
         <RevealImage
           src={siteImages.lookbookHero}
+          alt="Victorious Concept editorial"
           className="w-full aspect-[21/9] rounded-2xl"
         />
+      </div>
+
+      <div className="max-w-3xl mx-auto text-center mb-16 px-6">
+        <p className="font-display italic text-2xl md:text-3xl text-espresso dark:text-cream leading-relaxed">
+          "Every piece here started the same way the business did, a search, a find, a piece
+          worth carrying."
+        </p>
       </div>
 
       <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10">
