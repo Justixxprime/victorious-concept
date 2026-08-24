@@ -96,9 +96,22 @@ function OrderHistory() {
                     </div>
                   ))}
                 </div>
-                <div className="flex justify-between font-display italic font-semibold text-espresso dark:text-cream border-t border-gold/20 pt-3">
+                <div className="flex justify-between font-display italic font-semibold text-espresso dark:text-cream border-t border-gold/20 pt-3 mb-3">
                   <span>Total</span>
                   <span>{formatPrice(order.total)}</span>
+                </div>
+                <div className="flex items-center justify-between text-xs font-sans text-espresso/50 dark:text-cream/50">
+                  <span className="capitalize">
+                    Paid via {order.payment_method === 'card' ? 'Card' : order.payment_method === 'bank_transfer' ? 'Bank Transfer' : order.payment_method === 'whatsapp' ? 'WhatsApp' : 'Unknown'}
+                  </span>
+                  <a
+                    href={`https://wa.me/2348122470435?text=${encodeURIComponent(`Hi, I need help with my order ${order.order_number}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gold hover:underline"
+                  >
+                    Need help with this order?
+                  </a>
                 </div>
               </div>
             ))}

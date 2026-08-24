@@ -99,10 +99,18 @@ function TrackOrder() {
                 </div>
               ))}
             </div>
-            <div className="flex justify-between font-display italic font-semibold text-espresso dark:text-cream border-t border-gold/10 pt-3">
+            <div className="flex justify-between font-display italic font-semibold text-espresso dark:text-cream border-t border-gold/10 pt-3 mb-3">
               <span>Total</span>
               <span>{formatPrice(result.total)}</span>
             </div>
+            <a
+              href={`https://wa.me/2348122470435?text=${encodeURIComponent(`Hi, I need help with my order ${result.order_number}`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 font-sans text-xs text-gold hover:underline"
+            >
+              Need help with this order?
+            </a>
           </div>
         )}
 
