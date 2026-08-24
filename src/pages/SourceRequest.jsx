@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import SEO from '../components/SEO'
 import { ArrowRight, ArrowLeft, Upload, Check } from 'lucide-react'
+import { siteImages } from '../data/siteImages'
 
 const steps = ['What', 'References', 'Budget', 'You']
 
@@ -55,22 +56,61 @@ function SourceRequest() {
     (step === 3 && form.name.trim() !== '' && form.contact.trim() !== '')
 
   return (
-    <section className="bg-cream dark:bg-espresso transition-colors min-h-screen py-16 px-6">
+    <section className="bg-cream dark:bg-espresso transition-colors min-h-screen">
       <SEO
         title="Source It For Me"
         description="Tell us what you want. We will find it for you, anywhere in Nigeria or the world."
       />
-      <div className="max-w-xl mx-auto">
-        <p className="font-sans text-xs uppercase tracking-widest text-gold mb-4 text-center">
-          A Private Request
-        </p>
-        <h1 className="font-display italic font-semibold text-4xl md:text-5xl text-espresso dark:text-cream text-center leading-tight mb-4">
-          Can't find it? We'll go find it.
-        </h1>
-        <p className="font-sans text-sm text-espresso/60 dark:text-cream/60 text-center max-w-md mx-auto mb-12">
-          This is exactly how Victorious Concept started, sourcing the exact piece someone wanted, wherever it was.
-          Tell us what you're after and we'll do the hunting.
-        </p>
+
+      <div className="relative bg-espresso text-cream overflow-hidden">
+        <div className="absolute inset-0">
+          <img
+            src={siteImages.aboutStory}
+            alt=""
+            className="w-full h-full object-cover opacity-25"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-espresso/60 via-espresso/85 to-espresso" />
+        </div>
+        <div className="relative max-w-3xl mx-auto px-6 py-24 md:py-32 text-center flex flex-col items-center gap-6">
+          <p className="font-sans text-xs uppercase tracking-[0.3em] text-gold-light">
+            A Private Request
+          </p>
+          <h1 className="font-display italic font-semibold text-4xl md:text-6xl leading-tight">
+            Can't find it? We'll go find it.
+          </h1>
+          <p className="font-sans text-sm md:text-base text-cream/70 max-w-lg">
+            Before there was a website, there was Victoria, a description, a screenshot, a friend
+            who needed something specific, and a trip to Lagos Island to find it. This page is
+            that same promise, just with better lighting.
+          </p>
+        </div>
+      </div>
+
+      <div className="max-w-5xl mx-auto px-6 py-16 grid grid-cols-1 md:grid-cols-3 gap-8 border-b border-gold/10">
+        <div className="flex flex-col gap-2 text-center md:text-left">
+          <span className="font-display italic text-3xl text-gold">01</span>
+          <h3 className="font-sans text-sm font-medium text-espresso dark:text-cream">Tell us what you want</h3>
+          <p className="font-sans text-xs text-espresso/60 dark:text-cream/60 leading-relaxed">
+            A description, a photo, a vibe, whatever you've got is enough to start.
+          </p>
+        </div>
+        <div className="flex flex-col gap-2 text-center md:text-left">
+          <span className="font-display italic text-3xl text-gold">02</span>
+          <h3 className="font-sans text-sm font-medium text-espresso dark:text-cream">We go looking</h3>
+          <p className="font-sans text-xs text-espresso/60 dark:text-cream/60 leading-relaxed">
+            The same market instinct that started this business, now working for you specifically.
+          </p>
+        </div>
+        <div className="flex flex-col gap-2 text-center md:text-left">
+          <span className="font-display italic text-3xl text-gold">03</span>
+          <h3 className="font-sans text-sm font-medium text-espresso dark:text-cream">It reaches you</h3>
+          <p className="font-sans text-xs text-espresso/60 dark:text-cream/60 leading-relaxed">
+            Confirmed, priced, and delivered, the exact same way every other order works.
+          </p>
+        </div>
+      </div>
+
+      <div className="max-w-xl mx-auto px-6 py-16">
 
         <div className="flex items-center justify-center gap-2 mb-12">
           {steps.map((label, i) => (
@@ -238,6 +278,29 @@ function SourceRequest() {
               Send Request <ArrowRight className="w-4 h-4" />
             </button>
           )}
+                </div>
+      </div>
+
+      <div className="max-w-3xl mx-auto px-6 pb-20">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+          <div className="bg-gold/5 rounded-2xl p-6">
+            <p className="font-sans text-xs uppercase tracking-widest text-gold mb-2">No Middleman Markup</p>
+            <p className="font-sans text-xs text-espresso/60 dark:text-cream/60">
+              You get Victoria's real sourcing price, not an inflated finder's fee.
+            </p>
+          </div>
+          <div className="bg-gold/5 rounded-2xl p-6">
+            <p className="font-sans text-xs uppercase tracking-widest text-gold mb-2">Real Answers Fast</p>
+            <p className="font-sans text-xs text-espresso/60 dark:text-cream/60">
+              Every request gets a real reply from a real person on WhatsApp.
+            </p>
+          </div>
+          <div className="bg-gold/5 rounded-2xl p-6">
+            <p className="font-sans text-xs uppercase tracking-widest text-gold mb-2">Anywhere, Really</p>
+            <p className="font-sans text-xs text-espresso/60 dark:text-cream/60">
+              Lagos, anywhere in Nigeria, or internationally, if it exists, we'll try.
+            </p>
+          </div>
         </div>
       </div>
     </section>
