@@ -1,5 +1,4 @@
 import { useParams, Link } from 'react-router-dom'
-import { Heart, ShoppingBag, Truck, RefreshCw } from 'lucide-react'
 import { formatPrice } from '../utils/formatPrice'
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
