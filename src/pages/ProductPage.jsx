@@ -11,7 +11,7 @@ import ProductCard from '../components/ProductCard'
 import Reviews from '../components/Reviews'
 import ProductGallery from '../components/ProductGallery'
 import Breadcrumbs from '../components/Breadcrumbs'
-import { Heart, ShoppingBag, Truck, RefreshCw, ShieldCheck } from 'lucide-react'
+import { Heart, ShoppingBag, Truck, RefreshCw, ShieldCheck, MessageCircle } from 'lucide-react'
 
 function getDescription(product) {
   const descriptions = {
@@ -174,7 +174,18 @@ function ProductPage() {
             </button>
           </div>
 
-         <div className="flex flex-col gap-3 pt-4 border-t border-gold/20">
+          <a
+            href={`https://wa.me/2348122470435?text=${encodeURIComponent(
+              `Hi, I have a question about the ${product.name} (${formatPrice(product.price)})`
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 font-sans text-sm text-gold hover:underline"
+          >
+            <MessageCircle className="w-4 h-4" /> Ask a question about this piece
+          </a>
+
+          <div className="flex flex-col gap-3 pt-4 border-t border-gold/20">
             <div className="flex items-center gap-3 text-sm font-sans text-espresso/70 dark:text-cream/70">
               <Truck className="w-4 h-4 text-gold flex-shrink-0" />
               Nationwide and international delivery, coordinated directly with you after checkout
@@ -197,7 +208,11 @@ function ProductPage() {
             <div>
               <p className="font-sans text-xs uppercase tracking-widest text-gold mb-2">Availability</p>
               <p className="font-sans text-sm text-espresso dark:text-cream">
-                {product.status === 'preorder' ? 'Available for preorder' : product.stock > 0 ? 'In stock, ready to ship' : 'Currently unavailable'}
+                {product.status === 'preorder'
+                  ? 'Available for preorder'
+                  : product.stock > 0
+                  ? 'In stock, ready to ship'
+                  : 'Currently unavailable'}
               </p>
             </div>
           </div>
