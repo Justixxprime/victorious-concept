@@ -9,6 +9,7 @@ import logoCream from '../assets/logo/logo-cream-text.png'
 import { Search, Heart, ShoppingBag, User, Menu, X } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 import SearchOverlay from './SearchOverlay'
+import { useFlyToCart } from '../context/FlyToCartContext'
 
 const links = [
   { label: 'New In', to: '/shop?new=true' },
@@ -24,6 +25,8 @@ function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const { totalItems } = useCart()
+  const { registerCartIcon } = useFlyToCart()
+  const { registerCartIcon } = useFlyToCart()
   const { items: wishlistItems } = useWishlist()
   const isDark = document.documentElement.classList.contains('dark')
 
@@ -67,7 +70,7 @@ function Navbar() {
               </span>
             )}
           </Link>
-          <Link to="/cart" className="relative">
+          <Link to="/cart" className="relative" ref={registerCartIcon}>
             <ShoppingBag className="w-5 h-5 cursor-pointer hover:text-gold transition-colors" />
             {totalItems > 0 && (
               <span className="absolute -top-2 -right-2 bg-gold text-espresso text-[10px] font-sans font-bold w-4 h-4 rounded-full flex items-center justify-center">

@@ -5,12 +5,16 @@ import { formatPrice } from '../utils/formatPrice'
 import { useWishlist } from '../context/WishlistContext'
 import { useCart } from '../context/CartContext'
 import { useToast } from '../context/ToastContext'
+import { useFlyToCart } from '../context/FlyToCartContext'
 import RevealImage from './RevealImage'
+import { useRef } from 'react'
 
 function ProductCard({ product }) {
   const { toggleWishlist, isWishlisted } = useWishlist()
   const { addToCart } = useCart()
   const { showToast } = useToast()
+  const { fly } = useFlyToCart()
+  const imageRef = useRef(null)
   const saved = isWishlisted(product.id)
 
   function handleWishlist(e) {
@@ -26,7 +30,10 @@ function ProductCard({ product }) {
   function handleAddToCart(e) {
     e.preventDefault()
     e.stopPropagation()
-    if (outOfStock) return
+    if (imageRef.current) {
+      const rect = imageRef.current.getBoundingClientRect()
+      fly(product.image, rect)
+    }
     addToCart(product)
     showToast(`${product.name} added to cart`, 'cart')
   }
@@ -34,7 +41,7 @@ function ProductCard({ product }) {
   return (
     <div className="group relative">
       <Link to={`/product/${product.id}`}>
-        <div className="relative aspect-[3/4] rounded-2xl bg-gold/10 overflow-hidden">
+        <div ref={imageRef} className="relative aspect-[3/4] rounded-2xl bg-gold/10 overflow-hidden">
           <RevealImage
             src={product.image}
             alt={product.name}

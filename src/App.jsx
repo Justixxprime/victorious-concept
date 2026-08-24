@@ -12,6 +12,7 @@ import ScrollToTop from './components/ScrollToTop'
 import { useEffect } from 'react'
 import { useToast } from './context/ToastContext'
 import CartReminder from './components/CartReminder'
+import { FlyToCartProvider } from './context/FlyToCartContext'
 
 const Home = lazy(() => import('./pages/Home'))
 const Shop = lazy(() => import('./pages/Shop'))
@@ -74,7 +75,7 @@ function AnimatedRoutes() {
             <Route path="/admin" element={<Admin />} />
             <Route path="/track-order" element={<TrackOrder />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
-<Route path="/terms" element={<TermsOfService />} />
+            <Route path="/terms" element={<TermsOfService />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
@@ -107,15 +108,17 @@ function App() {
         <CartProvider>
           <WishlistProvider>
             <ToastProvider>
+              <FlyToCartProvider>
               <div className="min-h-screen bg-cream dark:bg-espresso transition-colors">
-              <ScrollToTop />
-              <WelcomeNudge />
-              <Navbar />
+                <ScrollToTop />
+                <WelcomeNudge />
+                <Navbar />
                 <AnimatedRoutes />
                 <Footer />
                 <WhatsAppButton />
-              <CartReminder />
+                <CartReminder />
               </div>
+            </FlyToCartProvider>
             </ToastProvider>
           </WishlistProvider>
         </CartProvider>
