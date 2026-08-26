@@ -3,13 +3,28 @@ import { useTopReviews } from '../hooks/useTopReviews'
 import { useTestimonials } from '../hooks/useTestimonials'
 
 function CustomerLove() {
-  const { reviews, loading } = useTopReviews(3)
-  const { testimonials } = useTestimonials()
+  const { reviews, loading: reviewsLoading } = useTopReviews(3)
+  const { testimonials, loading: testimonialsLoading } = useTestimonials()
 
-  const combined = [
-    ...reviews.map((r) => ({ id: `r-${r.id}`, quote: r.comment, name: r.customer_name, sub: r.products?.name ? `on ${r.products.name}` : null, rating: r.rating })),
-    ...testimonials.map((t) => ({ id: `t-${t.id}`, quote: t.quote, name: t.customer_name, sub: t.source, rating: null })),
-  ].slice(0, 3)
+  const loading = reviewsLoading || testimonialsLoading
+
+  const fromReviews = reviews.map((r) => ({
+    id: `r-${r.id}`,
+    quote: r.comment,
+    name: r.customer_name,
+    sub: r.products && r.products.name ? `on ${r.products.name}` : null,
+    rating: r.rating,
+  }))
+
+  const fromTestimonials = testimonials.map((t) => ({
+    id: `t-${t.id}`,
+    quote: t.quote,
+    name: t.customer_name,
+    sub: t.source || null,
+    rating: null,
+  }))
+
+  const combined = [...fromReviews, ...fromTestimonials].slice(0, 3)
 
   if (loading) return null
   if (combined.length === 0) return null

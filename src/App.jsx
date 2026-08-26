@@ -14,6 +14,7 @@ import { useEffect } from 'react'
 import { useToast } from './context/ToastContext'
 import CartReminder from './components/CartReminder'
 import { FlyToCartProvider } from './context/FlyToCartContext'
+import ErrorBoundary from './components/ErrorBoundary'
 
 
 const Home = lazy(() => import('./pages/Home'))
@@ -81,7 +82,7 @@ function AnimatedRoutes() {
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<TermsOfService />} />
             <Route path="/collections" element={<Collections />} />
-<Route path="/collection/:slug" element={<CollectionDetail />} />
+            <Route path="/collection/:slug" element={<CollectionDetail />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
@@ -109,28 +110,30 @@ function WelcomeNudge() {
 
 function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <CartProvider>
-          <WishlistProvider>
-            <ToastProvider>
-              <FlyToCartProvider>
-                <div className="min-h-screen bg-cream dark:bg-espresso transition-colors">
-                  <ScrollToTop />
-                  <WelcomeNudge />
-                  <OfflineBanner />
-                  <Navbar />
-                  <AnimatedRoutes />
-                  <Footer />
-                  <WhatsAppButton />
-                  <CartReminder />
-                </div>
-              </FlyToCartProvider>
-            </ToastProvider>
-          </WishlistProvider>
-        </CartProvider>
-      </AuthProvider>
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <AuthProvider>
+          <CartProvider>
+            <WishlistProvider>
+              <ToastProvider>
+                <FlyToCartProvider>
+                  <div className="min-h-screen bg-cream dark:bg-espresso transition-colors">
+                    <ScrollToTop />
+                    <WelcomeNudge />
+                    <OfflineBanner />
+                    <Navbar />
+                    <AnimatedRoutes />
+                    <Footer />
+                    <WhatsAppButton />
+                    <CartReminder />
+                  </div>
+                </FlyToCartProvider>
+              </ToastProvider>
+            </WishlistProvider>
+          </CartProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
   )
 }
 
