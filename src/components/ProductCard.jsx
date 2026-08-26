@@ -91,7 +91,7 @@ function ProductCard({ product }) {
         <motion.button
           onClick={handleAddToCart}
           whileTap={{ scale: 0.92 }}
-          className="absolute bottom-3 right-3 w-10 h-10 rounded-full bg-espresso text-cream flex items-center justify-center opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 hover:bg-gold hover:text-espresso"
+          className="absolute bottom-3 right-3 w-10 h-10 rounded-full bg-espresso text-cream flex items-center justify-center opacity-100 md:opacity-0 translate-y-0 md:translate-y-2 md:group-hover:opacity-100 md:group-hover:translate-y-0 transition-all duration-300 hover:bg-gold hover:text-espresso"
           aria-label="Quick add to cart"
         >
           <ShoppingBag className="w-4 h-4" />
