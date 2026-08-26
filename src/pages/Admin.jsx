@@ -8,6 +8,7 @@ import { supabase } from '../lib/supabaseClient'
 import { formatPrice } from '../utils/formatPrice'
 import { Trash2, Pencil, Plus, Package, Upload, Tag as TagIcon, Trash2 as TrashIcon, Plus as PlusIcon } from 'lucide-react'
 import { TrendingUp, ShoppingBag as BagIcon, AlertTriangle, DollarSign } from 'lucide-react'
+import { Package, ClipboardList, Tags, LayoutDashboard, BarChart3 } from 'lucide-react'
 
 function Admin() {
     const isAdmin = useIsAdmin()
@@ -161,43 +162,38 @@ function Admin() {
                 <div className="flex gap-2 mb-10 flex-wrap">
                     <button
                         onClick={() => setTab('products')}
-                        className={`px-5 py-2 rounded-full text-xs font-sans uppercase tracking-wide border transition-colors ${
-                            tab === 'products' ? 'bg-gold text-espresso border-gold' : 'border-gold/30 text-espresso dark:text-cream'
-                        }`}
+                        className={`flex items-center gap-2 px-5 py-2 rounded-full text-xs font-sans uppercase tracking-wide border transition-colors ${tab === 'products' ? 'bg-gold text-espresso border-gold' : 'border-gold/30 text-espresso dark:text-cream'
+                            }`}
                     >
-                        Products
+                        <Package className="w-3.5 h-3.5" /> Products
                     </button>
                     <button
                         onClick={() => setTab('orders')}
-                        className={`px-5 py-2 rounded-full text-xs font-sans uppercase tracking-wide border transition-colors ${
-                            tab === 'orders' ? 'bg-gold text-espresso border-gold' : 'border-gold/30 text-espresso dark:text-cream'
-                        }`}
+                        className={`flex items-center gap-2 px-5 py-2 rounded-full text-xs font-sans uppercase tracking-wide border transition-colors ${tab === 'orders' ? 'bg-gold text-espresso border-gold' : 'border-gold/30 text-espresso dark:text-cream'
+                            }`}
                     >
-                        Orders ({orders.length})
+                        <ClipboardList className="w-3.5 h-3.5" /> Orders ({orders.length})
                     </button>
                     <button
                         onClick={() => setTab('content')}
-                        className={`px-5 py-2 rounded-full text-xs font-sans uppercase tracking-wide border transition-colors ${
-                            tab === 'content' ? 'bg-gold text-espresso border-gold' : 'border-gold/30 text-espresso dark:text-cream'
-                        }`}
+                        className={`flex items-center gap-2 px-5 py-2 rounded-full text-xs font-sans uppercase tracking-wide border transition-colors ${tab === 'content' ? 'bg-gold text-espresso border-gold' : 'border-gold/30 text-espresso dark:text-cream'
+                            }`}
                     >
-                        Homepage
+                        <LayoutDashboard className="w-3.5 h-3.5" /> Homepage
                     </button>
                     <button
                         onClick={() => setTab('categories')}
-                        className={`px-5 py-2 rounded-full text-xs font-sans uppercase tracking-wide border transition-colors ${
-                            tab === 'categories' ? 'bg-gold text-espresso border-gold' : 'border-gold/30 text-espresso dark:text-cream'
-                        }`}
+                        className={`flex items-center gap-2 px-5 py-2 rounded-full text-xs font-sans uppercase tracking-wide border transition-colors ${tab === 'categories' ? 'bg-gold text-espresso border-gold' : 'border-gold/30 text-espresso dark:text-cream'
+                            }`}
                     >
-                        Categories
+                        <Tags className="w-3.5 h-3.5" /> Categories
                     </button>
                     <button
                         onClick={() => setTab('analytics')}
-                        className={`px-5 py-2 rounded-full text-xs font-sans uppercase tracking-wide border transition-colors ${
-                            tab === 'analytics' ? 'bg-gold text-espresso border-gold' : 'border-gold/30 text-espresso dark:text-cream'
-                        }`}
+                        className={`flex items-center gap-2 px-5 py-2 rounded-full text-xs font-sans uppercase tracking-wide border transition-colors ${tab === 'analytics' ? 'bg-gold text-espresso border-gold' : 'border-gold/30 text-espresso dark:text-cream'
+                            }`}
                     >
-                        Analytics
+                        <BarChart3 className="w-3.5 h-3.5" /> Analytics
                     </button>
                 </div>
 
