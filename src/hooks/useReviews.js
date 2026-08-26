@@ -19,7 +19,20 @@ export function useReviews(productId) {
     fetchReviews()
   }, [productId])
 
-  async function submitReview({ userId, customerName, rating, comment }) {
+  async function submitReview({ userId, customerName, rating, comment, imageFile }) {
+    let imageUrl = null
+
+    if (imageFile) {
+      const fileName = `${Date.now()}-${imageFile.name}`
+      const { error: uploadError } = await supabase.storage
+        .from('review-images')
+        .upload(fileName, imageFile)
+
+      if (!uploadError) {
+        const { data } = supabase.storage.from('review-images').getPublicUrl(fileName)
+        imageUrl = data.publicUrl
+      }
+    }
     const { data: userOrders } = await supabase
       .from('orders')
       .select('items')
@@ -36,6 +49,7 @@ export function useReviews(productId) {
       rating,
       comment,
       verified_purchase: purchased,
+      image_url: imageUrl,
     })
     if (!error) fetchReviews()
     return { error }

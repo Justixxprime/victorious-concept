@@ -3,6 +3,7 @@ import { Star } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useReviews } from '../hooks/useReviews'
 import { BadgeCheck } from 'lucide-react'
+import { Camera } from 'lucide-react'
 
 function Reviews({ productId }) {
   const { user } = useAuth()
@@ -11,6 +12,16 @@ function Reviews({ productId }) {
   const [comment, setComment] = useState('')
   const [name, setName] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [imageFile, setImageFile] = useState(null)
+  const [imagePreview, setImagePreview] = useState(null)
+
+  function handleImageSelect(e) {
+    const file = e.target.files[0]
+    if (file) {
+      setImageFile(file)
+      setImagePreview(URL.createObjectURL(file))
+    }
+  }
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -21,8 +32,11 @@ function Reviews({ productId }) {
       customerName: name || user.email.split('@')[0],
       rating,
       comment,
+      imageFile,
     })
     setComment('')
+    setImageFile(null)
+    setImagePreview(null)
     setSubmitting(false)
   }
 
@@ -68,6 +82,16 @@ function Reviews({ productId }) {
             onChange={(e) => setComment(e.target.value)}
             className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold resize-none"
           />
+          <label className="flex items-center gap-2 cursor-pointer w-fit">
+            <Camera className="w-4 h-4 text-gold" />
+            <span className="font-sans text-xs text-espresso/60 dark:text-cream/60">
+              {imagePreview ? 'Photo attached' : 'Add a photo (optional)'}
+            </span>
+            <input type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
+          </label>
+          {imagePreview && (
+            <img src={imagePreview} alt="Preview" className="w-16 h-16 rounded-lg object-cover" />
+          )}
           <button
             type="submit"
             disabled={submitting}
@@ -107,7 +131,10 @@ function Reviews({ productId }) {
                   </span>
                 )}
               </div>
-              <p className="font-sans text-sm text-espresso/80 dark:text-cream/80">{r.comment}</p>
+              <p className="font-sans text-sm text-espresso/80 dark:text-cream/80 mb-3">{r.comment}</p>
+              {r.image_url && (
+                <img src={r.image_url} alt="Customer photo" className="w-24 h-24 rounded-xl object-cover" />
+              )}
             </div>
           ))}
         </div>
