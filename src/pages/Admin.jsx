@@ -6,24 +6,48 @@ import { useCategories } from '../hooks/useCategories'
 import { useSiteSettings } from '../hooks/useSiteSettings'
 import { supabase } from '../lib/supabaseClient'
 import { formatPrice } from '../utils/formatPrice'
-import { Trash2, Pencil, Plus, Package, Upload, Tag as TagIcon, Trash2 as TrashIcon, Plus as PlusIcon } from 'lucide-react'
-import { TrendingUp, ShoppingBag as BagIcon, AlertTriangle, DollarSign } from 'lucide-react'
-import { ClipboardList, Tags, LayoutDashboard, BarChart3 } from 'lucide-react'
+import {
+    Trash2,
+    Pencil,
+    Plus,
+    Package,
+    Upload,
+    Tag as TagIcon,
+    ClipboardList,
+    Tags,
+    LayoutDashboard,
+    BarChart3,
+    TrendingUp,
+    ShoppingBag as BagIcon,
+    AlertTriangle,
+    DollarSign,
+} from 'lucide-react'
 
 function Admin() {
     const isAdmin = useIsAdmin()
     const { products, loading, error } = useProducts({ includeHidden: true })
     const { categories } = useCategories()
     const { value: heroValue, updateSetting: updateHero } = useSiteSettings('hero')
+
     const [heroForm, setHeroForm] = useState(null)
     const [refreshKey, setRefreshKey] = useState(0)
     const [editing, setEditing] = useState(null)
     const [tab, setTab] = useState('products')
     const [orders, setOrders] = useState([])
     const [ordersLoading, setOrdersLoading] = useState(true)
+
     const [form, setForm] = useState({
-        name: '', price: '', category: 'bags', image: '', imagesText: '', stock: 5, status: 'active', is_new: false, is_featured: false,
+        name: '',
+        price: '',
+        category: 'bags',
+        image: '',
+        imagesText: '',
+        stock: 5,
+        status: 'active',
+        is_new: false,
+        is_featured: false,
     })
+
     const [saving, setSaving] = useState(false)
     const [newCategoryName, setNewCategoryName] = useState('')
 
@@ -33,15 +57,21 @@ function Admin() {
                 .from('orders')
                 .select('*')
                 .order('created_at', { ascending: false })
+
             setOrders(data || [])
             setOrdersLoading(false)
         }
-        if (isAdmin) fetchAllOrders()
+
+        if (isAdmin) {
+            fetchAllOrders()
+        }
     }, [isAdmin])
 
     useEffect(() => {
-        if (heroValue && !heroForm) setHeroForm(heroValue)
-    }, [heroValue])
+        if (heroValue && !heroForm) {
+            setHeroForm(heroValue)
+        }
+    }, [heroValue, heroForm])
 
     if (!isAdmin) {
         return (
@@ -54,11 +84,15 @@ function Admin() {
     }
 
     function update(field, value) {
-        setForm((prev) => ({ ...prev, [field]: value }))
+        setForm((prev) => ({
+            ...prev,
+            [field]: value,
+        }))
     }
 
     function startEdit(product) {
         setEditing(product.id)
+
         setForm({
             name: product.name,
             price: product.price,
@@ -74,16 +108,30 @@ function Admin() {
 
     function resetForm() {
         setEditing(null)
-        setForm({ name: '', price: '', category: 'bags', image: '', imagesText: '', stock: 5, status: 'active', is_new: false, is_featured: false })
+
+        setForm({
+            name: '',
+            price: '',
+            category: 'bags',
+            image: '',
+            imagesText: '',
+            stock: 5,
+            status: 'active',
+            is_new: false,
+            is_featured: false,
+        })
     }
 
     async function handleFileUpload(e) {
         const files = Array.from(e.target.files)
+
         if (files.length === 0) return
 
         const uploadedUrls = []
+
         for (const file of files) {
             const fileName = `${Date.now()}-${file.name}`
+
             const { error } = await supabase.storage
                 .from('product-images')
                 .upload(fileName, file)
@@ -92,23 +140,39 @@ function Admin() {
                 const { data } = supabase.storage
                     .from('product-images')
                     .getPublicUrl(fileName)
+
                 uploadedUrls.push(data.publicUrl)
             }
         }
 
         if (uploadedUrls.length > 0) {
-            const existing = form.imagesText ? form.imagesText.split(',').map((s) => s.trim()).filter(Boolean) : []
+            const existing = form.imagesText
+                ? form.imagesText
+                    .split(',')
+                    .map((s) => s.trim())
+                    .filter(Boolean)
+                : []
+
             const combined = [...existing, ...uploadedUrls]
+
             update('imagesText', combined.join(', '))
-            if (!form.image) update('image', combined[0])
+
+            if (!form.image) {
+                update('image', combined[0])
+            }
         }
     }
 
     async function handleSave() {
         setSaving(true)
+
         const imagesArray = form.imagesText
-            ? form.imagesText.split(',').map((s) => s.trim()).filter(Boolean)
+            ? form.imagesText
+                .split(',')
+                .map((s) => s.trim())
+                .filter(Boolean)
             : [form.image]
+
         const payload = {
             name: form.name,
             price: form.price,
@@ -120,182 +184,336 @@ function Admin() {
             is_new: form.is_new,
             is_featured: form.is_featured,
         }
+
         if (editing) {
-            await supabase.from('products').update(payload).eq('id', editing)
+            await supabase
+                .from('products')
+                .update(payload)
+                .eq('id', editing)
         } else {
-            await supabase.from('products').insert(payload)
+            await supabase
+                .from('products')
+                .insert(payload)
         }
+
         setSaving(false)
         resetForm()
         setRefreshKey((k) => k + 1)
+
         window.location.reload()
     }
 
     async function handleDelete(id) {
         if (!confirm('Delete this product permanently?')) return
-        await supabase.from('products').delete().eq('id', id)
+
+        await supabase
+            .from('products')
+            .delete()
+            .eq('id', id)
+
         window.location.reload()
     }
 
     async function addCategory() {
         if (!newCategoryName.trim()) return
-        const id = newCategoryName.trim().toLowerCase().replace(/\s+/g, '-')
-        await supabase.from('categories').insert({ id, name: newCategoryName.trim(), sort_order: categories.length + 1 })
+
+        const id = newCategoryName
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, '-')
+
+        await supabase
+            .from('categories')
+            .insert({
+                id,
+                name: newCategoryName.trim(),
+                sort_order: categories.length + 1,
+            })
+
         setNewCategoryName('')
         window.location.reload()
     }
 
     async function deleteCategory(id) {
-        if (!confirm('Delete this category? Products in it will keep their category tag but it will no longer appear as a filter.')) return
-        await supabase.from('categories').delete().eq('id', id)
+        if (
+            !confirm(
+                'Delete this category? Products in it will keep their category tag but it will no longer appear as a filter.'
+            )
+        ) {
+            return
+        }
+
+        await supabase
+            .from('categories')
+            .delete()
+            .eq('id', id)
+
         window.location.reload()
     }
 
+    const tabButtonClass = (tabName) =>
+        `group relative flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-sans uppercase tracking-wide border transition-all duration-300 whitespace-nowrap ${
+            tab === tabName
+                ? 'bg-gold text-espresso border-gold shadow-[0_0_24px_rgba(212,175,55,0.18)]'
+                : 'border-gold/30 text-espresso dark:text-cream hover:border-gold/60 hover:bg-gold/5'
+        }`
+
     return (
         <section className="bg-cream dark:bg-espresso transition-colors min-h-screen py-12 px-6">
-            <SEO title="Admin" description="Victorious Concept admin dashboard." />
-            <div className="max-w-5xl mx-auto">
-                <h1 className="font-display italic font-semibold text-4xl text-espresso dark:text-cream mb-6">
-                    Admin Dashboard
-                </h1>
+            <SEO
+                title="Admin"
+                description="Victorious Concept admin dashboard."
+            />
 
-                <div className="flex gap-2 mb-10 flex-wrap">
+            <div className="max-w-5xl mx-auto">
+
+                {/* ========== BRANDED ADMIN HEADER ========== */}
+                <div className="flex items-center justify-between mb-8">
+                    <div>
+                        <p className="font-sans text-xs uppercase tracking-widest text-gold mb-2">
+                            Victorious Concept
+                        </p>
+
+                        <h1 className="font-display italic font-semibold text-4xl text-espresso dark:text-cream">
+                            Admin Dashboard
+                        </h1>
+                    </div>
+
+                    <div className="hidden sm:flex items-center gap-2 bg-gold/10 rounded-full px-4 py-2">
+                        <div className="w-2 h-2 rounded-full bg-green-500" />
+
+                        <span className="font-sans text-xs text-espresso dark:text-cream">
+                            Live
+                        </span>
+                    </div>
+                </div>
+
+                {/* ========== TABS ========== */}
+                <div className="flex gap-2 mb-10 overflow-x-auto pb-2">
                     <button
                         onClick={() => setTab('products')}
-                        className={`flex items-center gap-2 px-5 py-2 rounded-full text-xs font-sans uppercase tracking-wide border transition-colors ${tab === 'products' ? 'bg-gold text-espresso border-gold' : 'border-gold/30 text-espresso dark:text-cream'
-                            }`}
+                        className={tabButtonClass('products')}
                     >
-                        <Package className="w-3.5 h-3.5" /> Products
+                        <Package className="w-3.5 h-3.5" />
+                        Products
                     </button>
+
                     <button
                         onClick={() => setTab('orders')}
-                        className={`flex items-center gap-2 px-5 py-2 rounded-full text-xs font-sans uppercase tracking-wide border transition-colors ${tab === 'orders' ? 'bg-gold text-espresso border-gold' : 'border-gold/30 text-espresso dark:text-cream'
-                            }`}
+                        className={tabButtonClass('orders')}
                     >
-                        <ClipboardList className="w-3.5 h-3.5" /> Orders ({orders.length})
+                        <ClipboardList className="w-3.5 h-3.5" />
+                        Orders ({orders.length})
                     </button>
+
                     <button
                         onClick={() => setTab('content')}
-                        className={`flex items-center gap-2 px-5 py-2 rounded-full text-xs font-sans uppercase tracking-wide border transition-colors ${tab === 'content' ? 'bg-gold text-espresso border-gold' : 'border-gold/30 text-espresso dark:text-cream'
-                            }`}
+                        className={tabButtonClass('content')}
                     >
-                        <LayoutDashboard className="w-3.5 h-3.5" /> Homepage
+                        <LayoutDashboard className="w-3.5 h-3.5" />
+                        Homepage
                     </button>
+
                     <button
                         onClick={() => setTab('categories')}
-                        className={`flex items-center gap-2 px-5 py-2 rounded-full text-xs font-sans uppercase tracking-wide border transition-colors ${tab === 'categories' ? 'bg-gold text-espresso border-gold' : 'border-gold/30 text-espresso dark:text-cream'
-                            }`}
+                        className={tabButtonClass('categories')}
                     >
-                        <Tags className="w-3.5 h-3.5" /> Categories
+                        <Tags className="w-3.5 h-3.5" />
+                        Categories
                     </button>
+
                     <button
                         onClick={() => setTab('analytics')}
-                        className={`flex items-center gap-2 px-5 py-2 rounded-full text-xs font-sans uppercase tracking-wide border transition-colors ${tab === 'analytics' ? 'bg-gold text-espresso border-gold' : 'border-gold/30 text-espresso dark:text-cream'
-                            }`}
+                        className={tabButtonClass('analytics')}
                     >
-                        <BarChart3 className="w-3.5 h-3.5" /> Analytics
+                        <BarChart3 className="w-3.5 h-3.5" />
+                        Analytics
                     </button>
                 </div>
 
-                {tab === 'analytics' && (() => {
-                    const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0)
-                    const totalOrders = orders.length
-                    const lowStock = products.filter((p) => p.stock > 0 && p.stock <= 2)
-                    const outOfStock = products.filter((p) => p.stock <= 0)
-                    const avgOrderValue = totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0
+                {/* ========== ANALYTICS TAB ========== */}
+                {tab === 'analytics' &&
+                    (() => {
+                        const totalRevenue = orders.reduce(
+                            (sum, o) => sum + o.total,
+                            0
+                        )
 
-                    return (
-                        <div className="flex flex-col gap-8">
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                <div className="bg-gold/5 rounded-2xl p-5">
-                                    <DollarSign className="w-5 h-5 text-gold mb-2" />
-                                    <p className="font-display italic font-semibold text-2xl text-espresso dark:text-cream">
-                                        {formatPrice(totalRevenue)}
-                                    </p>
-                                    <p className="font-sans text-xs text-espresso/50 dark:text-cream/50">Total Revenue</p>
-                                </div>
-                                <div className="bg-gold/5 rounded-2xl p-5">
-                                    <BagIcon className="w-5 h-5 text-gold mb-2" />
-                                    <p className="font-display italic font-semibold text-2xl text-espresso dark:text-cream">
-                                        {totalOrders}
-                                    </p>
-                                    <p className="font-sans text-xs text-espresso/50 dark:text-cream/50">Total Orders</p>
-                                </div>
-                                <div className="bg-gold/5 rounded-2xl p-5">
-                                    <TrendingUp className="w-5 h-5 text-gold mb-2" />
-                                    <p className="font-display italic font-semibold text-2xl text-espresso dark:text-cream">
-                                        {formatPrice(avgOrderValue)}
-                                    </p>
-                                    <p className="font-sans text-xs text-espresso/50 dark:text-cream/50">Avg Order Value</p>
-                                </div>
-                                <div className="bg-gold/5 rounded-2xl p-5">
-                                    <AlertTriangle className="w-5 h-5 text-gold mb-2" />
-                                    <p className="font-display italic font-semibold text-2xl text-espresso dark:text-cream">
-                                        {lowStock.length + outOfStock.length}
-                                    </p>
-                                    <p className="font-sans text-xs text-espresso/50 dark:text-cream/50">Stock Alerts</p>
-                                </div>
-                            </div>
+                        const totalOrders = orders.length
 
-                            {(lowStock.length > 0 || outOfStock.length > 0) && (
-                                <div>
-                                    <h3 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">
-                                        Needs Attention
-                                    </h3>
-                                    <div className="flex flex-col gap-2">
-                                        {outOfStock.map((p) => (
-                                            <div key={p.id} className="flex justify-between items-center bg-red-500/5 rounded-xl px-4 py-3">
-                                                <span className="font-sans text-sm text-espresso dark:text-cream">{p.name}</span>
-                                                <span className="font-sans text-xs text-red-500">Out of stock</span>
-                                            </div>
-                                        ))}
-                                        {lowStock.map((p) => (
-                                            <div key={p.id} className="flex justify-between items-center bg-gold/10 rounded-xl px-4 py-3">
-                                                <span className="font-sans text-sm text-espresso dark:text-cream">{p.name}</span>
-                                                <span className="font-sans text-xs text-gold">Only {p.stock} left</span>
-                                            </div>
-                                        ))}
+                        const lowStock = products.filter(
+                            (p) => p.stock > 0 && p.stock <= 2
+                        )
+
+                        const outOfStock = products.filter(
+                            (p) => p.stock <= 0
+                        )
+
+                        const avgOrderValue =
+                            totalOrders > 0
+                                ? Math.round(totalRevenue / totalOrders)
+                                : 0
+
+                        return (
+                            <div className="flex flex-col gap-8">
+
+                                {/* STAT CARDS */}
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+
+                                    <div className="relative overflow-hidden bg-gradient-to-br from-gold/10 to-gold/5 rounded-2xl p-5 border border-gold/10">
+                                        <DollarSign className="w-5 h-5 text-gold mb-3" />
+
+                                        <p className="font-display italic font-semibold text-2xl text-espresso dark:text-cream">
+                                            {formatPrice(totalRevenue)}
+                                        </p>
+
+                                        <p className="font-sans text-xs text-espresso/50 dark:text-cream/50">
+                                            Total Revenue
+                                        </p>
+                                    </div>
+
+                                    <div className="relative overflow-hidden bg-gradient-to-br from-gold/10 to-gold/5 rounded-2xl p-5 border border-gold/10">
+                                        <BagIcon className="w-5 h-5 text-gold mb-3" />
+
+                                        <p className="font-display italic font-semibold text-2xl text-espresso dark:text-cream">
+                                            {totalOrders}
+                                        </p>
+
+                                        <p className="font-sans text-xs text-espresso/50 dark:text-cream/50">
+                                            Total Orders
+                                        </p>
+                                    </div>
+
+                                    <div className="relative overflow-hidden bg-gradient-to-br from-gold/10 to-gold/5 rounded-2xl p-5 border border-gold/10">
+                                        <TrendingUp className="w-5 h-5 text-gold mb-3" />
+
+                                        <p className="font-display italic font-semibold text-2xl text-espresso dark:text-cream">
+                                            {formatPrice(avgOrderValue)}
+                                        </p>
+
+                                        <p className="font-sans text-xs text-espresso/50 dark:text-cream/50">
+                                            Avg Order Value
+                                        </p>
+                                    </div>
+
+                                    <div className="relative overflow-hidden bg-gradient-to-br from-gold/10 to-gold/5 rounded-2xl p-5 border border-gold/10">
+                                        <AlertTriangle className="w-5 h-5 text-gold mb-3" />
+
+                                        <p className="font-display italic font-semibold text-2xl text-espresso dark:text-cream">
+                                            {lowStock.length + outOfStock.length}
+                                        </p>
+
+                                        <p className="font-sans text-xs text-espresso/50 dark:text-cream/50">
+                                            Stock Alerts
+                                        </p>
                                     </div>
                                 </div>
-                            )}
-                        </div>
-                    )
-                })()}
+
+                                {/* NEEDS ATTENTION */}
+                                {(lowStock.length > 0 ||
+                                    outOfStock.length > 0) && (
+                                    <div>
+                                        <h3 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">
+                                            Needs Attention
+                                        </h3>
+
+                                        <div className="flex flex-col gap-2">
+                                            {outOfStock.map((p) => (
+                                                <div
+                                                    key={p.id}
+                                                    className="flex justify-between items-center bg-red-500/5 rounded-xl px-4 py-3"
+                                                >
+                                                    <span className="font-sans text-sm text-espresso dark:text-cream">
+                                                        {p.name}
+                                                    </span>
+
+                                                    <span className="font-sans text-xs text-red-500">
+                                                        Out of stock
+                                                    </span>
+                                                </div>
+                                            ))}
+
+                                            {lowStock.map((p) => (
+                                                <div
+                                                    key={p.id}
+                                                    className="flex justify-between items-center bg-gold/10 rounded-xl px-4 py-3"
+                                                >
+                                                    <span className="font-sans text-sm text-espresso dark:text-cream">
+                                                        {p.name}
+                                                    </span>
+
+                                                    <span className="font-sans text-xs text-gold">
+                                                        Only {p.stock} left
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )
+                    })()}
 
                 {/* ========== HOMEPAGE / CONTENT TAB ========== */}
                 {tab === 'content' && heroForm && (
                     <div className="max-w-lg flex flex-col gap-4">
+
                         <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-2">
                             Hero Section
                         </h2>
+
                         <input
                             type="text"
                             placeholder="Small label (e.g. The Next Chapter)"
                             value={heroForm.label}
-                            onChange={(e) => setHeroForm({ ...heroForm, label: e.target.value })}
+                            onChange={(e) =>
+                                setHeroForm({
+                                    ...heroForm,
+                                    label: e.target.value,
+                                })
+                            }
                             className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
                         />
+
                         <textarea
                             placeholder="Headline"
                             rows={2}
                             value={heroForm.headline}
-                            onChange={(e) => setHeroForm({ ...heroForm, headline: e.target.value })}
+                            onChange={(e) =>
+                                setHeroForm({
+                                    ...heroForm,
+                                    headline: e.target.value,
+                                })
+                            }
                             className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold resize-none"
                         />
+
                         <textarea
                             placeholder="Supporting text"
                             rows={2}
                             value={heroForm.subtext}
-                            onChange={(e) => setHeroForm({ ...heroForm, subtext: e.target.value })}
+                            onChange={(e) =>
+                                setHeroForm({
+                                    ...heroForm,
+                                    subtext: e.target.value,
+                                })
+                            }
                             className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold resize-none"
                         />
+
                         <input
                             type="text"
                             placeholder="Backdrop image URL"
                             value={heroForm.backdropImage}
-                            onChange={(e) => setHeroForm({ ...heroForm, backdropImage: e.target.value })}
+                            onChange={(e) =>
+                                setHeroForm({
+                                    ...heroForm,
+                                    backdropImage: e.target.value,
+                                })
+                            }
                             className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
                         />
+
                         <button
                             onClick={() => updateHero(heroForm)}
                             className="bg-gold text-espresso font-sans font-medium px-6 py-3 rounded-full hover:bg-gold-light transition-colors self-start"
@@ -308,38 +526,62 @@ function Admin() {
                 {/* ========== CATEGORIES TAB ========== */}
                 {tab === 'categories' && (
                     <div className="max-w-lg">
+
                         <div className="flex gap-2 mb-8">
                             <input
                                 type="text"
                                 placeholder="New category name (e.g. Sale, New In)"
                                 value={newCategoryName}
-                                onChange={(e) => setNewCategoryName(e.target.value)}
+                                onChange={(e) =>
+                                    setNewCategoryName(e.target.value)
+                                }
                                 className="flex-1 bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
                             />
+
                             <button
                                 onClick={addCategory}
                                 className="flex items-center gap-2 bg-gold text-espresso font-sans font-medium px-5 rounded-full hover:bg-gold-light transition-colors"
                             >
-                                <PlusIcon className="w-4 h-4" /> Add
+                                <Plus className="w-4 h-4" />
+                                Add
                             </button>
                         </div>
 
                         <div className="flex flex-col gap-3">
                             {categories.map((cat) => (
-                                <div key={cat.id} className="border border-gold/20 rounded-xl p-4">
+                                <div
+                                    key={cat.id}
+                                    className="border border-gold/20 rounded-xl p-4"
+                                >
                                     <div className="flex items-center gap-3 mb-2">
+
                                         <TagIcon className="w-4 h-4 text-gold flex-shrink-0" />
-                                        <span className="flex-1 font-sans text-sm text-espresso dark:text-cream">{cat.name}</span>
-                                        <button onClick={() => deleteCategory(cat.id)} aria-label="Delete category">
-                                            <TrashIcon className="w-4 h-4 text-espresso/40 dark:text-cream/40 hover:text-red-500" />
+
+                                        <span className="flex-1 font-sans text-sm text-espresso dark:text-cream">
+                                            {cat.name}
+                                        </span>
+
+                                        <button
+                                            onClick={() =>
+                                                deleteCategory(cat.id)
+                                            }
+                                            aria-label="Delete category"
+                                        >
+                                            <Trash2 className="w-4 h-4 text-espresso/40 dark:text-cream/40 hover:text-red-500" />
                                         </button>
                                     </div>
+
                                     <textarea
                                         placeholder="Short introduction for this category page (optional)"
                                         rows={2}
                                         defaultValue={cat.description || ''}
                                         onBlur={async (e) => {
-                                            await supabase.from('categories').update({ description: e.target.value }).eq('id', cat.id)
+                                            await supabase
+                                                .from('categories')
+                                                .update({
+                                                    description: e.target.value,
+                                                })
+                                                .eq('id', cat.id)
                                         }}
                                         className="w-full bg-transparent border border-gold/20 rounded-lg px-3 py-2 font-sans text-xs text-espresso dark:text-cream outline-none focus:border-gold resize-none"
                                     />
@@ -352,6 +594,7 @@ function Admin() {
                 {/* ========== ORDERS TAB ========== */}
                 {tab === 'orders' && (
                     <div className="flex flex-col gap-4">
+
                         {ordersLoading ? (
                             <p className="font-sans text-sm text-espresso/60 dark:text-cream/60">
                                 Loading orders...
@@ -359,40 +602,83 @@ function Admin() {
                         ) : orders.length === 0 ? (
                             <div className="flex flex-col items-center gap-3 py-16 text-center">
                                 <Package className="w-8 h-8 text-gold" />
+
                                 <p className="font-sans text-sm text-espresso/60 dark:text-cream/60">
                                     No orders yet.
                                 </p>
                             </div>
                         ) : (
                             orders.map((order) => (
-                                <div key={order.id} className="border border-gold/20 rounded-2xl p-5">
+                                <div
+                                    key={order.id}
+                                    className="border border-gold/20 rounded-2xl p-5"
+                                >
                                     <div className="flex flex-wrap justify-between gap-2 mb-3">
+
                                         <span className="font-sans text-sm font-medium text-espresso dark:text-cream">
                                             {order.order_number}
                                         </span>
+
                                         <span className="font-sans text-xs text-espresso/50 dark:text-cream/50">
-                                            {new Date(order.created_at).toLocaleDateString('en-NG', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                            {new Date(
+                                                order.created_at
+                                            ).toLocaleDateString('en-NG', {
+                                                day: 'numeric',
+                                                month: 'long',
+                                                year: 'numeric',
+                                            })}
                                         </span>
                                     </div>
+
                                     <select
                                         value={order.status || 'pending'}
                                         onChange={async (e) => {
-                                            await supabase.from('orders').update({ status: e.target.value }).eq('id', order.id)
-                                            setOrders((prev) => prev.map((o) => o.id === order.id ? { ...o, status: e.target.value } : o))
+                                            await supabase
+                                                .from('orders')
+                                                .update({
+                                                    status: e.target.value,
+                                                })
+                                                .eq('id', order.id)
+
+                                            setOrders((prev) =>
+                                                prev.map((o) =>
+                                                    o.id === order.id
+                                                        ? {
+                                                            ...o,
+                                                            status: e.target.value,
+                                                        }
+                                                        : o
+                                                )
+                                            )
                                         }}
                                         className="bg-transparent border border-gold/30 rounded-full px-3 py-1 font-sans text-xs text-espresso dark:text-cream outline-none focus:border-gold mb-3"
                                     >
-                                        <option value="pending">Pending</option>
-                                        <option value="confirmed">Confirmed</option>
-                                        <option value="shipped">Shipped</option>
-                                        <option value="delivered">Delivered</option>
+                                        <option value="pending">
+                                            Pending
+                                        </option>
+
+                                        <option value="confirmed">
+                                            Confirmed
+                                        </option>
+
+                                        <option value="shipped">
+                                            Shipped
+                                        </option>
+
+                                        <option value="delivered">
+                                            Delivered
+                                        </option>
                                     </select>
+
                                     <p className="font-sans text-sm text-espresso/70 dark:text-cream/70 mb-1">
-                                        {order.customer_name} · {order.customer_phone}
+                                        {order.customer_name} ·{' '}
+                                        {order.customer_phone}
                                     </p>
+
                                     <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 mb-3">
                                         {order.customer_address}
                                     </p>
+
                                     <div className="flex flex-col gap-1 mb-3 border-t border-gold/10 pt-3">
                                         {order.items?.map((item) => (
                                             <div
@@ -400,15 +686,26 @@ function Admin() {
                                                 className="flex justify-between font-sans text-xs text-espresso/60 dark:text-cream/60"
                                             >
                                                 <span>
-                                                    {item.name} x{item.quantity}
+                                                    {item.name} x
+                                                    {item.quantity}
                                                 </span>
-                                                <span>{formatPrice(item.price * item.quantity)}</span>
+
+                                                <span>
+                                                    {formatPrice(
+                                                        item.price *
+                                                        item.quantity
+                                                    )}
+                                                </span>
                                             </div>
                                         ))}
                                     </div>
+
                                     <div className="flex justify-between font-display italic font-semibold text-espresso dark:text-cream">
                                         <span>Total</span>
-                                        <span>{formatPrice(order.total)}</span>
+
+                                        <span>
+                                            {formatPrice(order.total)}
+                                        </span>
                                     </div>
                                 </div>
                             ))
@@ -420,69 +717,111 @@ function Admin() {
                 {tab === 'products' && (
                     <>
                         <div className="bg-gold/5 rounded-2xl p-6 mb-12">
+
                             <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">
-                                {editing ? 'Edit Product' : 'Add New Product'}
+                                {editing
+                                    ? 'Edit Product'
+                                    : 'Add New Product'}
                             </h2>
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+
                                 <input
                                     type="text"
                                     placeholder="Product name"
                                     value={form.name}
-                                    onChange={(e) => update('name', e.target.value)}
+                                    onChange={(e) =>
+                                        update('name', e.target.value)
+                                    }
                                     className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
                                 />
+
                                 <input
                                     type="number"
                                     placeholder="Price (Naira)"
                                     value={form.price}
-                                    onChange={(e) => update('price', e.target.value)}
+                                    onChange={(e) =>
+                                        update('price', e.target.value)
+                                    }
                                     className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
                                 />
+
                                 <input
                                     type="number"
                                     placeholder="Stock quantity"
                                     value={form.stock}
-                                    onChange={(e) => update('stock', e.target.value)}
+                                    onChange={(e) =>
+                                        update('stock', e.target.value)
+                                    }
                                     className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
                                 />
+
                                 <select
                                     value={form.status}
-                                    onChange={(e) => update('status', e.target.value)}
+                                    onChange={(e) =>
+                                        update('status', e.target.value)
+                                    }
                                     className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
                                 >
-                                    <option value="active">Active (visible, normal sale)</option>
-                                    <option value="preorder">Preorder (visible, orderable even at 0 stock)</option>
-                                    <option value="hidden">Hidden (not shown anywhere on the site)</option>
+                                    <option value="active">
+                                        Active (visible, normal sale)
+                                    </option>
+
+                                    <option value="preorder">
+                                        Preorder (visible, orderable even at 0 stock)
+                                    </option>
+
+                                    <option value="hidden">
+                                        Hidden (not shown anywhere on the site)
+                                    </option>
                                 </select>
+
                                 <select
                                     value={form.category}
-                                    onChange={(e) => update('category', e.target.value)}
+                                    onChange={(e) =>
+                                        update('category', e.target.value)
+                                    }
                                     className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
                                 >
                                     {categories.map((c) => (
-                                        <option key={c.id} value={c.id}>{c.name}</option>
+                                        <option
+                                            key={c.id}
+                                            value={c.id}
+                                        >
+                                            {c.name}
+                                        </option>
                                     ))}
                                 </select>
+
                                 <input
                                     type="text"
                                     placeholder="Main Image URL"
                                     value={form.image}
-                                    onChange={(e) => update('image', e.target.value)}
+                                    onChange={(e) =>
+                                        update('image', e.target.value)
+                                    }
                                     className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
                                 />
                             </div>
+
                             <textarea
                                 placeholder="All image URLs, separated by commas (leave blank to just use the main image above)"
                                 rows={2}
                                 value={form.imagesText}
-                                onChange={(e) => update('imagesText', e.target.value)}
+                                onChange={(e) =>
+                                    update('imagesText', e.target.value)
+                                }
                                 className="w-full bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold resize-none mb-3"
                             />
+
                             <label className="flex items-center gap-2 justify-center border-2 border-dashed border-gold/30 rounded-xl px-4 py-4 cursor-pointer hover:border-gold transition-colors mb-4">
+
                                 <Upload className="w-4 h-4 text-gold" />
+
                                 <span className="font-sans text-sm text-espresso dark:text-cream">
                                     Or upload photos directly from your phone or computer
                                 </span>
+
                                 <input
                                     type="file"
                                     accept="image/*"
@@ -491,24 +830,58 @@ function Admin() {
                                     className="hidden"
                                 />
                             </label>
+
                             <div className="flex gap-6 mb-4">
+
                                 <label className="flex items-center gap-2 font-sans text-sm text-espresso dark:text-cream">
-                                    <input type="checkbox" checked={form.is_new} onChange={(e) => update('is_new', e.target.checked)} />
+                                    <input
+                                        type="checkbox"
+                                        checked={form.is_new}
+                                        onChange={(e) =>
+                                            update(
+                                                'is_new',
+                                                e.target.checked
+                                            )
+                                        }
+                                    />
+
                                     New Arrival
                                 </label>
+
                                 <label className="flex items-center gap-2 font-sans text-sm text-espresso dark:text-cream">
-                                    <input type="checkbox" checked={form.is_featured} onChange={(e) => update('is_featured', e.target.checked)} />
+                                    <input
+                                        type="checkbox"
+                                        checked={form.is_featured}
+                                        onChange={(e) =>
+                                            update(
+                                                'is_featured',
+                                                e.target.checked
+                                            )
+                                        }
+                                    />
+
                                     Featured
                                 </label>
                             </div>
+
                             <div className="flex gap-3">
+
                                 <button
                                     onClick={handleSave}
-                                    disabled={saving || !form.name || !form.price}
+                                    disabled={
+                                        saving ||
+                                        !form.name ||
+                                        !form.price
+                                    }
                                     className="flex items-center gap-2 bg-gold text-espresso font-sans font-medium px-6 py-3 rounded-full hover:bg-gold-light transition-colors disabled:opacity-40"
                                 >
-                                    <Plus className="w-4 h-4" /> {editing ? 'Save Changes' : 'Add Product'}
+                                    <Plus className="w-4 h-4" />
+
+                                    {editing
+                                        ? 'Save Changes'
+                                        : 'Add Product'}
                                 </button>
+
                                 {editing && (
                                     <button
                                         onClick={resetForm}
@@ -523,28 +896,65 @@ function Admin() {
                         <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">
                             All Products ({products.length})
                         </h2>
+
                         {loading ? (
-                            <p className="font-sans text-sm text-espresso/60 dark:text-cream/60">Loading...</p>
+                            <p className="font-sans text-sm text-espresso/60 dark:text-cream/60">
+                                Loading...
+                            </p>
+                        ) : error ? (
+                            <p className="font-sans text-sm text-red-500">
+                                Unable to load products.
+                            </p>
                         ) : (
                             <div className="flex flex-col gap-3">
+
                                 {products.map((product) => (
-                                    <div key={product.id} className="flex items-center gap-4 border border-gold/20 rounded-xl p-4">
-                                        <img src={product.image} alt={product.name} className="w-14 h-14 rounded-lg object-cover flex-shrink-0" />
-                                        <div className="flex-1">
-                                            <p className="font-sans text-sm text-espresso dark:text-cream">{product.name}</p>
+                                    <div
+                                        key={product.id}
+                                        className="flex items-center gap-4 border border-gold/20 rounded-xl p-4"
+                                    >
+                                        <img
+                                            src={product.image}
+                                            alt={product.name}
+                                            className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
+                                        />
+
+                                        <div className="flex-1 min-w-0">
+
+                                            <p className="font-sans text-sm text-espresso dark:text-cream truncate">
+                                                {product.name}
+                                            </p>
+
                                             <p className="font-sans text-xs text-gold">
-                                                {formatPrice(product.price)} · {product.category}
-                                                {product.status && product.status !== 'active' && (
-                                                    <span className="ml-2 uppercase tracking-wide text-[10px] opacity-70">
-                                                        · {product.status}
-                                                    </span>
-                                                )}
+                                                {formatPrice(product.price)} ·{' '}
+                                                {product.category}
+
+                                                {product.status &&
+                                                    product.status !==
+                                                    'active' && (
+                                                        <span className="ml-2 uppercase tracking-wide text-[10px] opacity-70">
+                                                            ·{' '}
+                                                            {product.status}
+                                                        </span>
+                                                    )}
                                             </p>
                                         </div>
-                                        <button onClick={() => startEdit(product)} aria-label="Edit">
+
+                                        <button
+                                            onClick={() =>
+                                                startEdit(product)
+                                            }
+                                            aria-label="Edit"
+                                        >
                                             <Pencil className="w-4 h-4 text-espresso/50 dark:text-cream/50 hover:text-gold" />
                                         </button>
-                                        <button onClick={() => handleDelete(product.id)} aria-label="Delete">
+
+                                        <button
+                                            onClick={() =>
+                                                handleDelete(product.id)
+                                            }
+                                            aria-label="Delete"
+                                        >
                                             <Trash2 className="w-4 h-4 text-espresso/50 dark:text-cream/50 hover:text-red-500" />
                                         </button>
                                     </div>
