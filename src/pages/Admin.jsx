@@ -23,6 +23,7 @@ import {
     AlertTriangle,
     DollarSign,
     Layers,
+    Percent,
 } from 'lucide-react'
 
 function Admin() {
@@ -42,6 +43,13 @@ function Admin() {
     const [tab, setTab] = useState('products')
     const [orders, setOrders] = useState([])
     const [ordersLoading, setOrdersLoading] = useState(true)
+
+    const [coupons, setCoupons] = useState([])
+    const [couponForm, setCouponForm] = useState({
+        code: '',
+        percent_off: '',
+        active: true,
+    })
 
     const [collectionForm, setCollectionForm] = useState({
         name: '',
@@ -81,6 +89,21 @@ function Admin() {
 
         if (isAdmin) {
             fetchAllOrders()
+        }
+    }, [isAdmin])
+
+    useEffect(() => {
+        async function fetchCoupons() {
+            const { data } = await supabase
+                .from('coupons')
+                .select('*')
+                .order('code')
+
+            setCoupons(data || [])
+        }
+
+        if (isAdmin) {
+            fetchCoupons()
         }
     }, [isAdmin])
 
@@ -266,6 +289,59 @@ function Admin() {
             .eq('id', id)
 
         window.location.reload()
+    }
+
+    async function addCoupon() {
+        if (!couponForm.code || !couponForm.percent_off) return
+
+        await supabase.from('coupons').insert({
+            code: couponForm.code.trim().toUpperCase(),
+            percent_off: Number(couponForm.percent_off),
+            active: true,
+        })
+
+        setCouponForm({
+            code: '',
+            percent_off: '',
+            active: true,
+        })
+
+        const { data } = await supabase
+            .from('coupons')
+            .select('*')
+            .order('code')
+
+        setCoupons(data || [])
+    }
+
+    async function toggleCoupon(id, active) {
+        await supabase
+            .from('coupons')
+            .update({ active: !active })
+            .eq('id', id)
+
+        const { data } = await supabase
+            .from('coupons')
+            .select('*')
+            .order('code')
+
+        setCoupons(data || [])
+    }
+
+    async function deleteCoupon(id) {
+        if (!confirm('Delete this discount code?')) return
+
+        await supabase
+            .from('coupons')
+            .delete()
+            .eq('id', id)
+
+        const { data } = await supabase
+            .from('coupons')
+            .select('*')
+            .order('code')
+
+        setCoupons(data || [])
     }
 
     function toggleProductInCollection(productId) {
@@ -454,6 +530,14 @@ function Admin() {
                     </button>
 
                     <button
+                        onClick={() => setTab('discounts')}
+                        className={tabButtonClass('discounts')}
+                    >
+                        <Percent className="w-3.5 h-3.5" />
+                        Discounts
+                    </button>
+
+                    <button
                         onClick={() => setTab('analytics')}
                         className={tabButtonClass('analytics')}
                     >
@@ -595,6 +679,124 @@ function Admin() {
                             </div>
                         )
                     })()}
+
+                {/* ========== DISCOUNTS TAB ========== */}
+
+                {tab === 'discounts' && (
+                    <div className="max-w-lg flex flex-col gap-8">
+
+                        <div className="bg-gold/5 rounded-2xl p-6">
+
+                            <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">
+                                New Discount Code
+                            </h2>
+
+                            <div className="flex gap-3 mb-4">
+
+                                <input
+                                    type="text"
+                                    placeholder="CODE (e.g. WELCOME10)"
+                                    value={couponForm.code}
+                                    onChange={(e) =>
+                                        setCouponForm({
+                                            ...couponForm,
+                                            code: e.target.value,
+                                        })
+                                    }
+                                    className="flex-1 bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
+                                />
+
+                                <input
+                                    type="number"
+                                    placeholder="% off"
+                                    value={couponForm.percent_off}
+                                    onChange={(e) =>
+                                        setCouponForm({
+                                            ...couponForm,
+                                            percent_off: e.target.value,
+                                        })
+                                    }
+                                    className="w-24 bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
+                                />
+
+                            </div>
+
+                            <button
+                                onClick={addCoupon}
+                                className="bg-gold text-espresso font-sans font-medium px-6 py-3 rounded-full hover:bg-gold-light transition-colors"
+                            >
+                                Create Code
+                            </button>
+
+                        </div>
+
+                        <div>
+
+                            <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">
+                                All Codes
+                            </h2>
+
+                            <div className="flex flex-col gap-2">
+
+                                {coupons.map((c) => (
+                                    <div
+                                        key={c.id}
+                                        className="flex items-center gap-3 border border-gold/20 rounded-xl p-4"
+                                    >
+
+                                        <span className="flex-1 font-sans text-sm text-espresso dark:text-cream">
+                                            {c.code}{' '}
+                                            <span className="text-gold">
+                                                ({c.percent_off}% off)
+                                            </span>
+                                        </span>
+
+                                        <button
+                                            onClick={() =>
+                                                toggleCoupon(
+                                                    c.id,
+                                                    c.active
+                                                )
+                                            }
+                                            className={`text-xs font-sans px-3 py-1 rounded-full ${
+                                                c.active
+                                                    ? 'bg-green-500/10 text-green-500'
+                                                    : 'bg-gold/10 text-espresso/50 dark:text-cream/50'
+                                            }`}
+                                        >
+                                            {c.active
+                                                ? 'Active'
+                                                : 'Disabled'}
+                                        </button>
+
+                                        <button
+                                            onClick={() =>
+                                                deleteCoupon(c.id)
+                                            }
+                                            aria-label="Delete code"
+                                        >
+                                            <Trash2 className="w-4 h-4 text-espresso/40 dark:text-cream/40 hover:text-red-500" />
+                                        </button>
+
+                                    </div>
+                                ))}
+
+                                {coupons.length === 0 && (
+                                    <div className="border border-gold/10 rounded-xl p-6 text-center">
+                                        <Percent className="w-6 h-6 text-gold mx-auto mb-2" />
+
+                                        <p className="font-sans text-sm text-espresso/60 dark:text-cream/60">
+                                            No discount codes yet.
+                                        </p>
+                                    </div>
+                                )}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                )}
 
                 {/* ========== COLLECTIONS TAB ========== */}
 
