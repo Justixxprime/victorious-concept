@@ -12,6 +12,7 @@ import ScrollToTop from './components/ScrollToTop'
 import { useEffect } from 'react'
 import { useToast } from './context/ToastContext'
 import CartReminder from './components/CartReminder'
+import OfflineBanner from './components/OfflineBanner'
 import { FlyToCartProvider } from './context/FlyToCartContext'
 
 const Home = lazy(() => import('./pages/Home'))
@@ -109,16 +110,17 @@ function App() {
           <WishlistProvider>
             <ToastProvider>
               <FlyToCartProvider>
-              <div className="min-h-screen bg-cream dark:bg-espresso transition-colors">
-                <ScrollToTop />
-                <WelcomeNudge />
-                <Navbar />
-                <AnimatedRoutes />
-                <Footer />
-                <WhatsAppButton />
-                <CartReminder />
-              </div>
-            </FlyToCartProvider>
+                <div className="min-h-screen bg-cream dark:bg-espresso transition-colors">
+                  <ScrollToTop />
+                  <OfflineBanner />
+                  <WelcomeNudge />
+                  <Navbar />
+                  <AnimatedRoutes />
+                  <Footer />
+                  <WhatsAppButton />
+                  <CartReminder />
+                </div>
+              </FlyToCartProvider>
             </ToastProvider>
           </WishlistProvider>
         </CartProvider>
