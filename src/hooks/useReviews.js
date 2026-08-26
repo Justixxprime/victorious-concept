@@ -42,7 +42,7 @@ export function useReviews(productId) {
       order.items.some((item) => String(item.id) === String(productId))
     )
 
-    const { error } = await supabase.from('reviews').insert({
+    const { error } = await supabase.from('reviews').upsert({
       product_id: productId,
       user_id: userId,
       customer_name: customerName,
@@ -50,7 +50,7 @@ export function useReviews(productId) {
       comment,
       verified_purchase: purchased,
       image_url: imageUrl,
-    })
+    }, { onConflict: 'user_id,product_id' })
     if (!error) fetchReviews()
     return { error }
   }

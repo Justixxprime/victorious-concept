@@ -8,6 +8,7 @@ import { Camera } from 'lucide-react'
 function Reviews({ productId }) {
   const { user } = useAuth()
   const { reviews, loading, submitReview, average } = useReviews(productId)
+  const existingReview = reviews.find((r) => r.user_id === user?.id)
   const [rating, setRating] = useState(5)
   const [comment, setComment] = useState('')
   const [name, setName] = useState('')
@@ -97,7 +98,7 @@ function Reviews({ productId }) {
             disabled={submitting}
             className="bg-gold text-espresso font-sans font-medium px-6 py-3 rounded-full hover:bg-gold-light transition-colors self-start disabled:opacity-50"
           >
-            Submit Review
+            {existingReview ? 'Update Your Review' : 'Submit Review'}
           </button>
         </form>
       ) : (
