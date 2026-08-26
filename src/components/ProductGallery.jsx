@@ -44,9 +44,6 @@ function ProductGallery({ images, alt, videoUrl }) {
 
       {images.length > 1 && (
         <div className="flex gap-2 mt-3">
-
-      {images.length > 1 && (
-        <div className="flex gap-2 mt-3">
           {images.map((img, i) => (
             <button
               key={i}
