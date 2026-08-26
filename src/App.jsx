@@ -15,6 +15,7 @@ import { useToast } from './context/ToastContext'
 import CartReminder from './components/CartReminder'
 import { FlyToCartProvider } from './context/FlyToCartContext'
 
+
 const Home = lazy(() => import('./pages/Home'))
 const Shop = lazy(() => import('./pages/Shop'))
 const ProductPage = lazy(() => import('./pages/ProductPage'))
@@ -37,6 +38,8 @@ const NotFound = lazy(() => import('./pages/NotFound'))
 const TrackOrder = lazy(() => import('./pages/TrackOrder'))
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'))
 const TermsOfService = lazy(() => import('./pages/TermsOfService'))
+const Collections = lazy(() => import('./pages/Collections'))
+const CollectionDetail = lazy(() => import('./pages/CollectionDetail'))
 
 function AnimatedRoutes() {
   const location = useLocation()
@@ -77,6 +80,8 @@ function AnimatedRoutes() {
             <Route path="/track-order" element={<TrackOrder />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<TermsOfService />} />
+            <Route path="/collections" element={<Collections />} />
+<Route path="/collection/:slug" element={<CollectionDetail />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>

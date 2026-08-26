@@ -22,6 +22,7 @@ import { useFlyToCart } from '../context/FlyToCartContext'
 const links = [
   { label: 'New In', to: '/shop?new=true' },
   { label: 'Shop', to: '/shop' },
+  { label: 'Collections', to: '/collections' },
   { label: 'Lookbook', to: '/lookbook' },
   { label: 'Journal', to: '/journal' },
   { label: 'Source It', to: '/source' },
