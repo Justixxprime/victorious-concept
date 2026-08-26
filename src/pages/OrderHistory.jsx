@@ -127,7 +127,7 @@ function TrackOrder() {
 
             {/* WhatsApp Integration Button Target */}
             <a
-              href={`https://wa.me{encodeURIComponent(`Hi Victoria Obioma, I need help with my order ${result.order_number}`)}`}
+              href={`https://wa.me/?text=${encodeURIComponent(`Hi Victoria Obioma, I need help with my order ${result.order_number}`)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 font-sans text-xs text-gold hover:underline mt-4"
