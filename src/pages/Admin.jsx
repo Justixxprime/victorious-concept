@@ -24,6 +24,8 @@ import {
     DollarSign,
     Layers,
     Percent,
+    Users,
+    MessageCircle,
 } from 'lucide-react'
 
 function Admin() {
@@ -112,6 +114,36 @@ function Admin() {
             setHeroForm(heroValue)
         }
     }, [heroValue, heroForm])
+
+    /*
+     * CUSTOMER AGGREGATION
+     *
+     * Customers are derived directly from real orders.
+     * No additional database table is required.
+     */
+    const customerMap = {}
+
+    orders.forEach((o) => {
+        const key = o.customer_phone
+
+        if (!key) return
+
+        if (!customerMap[key]) {
+            customerMap[key] = {
+                name: o.customer_name,
+                phone: o.customer_phone,
+                orderCount: 0,
+                totalSpent: 0,
+            }
+        }
+
+        customerMap[key].orderCount += 1
+        customerMap[key].totalSpent += Number(o.total) || 0
+    })
+
+    const customersList = Object.values(customerMap).sort(
+        (a, b) => b.totalSpent - a.totalSpent
+    )
 
     if (!isAdmin) {
         return (
@@ -529,6 +561,16 @@ function Admin() {
                         Collections
                     </button>
 
+                    {/* NEW CUSTOMERS TAB */}
+
+                    <button
+                        onClick={() => setTab('customers')}
+                        className={tabButtonClass('customers')}
+                    >
+                        <Users className="w-3.5 h-3.5" />
+                        Customers
+                    </button>
+
                     <button
                         onClick={() => setTab('discounts')}
                         className={tabButtonClass('discounts')}
@@ -552,7 +594,7 @@ function Admin() {
                 {tab === 'analytics' &&
                     (() => {
                         const totalRevenue = orders.reduce(
-                            (sum, o) => sum + o.total,
+                            (sum, o) => sum + (Number(o.total) || 0),
                             0
                         )
 
@@ -680,6 +722,93 @@ function Admin() {
                         )
                     })()}
 
+                {/* ========== CUSTOMERS TAB ========== */}
+
+                {tab === 'customers' && (
+                    <div className="max-w-2xl">
+
+                        <div className="flex items-center justify-between mb-5">
+                            <div>
+                                <h2 className="font-sans text-sm uppercase tracking-widest text-gold">
+                                    Customers
+                                </h2>
+
+                                <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 mt-1">
+                                    {customersList.length} unique customer
+                                    {customersList.length !== 1 ? 's' : ''} from
+                                    real orders
+                                </p>
+                            </div>
+
+                            <div className="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center">
+                                <Users className="w-4 h-4 text-gold" />
+                            </div>
+                        </div>
+
+                        {customersList.length === 0 ? (
+                            <div className="border border-gold/10 rounded-2xl p-8 text-center">
+
+                                <Users className="w-8 h-8 text-gold mx-auto mb-3" />
+
+                                <p className="font-sans text-sm text-espresso/60 dark:text-cream/60">
+                                    No customers yet.
+                                </p>
+
+                                <p className="font-sans text-xs text-espresso/40 dark:text-cream/40 mt-1">
+                                    Real customer data will appear here once
+                                    orders start coming in.
+                                </p>
+
+                            </div>
+                        ) : (
+                            <div className="flex flex-col gap-2">
+
+                                {customersList.map((c) => (
+                                    <div
+                                        key={c.phone}
+                                        className="flex items-center gap-4 border border-gold/20 rounded-xl p-4"
+                                    >
+
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-sans text-sm text-espresso dark:text-cream truncate">
+                                                {c.name || 'Customer'}
+                                            </p>
+
+                                            <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 truncate">
+                                                {c.phone}
+                                            </p>
+                                        </div>
+
+                                        <div className="text-right flex-shrink-0">
+                                            <p className="font-sans text-xs text-espresso/50 dark:text-cream/50">
+                                                {c.orderCount} order
+                                                {c.orderCount > 1 ? 's' : ''}
+                                            </p>
+
+                                            <p className="font-display italic font-semibold text-espresso dark:text-cream">
+                                                {formatPrice(c.totalSpent)}
+                                            </p>
+                                        </div>
+
+                                        <a
+                                            href={`https://wa.me/${c.phone.replace(/\D/g, '')}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            aria-label="Message on WhatsApp"
+                                            className="w-9 h-9 rounded-full bg-gold/10 flex items-center justify-center hover:bg-gold/20 transition-colors flex-shrink-0"
+                                        >
+                                            <MessageCircle className="w-4 h-4 text-gold" />
+                                        </a>
+
+                                    </div>
+                                ))}
+
+                            </div>
+                        )}
+
+                    </div>
+                )}
+
                 {/* ========== DISCOUNTS TAB ========== */}
 
                 {tab === 'discounts' && (
@@ -802,8 +931,6 @@ function Admin() {
 
                 {tab === 'collections' && (
                     <div className="max-w-2xl flex flex-col gap-8">
-
-                        {/* COLLECTION FORM */}
 
                         <div className="bg-gold/5 rounded-2xl p-6">
 
@@ -947,8 +1074,6 @@ function Admin() {
                             </div>
 
                         </div>
-
-                        {/* EXISTING COLLECTIONS */}
 
                         <div>
 
