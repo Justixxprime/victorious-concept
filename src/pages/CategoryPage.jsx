@@ -22,6 +22,8 @@ function CategoryPage() {
   const { categories } = useCategories()
   const category = categories.find((c) => c.id === categoryId)
   const categoryProducts = products.filter((p) => p.category === categoryId)
+  const newInCategory = categoryProducts.filter((p) => p.isNew)
+  const featuredInCategory = categoryProducts.filter((p) => p.isFeatured)
   const relatedCategories = categories.filter((c) => c.id !== categoryId)
 
   return (
@@ -54,6 +56,36 @@ function CategoryPage() {
         <p className="font-sans text-sm text-espresso/50 dark:text-cream/50 mb-10">
           {categoryProducts.length} {categoryProducts.length === 1 ? 'item' : 'items'}
         </p>
+
+        {newInCategory.length > 0 && (
+          <div className="mb-16">
+            <h2 className="font-sans text-xs uppercase tracking-widest text-gold mb-6">
+              New In {category?.name}
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {newInCategory.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {featuredInCategory.length > 0 && (
+          <div className="mb-16">
+            <h2 className="font-sans text-xs uppercase tracking-widest text-gold mb-6">
+              Best of {category?.name}
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {featuredInCategory.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        <h2 className="font-sans text-xs uppercase tracking-widest text-gold mb-6">
+          All {category?.name}
+        </h2>
 
         {categoryProducts.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-4 py-20 text-center">
