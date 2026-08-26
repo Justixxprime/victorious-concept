@@ -8,7 +8,7 @@ import { supabase } from '../lib/supabaseClient'
 import { formatPrice } from '../utils/formatPrice'
 import { Trash2, Pencil, Plus, Package, Upload, Tag as TagIcon, Trash2 as TrashIcon, Plus as PlusIcon } from 'lucide-react'
 import { TrendingUp, ShoppingBag as BagIcon, AlertTriangle, DollarSign } from 'lucide-react'
-import { Package, ClipboardList, Tags, LayoutDashboard, BarChart3 } from 'lucide-react'
+import { ClipboardList, Tags, LayoutDashboard, BarChart3 } from 'lucide-react'
 
 function Admin() {
     const isAdmin = useIsAdmin()
