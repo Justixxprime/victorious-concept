@@ -1,0 +1,16 @@
+{
+  "name": "Victorious Concept",
+  "short_name": "Victorious",
+  "description": "Sourced with intention. Worn with confidence.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fbf3e7",
+  "theme_color": "#3a2318",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "1024x1024",
+      "type": "image/png"
+    }
+  ]
+}
