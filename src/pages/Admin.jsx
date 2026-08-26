@@ -3,6 +3,7 @@ import SEO from '../components/SEO'
 import { useIsAdmin } from '../hooks/useIsAdmin'
 import { useProducts } from '../hooks/useProducts'
 import { useCategories } from '../hooks/useCategories'
+import { useCollections } from '../hooks/useCollections'
 import { useSiteSettings } from '../hooks/useSiteSettings'
 import { supabase } from '../lib/supabaseClient'
 import { formatPrice } from '../utils/formatPrice'
@@ -21,13 +22,19 @@ import {
     ShoppingBag as BagIcon,
     AlertTriangle,
     DollarSign,
+    Layers,
 } from 'lucide-react'
 
 function Admin() {
     const isAdmin = useIsAdmin()
     const { products, loading, error } = useProducts({ includeHidden: true })
     const { categories } = useCategories()
-    const { value: heroValue, updateSetting: updateHero } = useSiteSettings('hero')
+    const {
+        collections,
+        refetch: refetchCollections,
+    } = useCollections()
+    const { value: heroValue, updateSetting: updateHero } =
+        useSiteSettings('hero')
 
     const [heroForm, setHeroForm] = useState(null)
     const [refreshKey, setRefreshKey] = useState(0)
@@ -35,6 +42,16 @@ function Admin() {
     const [tab, setTab] = useState('products')
     const [orders, setOrders] = useState([])
     const [ordersLoading, setOrdersLoading] = useState(true)
+
+    const [collectionForm, setCollectionForm] = useState({
+        name: '',
+        slug: '',
+        description: '',
+        image: '',
+        product_ids: [],
+    })
+
+    const [editingCollection, setEditingCollection] = useState(null)
 
     const [form, setForm] = useState({
         name: '',
@@ -251,6 +268,109 @@ function Admin() {
         window.location.reload()
     }
 
+    function toggleProductInCollection(productId) {
+        setCollectionForm((prev) => {
+            const id = String(productId)
+
+            const existingIds = (prev.product_ids || []).map((p) =>
+                String(p)
+            )
+
+            const exists = existingIds.includes(id)
+
+            return {
+                ...prev,
+                product_ids: exists
+                    ? existingIds.filter((p) => p !== id)
+                    : [...existingIds, id],
+            }
+        })
+    }
+
+    async function saveCollection() {
+        if (!collectionForm.name.trim()) return
+
+        const slug =
+            collectionForm.slug.trim() ||
+            collectionForm.name
+                .trim()
+                .toLowerCase()
+                .replace(/\s+/g, '-')
+
+        const payload = {
+            ...collectionForm,
+            name: collectionForm.name.trim(),
+            slug,
+            product_ids: (collectionForm.product_ids || []).map((id) =>
+                String(id)
+            ),
+        }
+
+        if (editingCollection) {
+            await supabase
+                .from('collections')
+                .update(payload)
+                .eq('id', editingCollection)
+        } else {
+            await supabase
+                .from('collections')
+                .insert(payload)
+        }
+
+        setCollectionForm({
+            name: '',
+            slug: '',
+            description: '',
+            image: '',
+            product_ids: [],
+        })
+
+        setEditingCollection(null)
+
+        refetchCollections()
+    }
+
+    function startEditCollection(col) {
+        setEditingCollection(col.id)
+
+        setCollectionForm({
+            name: col.name || '',
+            slug: col.slug || '',
+            description: col.description || '',
+            image: col.image || '',
+            product_ids: (col.product_ids || []).map((id) =>
+                String(id)
+            ),
+        })
+    }
+
+    function resetCollectionForm() {
+        setEditingCollection(null)
+
+        setCollectionForm({
+            name: '',
+            slug: '',
+            description: '',
+            image: '',
+            product_ids: [],
+        })
+    }
+
+    async function deleteCollection(id) {
+        if (!confirm('Delete this collection?')) return
+
+        await supabase
+            .from('collections')
+            .delete()
+            .eq('id', id)
+
+        refetchCollections()
+
+        if (editingCollection === id) {
+            resetCollectionForm()
+        }
+    }
+
     const tabButtonClass = (tabName) =>
         `group relative flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-sans uppercase tracking-wide border transition-all duration-300 whitespace-nowrap ${
             tab === tabName
@@ -268,6 +388,7 @@ function Admin() {
             <div className="max-w-5xl mx-auto">
 
                 {/* ========== BRANDED ADMIN HEADER ========== */}
+
                 <div className="flex items-center justify-between mb-8">
                     <div>
                         <p className="font-sans text-xs uppercase tracking-widest text-gold mb-2">
@@ -289,7 +410,9 @@ function Admin() {
                 </div>
 
                 {/* ========== TABS ========== */}
+
                 <div className="flex gap-2 mb-10 overflow-x-auto pb-2">
+
                     <button
                         onClick={() => setTab('products')}
                         className={tabButtonClass('products')}
@@ -323,15 +446,25 @@ function Admin() {
                     </button>
 
                     <button
+                        onClick={() => setTab('collections')}
+                        className={tabButtonClass('collections')}
+                    >
+                        <Layers className="w-3.5 h-3.5" />
+                        Collections
+                    </button>
+
+                    <button
                         onClick={() => setTab('analytics')}
                         className={tabButtonClass('analytics')}
                     >
                         <BarChart3 className="w-3.5 h-3.5" />
                         Analytics
                     </button>
+
                 </div>
 
                 {/* ========== ANALYTICS TAB ========== */}
+
                 {tab === 'analytics' &&
                     (() => {
                         const totalRevenue = orders.reduce(
@@ -351,13 +484,16 @@ function Admin() {
 
                         const avgOrderValue =
                             totalOrders > 0
-                                ? Math.round(totalRevenue / totalOrders)
+                                ? Math.round(
+                                    totalRevenue / totalOrders
+                                )
                                 : 0
 
                         return (
                             <div className="flex flex-col gap-8">
 
                                 {/* STAT CARDS */}
+
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
 
                                     <div className="relative overflow-hidden bg-gradient-to-br from-gold/10 to-gold/5 rounded-2xl p-5 border border-gold/10">
@@ -400,61 +536,311 @@ function Admin() {
                                         <AlertTriangle className="w-5 h-5 text-gold mb-3" />
 
                                         <p className="font-display italic font-semibold text-2xl text-espresso dark:text-cream">
-                                            {lowStock.length + outOfStock.length}
+                                            {lowStock.length +
+                                                outOfStock.length}
                                         </p>
 
                                         <p className="font-sans text-xs text-espresso/50 dark:text-cream/50">
                                             Stock Alerts
                                         </p>
                                     </div>
+
                                 </div>
 
                                 {/* NEEDS ATTENTION */}
+
                                 {(lowStock.length > 0 ||
                                     outOfStock.length > 0) && (
-                                    <div>
-                                        <h3 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">
-                                            Needs Attention
-                                        </h3>
+                                        <div>
+                                            <h3 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">
+                                                Needs Attention
+                                            </h3>
 
-                                        <div className="flex flex-col gap-2">
-                                            {outOfStock.map((p) => (
-                                                <div
-                                                    key={p.id}
-                                                    className="flex justify-between items-center bg-red-500/5 rounded-xl px-4 py-3"
-                                                >
-                                                    <span className="font-sans text-sm text-espresso dark:text-cream">
-                                                        {p.name}
-                                                    </span>
+                                            <div className="flex flex-col gap-2">
 
-                                                    <span className="font-sans text-xs text-red-500">
-                                                        Out of stock
-                                                    </span>
-                                                </div>
-                                            ))}
+                                                {outOfStock.map((p) => (
+                                                    <div
+                                                        key={p.id}
+                                                        className="flex justify-between items-center bg-red-500/5 rounded-xl px-4 py-3"
+                                                    >
+                                                        <span className="font-sans text-sm text-espresso dark:text-cream">
+                                                            {p.name}
+                                                        </span>
 
-                                            {lowStock.map((p) => (
-                                                <div
-                                                    key={p.id}
-                                                    className="flex justify-between items-center bg-gold/10 rounded-xl px-4 py-3"
-                                                >
-                                                    <span className="font-sans text-sm text-espresso dark:text-cream">
-                                                        {p.name}
-                                                    </span>
+                                                        <span className="font-sans text-xs text-red-500">
+                                                            Out of stock
+                                                        </span>
+                                                    </div>
+                                                ))}
 
-                                                    <span className="font-sans text-xs text-gold">
-                                                        Only {p.stock} left
-                                                    </span>
-                                                </div>
-                                            ))}
+                                                {lowStock.map((p) => (
+                                                    <div
+                                                        key={p.id}
+                                                        className="flex justify-between items-center bg-gold/10 rounded-xl px-4 py-3"
+                                                    >
+                                                        <span className="font-sans text-sm text-espresso dark:text-cream">
+                                                            {p.name}
+                                                        </span>
+
+                                                        <span className="font-sans text-xs text-gold">
+                                                            Only {p.stock} left
+                                                        </span>
+                                                    </div>
+                                                ))}
+
+                                            </div>
                                         </div>
-                                    </div>
-                                )}
+                                    )}
+
                             </div>
                         )
                     })()}
 
+                {/* ========== COLLECTIONS TAB ========== */}
+
+                {tab === 'collections' && (
+                    <div className="max-w-2xl flex flex-col gap-8">
+
+                        {/* COLLECTION FORM */}
+
+                        <div className="bg-gold/5 rounded-2xl p-6">
+
+                            <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">
+                                {editingCollection
+                                    ? 'Edit Collection'
+                                    : 'New Collection'}
+                            </h2>
+
+                            <div className="flex flex-col gap-3 mb-4">
+
+                                <input
+                                    type="text"
+                                    placeholder="Collection name (e.g. Gift Ideas)"
+                                    value={collectionForm.name}
+                                    onChange={(e) =>
+                                        setCollectionForm({
+                                            ...collectionForm,
+                                            name: e.target.value,
+                                        })
+                                    }
+                                    className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
+                                />
+
+                                <input
+                                    type="text"
+                                    placeholder="Slug (optional, e.g. gift-ideas)"
+                                    value={collectionForm.slug}
+                                    onChange={(e) =>
+                                        setCollectionForm({
+                                            ...collectionForm,
+                                            slug: e.target.value,
+                                        })
+                                    }
+                                    className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
+                                />
+
+                                <textarea
+                                    placeholder="Short description"
+                                    rows={2}
+                                    value={collectionForm.description}
+                                    onChange={(e) =>
+                                        setCollectionForm({
+                                            ...collectionForm,
+                                            description: e.target.value,
+                                        })
+                                    }
+                                    className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold resize-none"
+                                />
+
+                                <input
+                                    type="text"
+                                    placeholder="Cover image URL (optional)"
+                                    value={collectionForm.image}
+                                    onChange={(e) =>
+                                        setCollectionForm({
+                                            ...collectionForm,
+                                            image: e.target.value,
+                                        })
+                                    }
+                                    className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
+                                />
+
+                            </div>
+
+                            <p className="font-sans text-xs uppercase tracking-widest text-gold mb-3">
+                                Select Products
+                            </p>
+
+                            <div className="flex flex-col gap-2 max-h-64 overflow-y-auto mb-4">
+
+                                {products.length === 0 ? (
+                                    <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 py-4">
+                                        No products available yet.
+                                    </p>
+                                ) : (
+                                    products.map((p) => {
+
+                                        const selected =
+                                            (
+                                                collectionForm.product_ids ||
+                                                []
+                                            )
+                                                .map((id) => String(id))
+                                                .includes(
+                                                    String(p.id)
+                                                )
+
+                                        return (
+                                            <label
+                                                key={p.id}
+                                                className="flex items-center gap-3 border border-gold/10 rounded-lg p-2 cursor-pointer hover:border-gold/30 transition-colors"
+                                            >
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selected}
+                                                    onChange={() =>
+                                                        toggleProductInCollection(
+                                                            p.id
+                                                        )
+                                                    }
+                                                />
+
+                                                <img
+                                                    src={p.image}
+                                                    alt={p.name}
+                                                    className="w-8 h-8 rounded object-cover flex-shrink-0"
+                                                />
+
+                                                <span className="font-sans text-xs text-espresso dark:text-cream truncate">
+                                                    {p.name}
+                                                </span>
+                                            </label>
+                                        )
+                                    })
+                                )}
+
+                            </div>
+
+                            <div className="flex items-center gap-3">
+
+                                <button
+                                    onClick={saveCollection}
+                                    disabled={!collectionForm.name.trim()}
+                                    className="bg-gold text-espresso font-sans font-medium px-6 py-3 rounded-full hover:bg-gold-light transition-colors disabled:opacity-40"
+                                >
+                                    {editingCollection
+                                        ? 'Save Changes'
+                                        : 'Create Collection'}
+                                </button>
+
+                                {editingCollection && (
+                                    <button
+                                        onClick={resetCollectionForm}
+                                        className="font-sans text-sm text-espresso/60 dark:text-cream/60 hover:text-gold"
+                                    >
+                                        Cancel
+                                    </button>
+                                )}
+
+                            </div>
+
+                        </div>
+
+                        {/* EXISTING COLLECTIONS */}
+
+                        <div>
+
+                            <div className="flex items-center justify-between mb-4">
+
+                                <h2 className="font-sans text-sm uppercase tracking-widest text-gold">
+                                    Existing Collections
+                                </h2>
+
+                                <span className="font-sans text-xs text-espresso/40 dark:text-cream/40">
+                                    {collections.length} total
+                                </span>
+
+                            </div>
+
+                            {collections.length === 0 ? (
+                                <div className="border border-gold/10 rounded-2xl p-8 text-center">
+
+                                    <Layers className="w-8 h-8 text-gold mx-auto mb-3" />
+
+                                    <p className="font-sans text-sm text-espresso/60 dark:text-cream/60">
+                                        No collections created yet.
+                                    </p>
+
+                                    <p className="font-sans text-xs text-espresso/40 dark:text-cream/40 mt-1">
+                                        Create your first curated product collection above.
+                                    </p>
+
+                                </div>
+                            ) : (
+                                <div className="flex flex-col gap-2">
+
+                                    {collections.map((col) => (
+                                        <div
+                                            key={col.id}
+                                            className="flex items-center gap-3 border border-gold/20 rounded-xl p-4"
+                                        >
+
+                                            {col.image ? (
+                                                <img
+                                                    src={col.image}
+                                                    alt={col.name}
+                                                    className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
+                                                />
+                                            ) : (
+                                                <div className="w-10 h-10 rounded-lg bg-gold/10 flex items-center justify-center flex-shrink-0">
+                                                    <Layers className="w-4 h-4 text-gold" />
+                                                </div>
+                                            )}
+
+                                            <span className="flex-1 font-sans text-sm text-espresso dark:text-cream min-w-0 truncate">
+
+                                                {col.name}
+
+                                                <span className="text-espresso/40 dark:text-cream/40 ml-1">
+                                                    (
+                                                    {col.product_ids?.length ||
+                                                        0}{' '}
+                                                    items)
+                                                </span>
+
+                                            </span>
+
+                                            <button
+                                                onClick={() =>
+                                                    startEditCollection(col)
+                                                }
+                                                aria-label="Edit collection"
+                                            >
+                                                <Pencil className="w-4 h-4 text-espresso/50 dark:text-cream/50 hover:text-gold" />
+                                            </button>
+
+                                            <button
+                                                onClick={() =>
+                                                    deleteCollection(col.id)
+                                                }
+                                                aria-label="Delete collection"
+                                            >
+                                                <Trash2 className="w-4 h-4 text-espresso/50 dark:text-cream/50 hover:text-red-500" />
+                                            </button>
+
+                                        </div>
+                                    ))}
+
+                                </div>
+                            )}
+
+                        </div>
+
+                    </div>
+                )}
+
                 {/* ========== HOMEPAGE / CONTENT TAB ========== */}
+
                 {tab === 'content' && heroForm && (
                     <div className="max-w-lg flex flex-col gap-4">
 
@@ -520,14 +906,17 @@ function Admin() {
                         >
                             Save Homepage Hero
                         </button>
+
                     </div>
                 )}
 
                 {/* ========== CATEGORIES TAB ========== */}
+
                 {tab === 'categories' && (
                     <div className="max-w-lg">
 
                         <div className="flex gap-2 mb-8">
+
                             <input
                                 type="text"
                                 placeholder="New category name (e.g. Sale, New In)"
@@ -545,14 +934,17 @@ function Admin() {
                                 <Plus className="w-4 h-4" />
                                 Add
                             </button>
+
                         </div>
 
                         <div className="flex flex-col gap-3">
+
                             {categories.map((cat) => (
                                 <div
                                     key={cat.id}
                                     className="border border-gold/20 rounded-xl p-4"
                                 >
+
                                     <div className="flex items-center gap-3 mb-2">
 
                                         <TagIcon className="w-4 h-4 text-gold flex-shrink-0" />
@@ -569,29 +961,37 @@ function Admin() {
                                         >
                                             <Trash2 className="w-4 h-4 text-espresso/40 dark:text-cream/40 hover:text-red-500" />
                                         </button>
+
                                     </div>
 
                                     <textarea
                                         placeholder="Short introduction for this category page (optional)"
                                         rows={2}
-                                        defaultValue={cat.description || ''}
+                                        defaultValue={
+                                            cat.description || ''
+                                        }
                                         onBlur={async (e) => {
                                             await supabase
                                                 .from('categories')
                                                 .update({
-                                                    description: e.target.value,
+                                                    description:
+                                                        e.target.value,
                                                 })
                                                 .eq('id', cat.id)
                                         }}
                                         className="w-full bg-transparent border border-gold/20 rounded-lg px-3 py-2 font-sans text-xs text-espresso dark:text-cream outline-none focus:border-gold resize-none"
                                     />
+
                                 </div>
                             ))}
+
                         </div>
+
                     </div>
                 )}
 
                 {/* ========== ORDERS TAB ========== */}
+
                 {tab === 'orders' && (
                     <div className="flex flex-col gap-4">
 
@@ -601,11 +1001,13 @@ function Admin() {
                             </p>
                         ) : orders.length === 0 ? (
                             <div className="flex flex-col items-center gap-3 py-16 text-center">
+
                                 <Package className="w-8 h-8 text-gold" />
 
                                 <p className="font-sans text-sm text-espresso/60 dark:text-cream/60">
                                     No orders yet.
                                 </p>
+
                             </div>
                         ) : (
                             orders.map((order) => (
@@ -613,6 +1015,7 @@ function Admin() {
                                     key={order.id}
                                     className="border border-gold/20 rounded-2xl p-5"
                                 >
+
                                     <div className="flex flex-wrap justify-between gap-2 mb-3">
 
                                         <span className="font-sans text-sm font-medium text-espresso dark:text-cream">
@@ -622,30 +1025,41 @@ function Admin() {
                                         <span className="font-sans text-xs text-espresso/50 dark:text-cream/50">
                                             {new Date(
                                                 order.created_at
-                                            ).toLocaleDateString('en-NG', {
-                                                day: 'numeric',
-                                                month: 'long',
-                                                year: 'numeric',
-                                            })}
+                                            ).toLocaleDateString(
+                                                'en-NG',
+                                                {
+                                                    day: 'numeric',
+                                                    month: 'long',
+                                                    year: 'numeric',
+                                                }
+                                            )}
                                         </span>
+
                                     </div>
 
                                     <select
-                                        value={order.status || 'pending'}
+                                        value={
+                                            order.status || 'pending'
+                                        }
                                         onChange={async (e) => {
                                             await supabase
                                                 .from('orders')
                                                 .update({
                                                     status: e.target.value,
                                                 })
-                                                .eq('id', order.id)
+                                                .eq(
+                                                    'id',
+                                                    order.id
+                                                )
 
                                             setOrders((prev) =>
                                                 prev.map((o) =>
                                                     o.id === order.id
                                                         ? {
                                                             ...o,
-                                                            status: e.target.value,
+                                                            status: e
+                                                                .target
+                                                                .value,
                                                         }
                                                         : o
                                                 )
@@ -653,6 +1067,7 @@ function Admin() {
                                         }}
                                         className="bg-transparent border border-gold/30 rounded-full px-3 py-1 font-sans text-xs text-espresso dark:text-cream outline-none focus:border-gold mb-3"
                                     >
+
                                         <option value="pending">
                                             Pending
                                         </option>
@@ -668,6 +1083,7 @@ function Admin() {
                                         <option value="delivered">
                                             Delivered
                                         </option>
+
                                     </select>
 
                                     <p className="font-sans text-sm text-espresso/70 dark:text-cream/70 mb-1">
@@ -680,13 +1096,15 @@ function Admin() {
                                     </p>
 
                                     <div className="flex flex-col gap-1 mb-3 border-t border-gold/10 pt-3">
+
                                         {order.items?.map((item) => (
                                             <div
                                                 key={item.id}
                                                 className="flex justify-between font-sans text-xs text-espresso/60 dark:text-cream/60"
                                             >
+
                                                 <span>
-                                                    {item.name} x
+                                                    {item.name} x{' '}
                                                     {item.quantity}
                                                 </span>
 
@@ -696,26 +1114,34 @@ function Admin() {
                                                         item.quantity
                                                     )}
                                                 </span>
+
                                             </div>
                                         ))}
+
                                     </div>
 
                                     <div className="flex justify-between font-display italic font-semibold text-espresso dark:text-cream">
+
                                         <span>Total</span>
 
                                         <span>
                                             {formatPrice(order.total)}
                                         </span>
+
                                     </div>
+
                                 </div>
                             ))
                         )}
+
                     </div>
                 )}
 
                 {/* ========== PRODUCTS TAB ========== */}
+
                 {tab === 'products' && (
                     <>
+
                         <div className="bg-gold/5 rounded-2xl p-6 mb-12">
 
                             <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">
@@ -731,7 +1157,10 @@ function Admin() {
                                     placeholder="Product name"
                                     value={form.name}
                                     onChange={(e) =>
-                                        update('name', e.target.value)
+                                        update(
+                                            'name',
+                                            e.target.value
+                                        )
                                     }
                                     className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
                                 />
@@ -741,7 +1170,10 @@ function Admin() {
                                     placeholder="Price (Naira)"
                                     value={form.price}
                                     onChange={(e) =>
-                                        update('price', e.target.value)
+                                        update(
+                                            'price',
+                                            e.target.value
+                                        )
                                     }
                                     className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
                                 />
@@ -751,7 +1183,10 @@ function Admin() {
                                     placeholder="Stock quantity"
                                     value={form.stock}
                                     onChange={(e) =>
-                                        update('stock', e.target.value)
+                                        update(
+                                            'stock',
+                                            e.target.value
+                                        )
                                     }
                                     className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
                                 />
@@ -759,10 +1194,14 @@ function Admin() {
                                 <select
                                     value={form.status}
                                     onChange={(e) =>
-                                        update('status', e.target.value)
+                                        update(
+                                            'status',
+                                            e.target.value
+                                        )
                                     }
                                     className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
                                 >
+
                                     <option value="active">
                                         Active (visible, normal sale)
                                     </option>
@@ -774,15 +1213,20 @@ function Admin() {
                                     <option value="hidden">
                                         Hidden (not shown anywhere on the site)
                                     </option>
+
                                 </select>
 
                                 <select
                                     value={form.category}
                                     onChange={(e) =>
-                                        update('category', e.target.value)
+                                        update(
+                                            'category',
+                                            e.target.value
+                                        )
                                     }
                                     className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
                                 >
+
                                     {categories.map((c) => (
                                         <option
                                             key={c.id}
@@ -791,6 +1235,7 @@ function Admin() {
                                             {c.name}
                                         </option>
                                     ))}
+
                                 </select>
 
                                 <input
@@ -798,10 +1243,14 @@ function Admin() {
                                     placeholder="Main Image URL"
                                     value={form.image}
                                     onChange={(e) =>
-                                        update('image', e.target.value)
+                                        update(
+                                            'image',
+                                            e.target.value
+                                        )
                                     }
                                     className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
                                 />
+
                             </div>
 
                             <textarea
@@ -809,7 +1258,10 @@ function Admin() {
                                 rows={2}
                                 value={form.imagesText}
                                 onChange={(e) =>
-                                    update('imagesText', e.target.value)
+                                    update(
+                                        'imagesText',
+                                        e.target.value
+                                    )
                                 }
                                 className="w-full bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold resize-none mb-3"
                             />
@@ -829,11 +1281,13 @@ function Admin() {
                                     onChange={handleFileUpload}
                                     className="hidden"
                                 />
+
                             </label>
 
                             <div className="flex gap-6 mb-4">
 
                                 <label className="flex items-center gap-2 font-sans text-sm text-espresso dark:text-cream">
+
                                     <input
                                         type="checkbox"
                                         checked={form.is_new}
@@ -846,9 +1300,11 @@ function Admin() {
                                     />
 
                                     New Arrival
+
                                 </label>
 
                                 <label className="flex items-center gap-2 font-sans text-sm text-espresso dark:text-cream">
+
                                     <input
                                         type="checkbox"
                                         checked={form.is_featured}
@@ -861,7 +1317,9 @@ function Admin() {
                                     />
 
                                     Featured
+
                                 </label>
+
                             </div>
 
                             <div className="flex gap-3">
@@ -875,11 +1333,13 @@ function Admin() {
                                     }
                                     className="flex items-center gap-2 bg-gold text-espresso font-sans font-medium px-6 py-3 rounded-full hover:bg-gold-light transition-colors disabled:opacity-40"
                                 >
+
                                     <Plus className="w-4 h-4" />
 
                                     {editing
                                         ? 'Save Changes'
                                         : 'Add Product'}
+
                                 </button>
 
                                 {editing && (
@@ -890,7 +1350,9 @@ function Admin() {
                                         Cancel
                                     </button>
                                 )}
+
                             </div>
+
                         </div>
 
                         <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">
@@ -913,6 +1375,7 @@ function Admin() {
                                         key={product.id}
                                         className="flex items-center gap-4 border border-gold/20 rounded-xl p-4"
                                     >
+
                                         <img
                                             src={product.image}
                                             alt={product.name}
@@ -926,7 +1389,13 @@ function Admin() {
                                             </p>
 
                                             <p className="font-sans text-xs text-gold">
-                                                {formatPrice(product.price)} ·{' '}
+
+                                                {formatPrice(
+                                                    product.price
+                                                )}
+
+                                                {' · '}
+
                                                 {product.category}
 
                                                 {product.status &&
@@ -934,10 +1403,14 @@ function Admin() {
                                                     'active' && (
                                                         <span className="ml-2 uppercase tracking-wide text-[10px] opacity-70">
                                                             ·{' '}
-                                                            {product.status}
+                                                            {
+                                                                product.status
+                                                            }
                                                         </span>
                                                     )}
+
                                             </p>
+
                                         </div>
 
                                         <button
@@ -951,18 +1424,24 @@ function Admin() {
 
                                         <button
                                             onClick={() =>
-                                                handleDelete(product.id)
+                                                handleDelete(
+                                                    product.id
+                                                )
                                             }
                                             aria-label="Delete"
                                         >
                                             <Trash2 className="w-4 h-4 text-espresso/50 dark:text-cream/50 hover:text-red-500" />
                                         </button>
+
                                     </div>
                                 ))}
+
                             </div>
                         )}
+
                     </>
                 )}
+
             </div>
         </section>
     )
