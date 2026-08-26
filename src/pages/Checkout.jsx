@@ -65,6 +65,19 @@ function Checkout() {
 
     setOrder(newOrder)
     clearCart()
+
+    if (user?.email) {
+      fetch('/api/send-order-confirmation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: user.email,
+          orderNumber,
+          items,
+          total: totalPrice,
+        }),
+      }).catch(() => {})
+    }
   }
 
   function handlePaystackSuccess(reference) {
