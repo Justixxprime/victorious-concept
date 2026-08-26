@@ -1,17 +1,22 @@
+import { useState, useEffect, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import { Heart, ShoppingBag, Truck, RefreshCw, ShieldCheck, MessageCircle } from 'lucide-react'
+import { useProducts } from '../hooks/useProducts'
 import { formatPrice } from '../utils/formatPrice'
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
+import { useRecentlyViewed } from '../hooks/useRecentlyViewed'
 import { useFlyToCart } from '../context/FlyToCartContext'
 import SEO from '../components/SEO'
-import { useState, useEffect, useRef } from 'react'
-import { useProducts } from '../hooks/useProducts'
-import { useRecentlyViewed } from '../hooks/useRecentlyViewed'
-import ProductCard from '../components/ProductCard'
-import Reviews from '../components/Reviews'
 import ProductGallery from '../components/ProductGallery'
 import Breadcrumbs from '../components/Breadcrumbs'
-import { Heart, ShoppingBag, Truck, RefreshCw, ShieldCheck, MessageCircle } from 'lucide-react'
+import ProductCard from '../components/ProductCard'
+import Reviews from '../components/Reviews'
+
+const categoryIconLabel = {
+  bags: 'bags', shoes: 'shoes', slippers: 'slippers',
+  clothing: 'clothing', perfumes: 'perfumes', accessories: 'accessories',
+}
 
 function getDescription(product) {
   const descriptions = {
@@ -29,12 +34,13 @@ function ProductPage() {
   const { id } = useParams()
   const { products, loading: productsLoading } = useProducts()
   const product = products.find((p) => String(p.id) === id)
+
   const { addToCart } = useCart()
-  const { fly } = useFlyToCart()
-  const galleryRef = useRef(null)
   const { toggleWishlist, isWishlisted } = useWishlist()
   const { viewed, addViewed } = useRecentlyViewed()
+  const { fly } = useFlyToCart()
   const [selectedSize, setSelectedSize] = useState(null)
+  const galleryRef = useRef(null)
 
   useEffect(() => {
     if (product) addViewed(product)
@@ -62,6 +68,18 @@ function ProductPage() {
   }
 
   const saved = isWishlisted(product.id)
+  const isPreorder = product.status === 'preorder'
+  const outOfStock = product.stock <= 0 && !isPreorder
+
+  function handleAddToCart() {
+    if (galleryRef.current) {
+      fly(product.image, galleryRef.current.getBoundingClientRect())
+    }
+    addToCart({ ...product, size: selectedSize })
+  }
+
+  const related = products.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 4)
+  const recentlyViewed = (viewed || []).filter((p) => p.id !== product.id).slice(0, 4)
 
   return (
     <section className="bg-cream dark:bg-espresso transition-colors py-12 px-6 pb-24 md:pb-12 min-h-screen">
@@ -77,9 +95,7 @@ function ProductPage() {
             '@type': 'Offer',
             priceCurrency: 'NGN',
             price: product.price,
-            availability: product.stock > 0
-              ? 'https://schema.org/InStock'
-              : 'https://schema.org/OutOfStock',
+            availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
           },
         })}
       </script>
@@ -142,42 +158,23 @@ function ProductPage() {
 
           <div className="flex gap-3">
             <button
-              onClick={() => {
-                if (galleryRef.current) {
-                  fly(product.image, galleryRef.current.getBoundingClientRect())
-                }
-                addToCart({ ...product, size: selectedSize })
-              }}
-              disabled={
-                (product.stock <= 0 && product.status !== 'preorder') ||
-                (product.sizes && product.sizes.length > 0 && !selectedSize)
-              }
+              onClick={handleAddToCart}
+              disabled={(outOfStock) || (product.sizes && product.sizes.length > 0 && !selectedSize)}
               className="flex-1 bg-gold text-espresso font-sans font-medium px-8 py-4 rounded-full flex items-center justify-center gap-2 hover:bg-gold-light transition-colors disabled:opacity-40"
             >
-              <ShoppingBag className="w-4 h-4" />{' '}
-              {product.status === 'preorder'
-                ? 'Preorder'
-                : product.stock <= 0
-                ? 'Out of Stock'
-                : 'Add to Cart'}
+              <ShoppingBag className="w-4 h-4" /> {isPreorder ? 'Preorder' : outOfStock ? 'Out of Stock' : 'Add to Cart'}
             </button>
             <button
               onClick={() => toggleWishlist(product)}
               className="w-14 h-14 rounded-full border border-gold/30 flex items-center justify-center hover:border-gold transition-colors"
               aria-label="Add to wishlist"
             >
-              <Heart
-                className={`w-5 h-5 ${
-                  saved ? 'fill-gold text-gold' : 'text-espresso dark:text-cream'
-                }`}
-              />
+              <Heart className={`w-5 h-5 ${saved ? 'fill-gold text-gold' : 'text-espresso dark:text-cream'}`} />
             </button>
           </div>
 
-          <a
-            href={`https://wa.me/2348122470435?text=${encodeURIComponent(
-              `Hi, I have a question about the ${product.name} (${formatPrice(product.price)})`
-            )}`}
+          
+            href={`https://wa.me/2348122470435?text=${encodeURIComponent(`Hi, I have a question about the ${product.name} (${formatPrice(product.price)})`)}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 font-sans text-sm text-gold hover:underline"
@@ -208,11 +205,7 @@ function ProductPage() {
             <div>
               <p className="font-sans text-xs uppercase tracking-widest text-gold mb-2">Availability</p>
               <p className="font-sans text-sm text-espresso dark:text-cream">
-                {product.status === 'preorder'
-                  ? 'Available for preorder'
-                  : product.stock > 0
-                  ? 'In stock, ready to ship'
-                  : 'Currently unavailable'}
+                {isPreorder ? 'Available for preorder' : product.stock > 0 ? 'In stock, ready to ship' : 'Currently unavailable'}
               </p>
             </div>
           </div>
@@ -230,47 +223,33 @@ function ProductPage() {
         </div>
       </div>
 
-      {/* Related Products + Recently Viewed */}
-      {product &&
-        (() => {
-          const related = products
-            .filter((p) => p.category === product.category && p.id !== product.id)
-            .slice(0, 4)
-          const recentlyViewed = viewed.filter((p) => p.id !== product.id).slice(0, 4)
-          return (
-            <div className="max-w-7xl mx-auto px-6 pb-16 flex flex-col gap-16">
-              {related.length > 0 && (
-                <div>
-                  <h2 className="font-display italic font-semibold text-2xl text-espresso dark:text-cream mb-6">
-                    You might also like
-                  </h2>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    {related.map((p) => (
-                      <ProductCard key={p.id} product={p} />
-                    ))}
-                  </div>
-                </div>
-              )}
-              {recentlyViewed.length > 0 && (
-                <div>
-                  <h2 className="font-display italic font-semibold text-2xl text-espresso dark:text-cream mb-6">
-                    Recently Viewed
-                  </h2>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    {recentlyViewed.map((p) => (
-                      <ProductCard key={p.id} product={p} />
-                    ))}
-                  </div>
-                </div>
-              )}
+      {(related.length > 0 || recentlyViewed.length > 0) && (
+        <div className="max-w-7xl mx-auto px-0 pt-16 pb-8 flex flex-col gap-16">
+          {related.length > 0 && (
+            <div>
+              <h2 className="font-display italic font-semibold text-2xl text-espresso dark:text-cream mb-6">
+                You might also like
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                {related.map((p) => <ProductCard key={p.id} product={p} />)}
+              </div>
             </div>
-          )
-        })()}
+          )}
+          {recentlyViewed.length > 0 && (
+            <div>
+              <h2 className="font-display italic font-semibold text-2xl text-espresso dark:text-cream mb-6">
+                Recently Viewed
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                {recentlyViewed.map((p) => <ProductCard key={p.id} product={p} />)}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
-      {/* Reviews */}
-      {product && <Reviews productId={product.id} />}
+      <Reviews productId={product.id} />
 
-      {/* Mobile sticky bottom bar */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-cream dark:bg-espresso border-t border-gold/20 px-4 py-3 flex items-center justify-between gap-3 z-40">
         <div>
           <p className="font-sans text-xs text-espresso/50 dark:text-cream/50">{product.name}</p>
@@ -279,21 +258,11 @@ function ProductPage() {
           </p>
         </div>
         <button
-          onClick={() => {
-            if (galleryRef.current) {
-              fly(product.image, galleryRef.current.getBoundingClientRect())
-            }
-            addToCart(product)
-          }}
-          disabled={product.stock <= 0 && product.status !== 'preorder'}
+          onClick={handleAddToCart}
+          disabled={outOfStock}
           className="bg-gold text-espresso font-sans font-medium px-6 py-3 rounded-full flex items-center gap-2 hover:bg-gold-light transition-colors flex-shrink-0 disabled:opacity-40"
         >
-          <ShoppingBag className="w-4 h-4" />{' '}
-          {product.status === 'preorder'
-            ? 'Preorder'
-            : product.stock <= 0
-            ? 'Out of Stock'
-            : 'Add to Cart'}
+          <ShoppingBag className="w-4 h-4" /> {isPreorder ? 'Preorder' : outOfStock ? 'Out of Stock' : 'Add to Cart'}
         </button>
       </div>
     </section>
