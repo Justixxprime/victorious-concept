@@ -31,7 +31,7 @@ function CartReminder() {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 40 }}
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className="fixed bottom-6 left-4 sm:left-6 z-40 bg-espresso text-cream rounded-2xl p-4 pr-3 flex items-center gap-3 shadow-xl max-w-xs"
+        className="fixed bottom-24 md:bottom-6 left-4 sm:left-6 z-40 bg-espresso text-cream rounded-2xl p-4 pr-3 flex items-center gap-3 shadow-xl max-w-xs"
       >
         <ShoppingBag className="w-5 h-5 text-gold flex-shrink-0" />
         <div className="flex-1">

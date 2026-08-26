@@ -18,6 +18,11 @@
   }
 }
 
+* {
+  transition-property: background-color, border-color, color;
+  transition-duration: 200ms;
+}
+
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,

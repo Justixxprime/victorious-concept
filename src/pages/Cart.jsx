@@ -98,6 +98,7 @@ function Cart() {
                 <button
                   onClick={() => updateQuantity(item.id, item.quantity - 1)}
                   aria-label="Decrease quantity"
+                  className="w-6 h-6 flex items-center justify-center"
                 >
                   <Minus className="w-3 h-3 text-espresso dark:text-cream" />
                 </button>
@@ -107,6 +108,7 @@ function Cart() {
                 <button
                   onClick={() => updateQuantity(item.id, item.quantity + 1)}
                   aria-label="Increase quantity"
+                  className="w-6 h-6 flex items-center justify-center"
                 >
                   <Plus className="w-3 h-3 text-espresso dark:text-cream" />
                 </button>
