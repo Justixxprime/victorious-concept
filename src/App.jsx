@@ -9,10 +9,10 @@ import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import WhatsAppButton from './components/WhatsAppButton'
 import ScrollToTop from './components/ScrollToTop'
+import OfflineBanner from './components/OfflineBanner'
 import { useEffect } from 'react'
 import { useToast } from './context/ToastContext'
 import CartReminder from './components/CartReminder'
-import OfflineBanner from './components/OfflineBanner'
 import { FlyToCartProvider } from './context/FlyToCartContext'
 
 const Home = lazy(() => import('./pages/Home'))
@@ -112,8 +112,8 @@ function App() {
               <FlyToCartProvider>
                 <div className="min-h-screen bg-cream dark:bg-espresso transition-colors">
                   <ScrollToTop />
-                  <OfflineBanner />
                   <WelcomeNudge />
+                  <OfflineBanner />
                   <Navbar />
                   <AnimatedRoutes />
                   <Footer />
