@@ -9,10 +9,12 @@ import Newsletter from '../components/Newsletter'
 import ShopTheLook from '../components/ShopTheLook'
 import CustomerLove from '../components/CustomerLove'
 import { useProducts } from '../hooks/useProducts'
+import EditorialFeature from '../components/EditorialFeature'
 
 function Home() {
   const { products } = useProducts()
   const lookProducts = products.slice(0, 3)
+  const spotlightProduct = [...products].filter((p) => p.isFeatured).sort((a, b) => b.price - a.price)[0]
 
   return (
     <>
@@ -38,6 +40,7 @@ function Home() {
       <Hero />
       <NewArrivals />
       <CategoryGrid />
+      <EditorialFeature product={spotlightProduct} />
       <FounderTeaser />
       <FeaturedProducts />
       <CustomerLove />
