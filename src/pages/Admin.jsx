@@ -25,6 +25,7 @@ import {
     Layers,
     Percent,
     Users,
+    Quote,
     MessageCircle,
     Mail,
 } from 'lucide-react'
@@ -90,6 +91,22 @@ function Admin() {
 
     const [saving, setSaving] = useState(false)
     const [newCategoryName, setNewCategoryName] = useState('')
+
+    // ====== TESTIMONIALS STATE ======
+    const [testimonials, setTestimonials] = useState([])
+    const [testimonialForm, setTestimonialForm] = useState({ customer_name: '', quote: '', source: '' })
+
+    /*
+     * FETCH TESTIMONIALS
+     */
+
+    useEffect(() => {
+        async function fetchTestimonials() {
+            const { data } = await supabase.from('testimonials').select('*')
+            setTestimonials(data || [])
+        }
+        if (isAdmin) fetchTestimonials()
+    }, [isAdmin])
 
     /*
      * FETCH ORDERS
@@ -533,6 +550,25 @@ function Admin() {
     }
 
     /*
+     * TESTIMONIALS
+     */
+
+    async function addTestimonial() {
+        if (!testimonialForm.customer_name || !testimonialForm.quote) return
+        await supabase.from('testimonials').insert(testimonialForm)
+        setTestimonialForm({ customer_name: '', quote: '', source: '' })
+        const { data } = await supabase.from('testimonials').select('*')
+        setTestimonials(data || [])
+    }
+
+    async function deleteTestimonial(id) {
+        if (!confirm('Delete this testimonial?')) return
+        await supabase.from('testimonials').delete().eq('id', id)
+        const { data } = await supabase.from('testimonials').select('*')
+        setTestimonials(data || [])
+    }
+
+    /*
      * COLLECTIONS
      */
 
@@ -773,8 +809,16 @@ function Admin() {
                         Collections
                     </button>
 
-                    {/* MESSAGES */}
+                    {/* TESTIMONIALS TAB */}
+                    <button
+                        onClick={() => setTab('testimonials')}
+                        className={tabButtonClass('testimonials')}
+                    >
+                        <Quote className="w-3.5 h-3.5" />
+                        Testimonials
+                    </button>
 
+                    {/* MESSAGES TAB */}
                     <button
                         onClick={() =>
                             setTab('messages')
@@ -1001,6 +1045,94 @@ function Admin() {
                         )
                     })()}
 
+                {/* TESTIMONIALS TAB CONTENT */}
+
+                {tab === 'testimonials' && (
+                    <div className="max-w-lg flex flex-col gap-8">
+                        <div className="bg-gold/5 rounded-2xl p-6">
+                            <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">
+                                Add a Real Testimonial
+                            </h2>
+                            <div className="flex flex-col gap-3 mb-4">
+                                <input
+                                    type="text"
+                                    placeholder="Customer name"
+                                    value={testimonialForm.customer_name}
+                                    onChange={(e) => setTestimonialForm({ ...testimonialForm, customer_name: e.target.value })}
+                                    className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
+                                />
+                                <textarea
+                                    placeholder="What they said (their real words)"
+                                    rows={3}
+                                    value={testimonialForm.quote}
+                                    onChange={(e) => setTestimonialForm({ ...testimonialForm, quote: e.target.value })}
+                                    className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold resize-none"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Where it's from (e.g. Instagram, WhatsApp)"
+                                    value={testimonialForm.source}
+                                    onChange={(e) => setTestimonialForm({ ...testimonialForm, source: e.target.value })}
+                                    className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
+                                />
+                            </div>
+                            <button
+                                onClick={addTestimonial}
+                                className="bg-gold text-espresso font-sans font-medium px-6 py-3 rounded-full hover:bg-gold-light transition-colors"
+                            >
+                                Add Testimonial
+                            </button>
+                        </div>
+
+                        <div>
+                            <div className="flex items-center justify-between mb-4">
+                                <h2 className="font-sans text-sm uppercase tracking-widest text-gold">
+                                    All Testimonials
+                                </h2>
+                                <span className="font-sans text-xs text-espresso/40 dark:text-cream/40">
+                                    {testimonials.length} total
+                                </span>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                {testimonials.length === 0 ? (
+                                    <div className="border border-gold/10 rounded-2xl p-8 text-center">
+                                        <Quote className="w-8 h-8 text-gold mx-auto mb-3" />
+                                        <p className="font-sans text-sm text-espresso/60 dark:text-cream/60">
+                                            No testimonials yet.
+                                        </p>
+                                        <p className="font-sans text-xs text-espresso/40 dark:text-cream/40 mt-1">
+                                            Add your first customer testimonial above.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    testimonials.map((t) => (
+                                        <div key={t.id} className="border border-gold/20 rounded-xl p-4">
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <p className="font-sans text-sm text-espresso dark:text-cream">
+                                                        {t.customer_name}
+                                                        {t.source && (
+                                                            <span className="text-espresso/40 dark:text-cream/40 ml-2 text-xs">
+                                                                · {t.source}
+                                                            </span>
+                                                        )}
+                                                    </p>
+                                                    <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 mt-1">
+                                                        "{t.quote}"
+                                                    </p>
+                                                </div>
+                                                <button onClick={() => deleteTestimonial(t.id)} aria-label="Delete">
+                                                    <Trash2 className="w-4 h-4 text-espresso/40 dark:text-cream/40 hover:text-red-500" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* MESSAGES */}
 
                 {tab === 'messages' && (
@@ -1224,1280 +1356,1280 @@ function Admin() {
                                             </div>
 
                                             <a
-                                                href={`https://wa.me/${customer.phone.replace(
-                                                    /\D/g,
-                                                    ''
-                                                )}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                aria-label="Message on WhatsApp"
-                                                className="w-9 h-9 rounded-full bg-gold/10 flex items-center justify-center hover:bg-gold/20 transition-colors flex-shrink-0"
-                                            >
-                                                <MessageCircle className="w-4 h-4 text-gold" />
-                                            </a>
-
-                                        </div>
-                                    )
-                                )}
-
-                            </div>
-                        )}
-
-                    </div>
-                )}
-
-                {/* DISCOUNTS */}
-
-                {tab === 'discounts' && (
-                    <div className="max-w-lg flex flex-col gap-8">
-
-                        <div className="bg-gold/5 rounded-2xl p-6">
-
-                            <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">
-                                New Discount Code
-                            </h2>
-
-                            <div className="flex gap-3 mb-4">
-
-                                <input
-                                    type="text"
-                                    placeholder="CODE (e.g. WELCOME10)"
-                                    value={
-                                        couponForm.code
-                                    }
-                                    onChange={(e) =>
-                                        setCouponForm(
-                                            {
-                                                ...couponForm,
-                                                code: e
-                                                    .target
-                                                    .value,
-                                            }
-                                        )
-                                    }
-                                    className="flex-1 bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
-                                />
-
-                                <input
-                                    type="number"
-                                    placeholder="% off"
-                                    min="1"
-                                    max="100"
-                                    value={
-                                        couponForm.percent_off
-                                    }
-                                    onChange={(e) =>
-                                        setCouponForm(
-                                            {
-                                                ...couponForm,
-                                                percent_off:
-                                                    e
-                                                        .target
-                                                        .value,
-                                            }
-                                        )
-                                    }
-                                    className="w-24 bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
-                                />
-
-                            </div>
-
-                            <button
-                                onClick={
-                                    addCoupon
-                                }
-                                className="bg-gold text-espresso font-sans font-medium px-6 py-3 rounded-full hover:bg-gold-light transition-colors"
-                            >
-                                Create Code
-                            </button>
-
-                        </div>
-
-                        <div>
-
-                            <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">
-                                All Codes
-                            </h2>
-
-                            <div className="flex flex-col gap-2">
-
-                                {coupons.map(
-                                    (coupon) => (
-                                        <div
-                                            key={
-                                                coupon.id
-                                            }
-                                            className="flex items-center gap-3 border border-gold/20 rounded-xl p-4"
-                                        >
-
-                                            <span className="flex-1 font-sans text-sm text-espresso dark:text-cream">
-
-                                                {
-                                                    coupon.code
-                                                }{' '}
-
-                                                <span className="text-gold">
-                                                    (
-                                                    {
-                                                        coupon.percent_off
-                                                    }
-                                                    % off)
-                                                </span>
-
-                                            </span>
-
-                                            <button
-                                                onClick={() =>
-                                                    toggleCoupon(
-                                                        coupon.id,
-                                                        coupon.active
-                                                    )
-                                                }
-                                                className={`text-xs font-sans px-3 py-1 rounded-full ${
-                                                    coupon.active
-                                                        ? 'bg-green-500/10 text-green-500'
-                                                        : 'bg-gold/10 text-espresso/50 dark:text-cream/50'
-                                                }`}
-                                            >
-                                                {coupon.active
-                                                    ? 'Active'
-                                                    : 'Disabled'}
-                                            </button>
-
-                                            <button
-                                                onClick={() =>
-                                                    deleteCoupon(
-                                                        coupon.id
-                                                    )
-                                                }
-                                                aria-label="Delete code"
-                                            >
-                                                <Trash2 className="w-4 h-4 text-espresso/40 dark:text-cream/40 hover:text-red-500" />
-                                            </button>
-
-                                        </div>
-                                    )
-                                )}
-
-                                {coupons.length ===
-                                    0 && (
-                                        <div className="border border-gold/10 rounded-xl p-6 text-center">
-
-                                            <Percent className="w-6 h-6 text-gold mx-auto mb-2" />
-
-                                            <p className="font-sans text-sm text-espresso/60 dark:text-cream/60">
-                                                No discount codes yet.
-                                            </p>
-
-                                        </div>
-                                    )}
-
-                            </div>
-
-                        </div>
-
-                    </div>
-                )}
-
-                {/* COLLECTIONS */}
-
-                {tab === 'collections' && (
-                    <div className="max-w-2xl flex flex-col gap-8">
-
-                        <div className="bg-gold/5 rounded-2xl p-6">
-
-                            <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">
-                                {editingCollection
-                                    ? 'Edit Collection'
-                                    : 'New Collection'}
-                            </h2>
-
-                            <div className="flex flex-col gap-3 mb-4">
-
-                                <input
-                                    type="text"
-                                    placeholder="Collection name (e.g. Gift Ideas)"
-                                    value={
-                                        collectionForm.name
-                                    }
-                                    onChange={(e) =>
-                                        setCollectionForm(
-                                            {
-                                                ...collectionForm,
-                                                name: e
-                                                    .target
-                                                    .value,
-                                            }
-                                        )
-                                    }
-                                    className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
-                                />
-
-                                <input
-                                    type="text"
-                                    placeholder="Slug (optional, e.g. gift-ideas)"
-                                    value={
-                                        collectionForm.slug
-                                    }
-                                    onChange={(e) =>
-                                        setCollectionForm(
-                                            {
-                                                ...collectionForm,
-                                                slug: e
-                                                    .target
-                                                    .value,
-                                            }
-                                        )
-                                    }
-                                    className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
-                                />
-
-                                <textarea
-                                    placeholder="Short description"
-                                    rows={2}
-                                    value={
-                                        collectionForm.description
-                                    }
-                                    onChange={(e) =>
-                                        setCollectionForm(
-                                            {
-                                                ...collectionForm,
-                                                description:
-                                                    e
-                                                        .target
-                                                        .value,
-                                            }
-                                        )
-                                    }
-                                    className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold resize-none"
-                                />
-
-                                <input
-                                    type="text"
-                                    placeholder="Cover image URL (optional)"
-                                    value={
-                                        collectionForm.image
-                                    }
-                                    onChange={(e) =>
-                                        setCollectionForm(
-                                            {
-                                                ...collectionForm,
-                                                image: e
-                                                    .target
-                                                    .value,
-                                            }
-                                        )
-                                    }
-                                    className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
-                                />
-
-                            </div>
-
-                            <p className="font-sans text-xs uppercase tracking-widest text-gold mb-3">
-                                Select Products
-                            </p>
-
-                            <div className="flex flex-col gap-2 max-h-64 overflow-y-auto mb-4">
-
-                                {products.length ===
-                                0 ? (
-                                    <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 py-4">
-                                        No products available yet.
-                                    </p>
-                                ) : (
-                                    products.map(
-                                        (
-                                            product
-                                        ) => {
-                                            const selected =
-                                                (
-                                                    collectionForm.product_ids ||
-                                                    []
-                                                )
-                                                    .map(
-                                                        (
-                                                            id
-                                                        ) =>
-                                                            String(
-                                                                id
-                                                            )
-                                                    )
-                                                    .includes(
-                                                        String(
-                                                            product.id
-                                                        )
-                                                    )
-
-                                            return (
-                                                <label
-                                                    key={
-                                                        product.id
-                                                    }
-                                                    className="flex items-center gap-3 border border-gold/10 rounded-lg p-2 cursor-pointer hover:border-gold/30 transition-colors"
-                                                >
-
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={
-                                                            selected
-                                                        }
-                                                        onChange={() =>
-                                                            toggleProductInCollection(
-                                                                product.id
-                                                            )
-                                                        }
-                                                    />
-
-                                                    <img
-                                                        src={
-                                                            product.image
-                                                        }
-                                                        alt={
-                                                            product.name
-                                                        }
-                                                        className="w-8 h-8 rounded object-cover flex-shrink-0"
-                                                    />
-
-                                                    <span className="font-sans text-xs text-espresso dark:text-cream truncate">
-                                                        {
-                                                            product.name
-                                                        }
-                                                    </span>
-
-                                                </label>
-                                            )
-                                        }
-                                    )
-                                )}
-
-                            </div>
-
-                            <div className="flex items-center gap-3">
-
-                                <button
-                                    onClick={
-                                        saveCollection
-                                    }
-                                    disabled={
-                                        !collectionForm.name.trim()
-                                    }
-                                    className="bg-gold text-espresso font-sans font-medium px-6 py-3 rounded-full hover:bg-gold-light transition-colors disabled:opacity-40"
-                                >
-                                    {editingCollection
-                                        ? 'Save Changes'
-                                        : 'Create Collection'}
-                                </button>
-
-                                {editingCollection && (
-                                    <button
-                                        onClick={
-                                            resetCollectionForm
-                                        }
-                                        className="font-sans text-sm text-espresso/60 dark:text-cream/60 hover:text-gold"
-                                    >
-                                        Cancel
-                                    </button>
-                                )}
-
-                            </div>
-
-                        </div>
-
-                        <div>
-
-                            <div className="flex items-center justify-between mb-4">
-
-                                <h2 className="font-sans text-sm uppercase tracking-widest text-gold">
-                                    Existing Collections
-                                </h2>
-
-                                <span className="font-sans text-xs text-espresso/40 dark:text-cream/40">
-                                    {
-                                        collections.length
-                                    }{' '}
-                                    total
-                                </span>
-
-                            </div>
-
-                            {collections.length ===
-                            0 ? (
-                                <div className="border border-gold/10 rounded-2xl p-8 text-center">
-
-                                    <Layers className="w-8 h-8 text-gold mx-auto mb-3" />
-
-                                    <p className="font-sans text-sm text-espresso/60 dark:text-cream/60">
-                                        No collections created yet.
-                                    </p>
-
-                                    <p className="font-sans text-xs text-espresso/40 dark:text-cream/40 mt-1">
-                                        Create your first curated product collection above.
-                                    </p>
-
-                                </div>
-                            ) : (
-                                <div className="flex flex-col gap-2">
-
-                                    {collections.map(
-                                        (
-                                            collection
-                                        ) => (
-                                            <div
-                                                key={
-                                                    collection.id
-                                                }
-                                                className="flex items-center gap-3 border border-gold/20 rounded-xl p-4"
-                                            >
-
-                                                {collection.image ? (
-                                                    <img
-                                                        src={
-                                                            collection.image
-                                                        }
-                                                        alt={
-                                                            collection.name
-                                                        }
-                                                        className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
-                                                    />
-                                                ) : (
-                                                    <div className="w-10 h-10 rounded-lg bg-gold/10 flex items-center justify-center flex-shrink-0">
-                                                        <Layers className="w-4 h-4 text-gold" />
-                                                    </div>
-                                                )}
-
-                                                <span className="flex-1 font-sans text-sm text-espresso dark:text-cream min-w-0 truncate">
-
-                                                    {
-                                                        collection.name
-                                                    }
-
-                                                    <span className="text-espresso/40 dark:text-cream/40 ml-1">
-                                                        (
-                                                        {
-                                                            collection.product_ids?.length ||
-                                                            0
-                                                        }{' '}
-                                                        items)
-                                                    </span>
-
-                                                </span>
-
-                                                <button
-                                                    onClick={() =>
-                                                        startEditCollection(
-                                                            collection
-                                                        )
-                                                    }
-                                                    aria-label="Edit collection"
-                                                >
-                                                    <Pencil className="w-4 h-4 text-espresso/50 dark:text-cream/50 hover:text-gold" />
-                                                </button>
-
-                                                <button
-                                                    onClick={() =>
-                                                        deleteCollection(
-                                                            collection.id
-                                                        )
-                                                    }
-                                                    aria-label="Delete collection"
-                                                >
-                                                    <Trash2 className="w-4 h-4 text-espresso/50 dark:text-cream/50 hover:text-red-500" />
-                                                </button>
-
-                                            </div>
-                                        )
-                                    )}
-
-                                </div>
-                            )}
-
-                        </div>
-
-                    </div>
-                )}
-
-                {/* HOMEPAGE */}
-
-                {tab === 'content' &&
-                    heroForm && (
-                        <div className="max-w-lg flex flex-col gap-4">
-
-                            <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-2">
-                                Hero Section
-                            </h2>
-
-                            <input
-                                type="text"
-                                placeholder="Small label (e.g. The Next Chapter)"
-                                value={
-                                    heroForm.label
-                                }
-                                onChange={(e) =>
-                                    setHeroForm(
-                                        {
-                                            ...heroForm,
-                                            label: e
-                                                .target
-                                                .value,
-                                        }
-                                    )
-                                }
-                                className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
-                            />
-
-                            <textarea
-                                placeholder="Headline"
-                                rows={2}
-                                value={
-                                    heroForm.headline
-                                }
-                                onChange={(e) =>
-                                    setHeroForm(
-                                        {
-                                            ...heroForm,
-                                            headline:
-                                                e
-                                                    .target
-                                                    .value,
-                                        }
-                                    )
-                                }
-                                className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold resize-none"
-                            />
-
-                            <textarea
-                                placeholder="Supporting text"
-                                rows={2}
-                                value={
-                                    heroForm.subtext
-                                }
-                                onChange={(e) =>
-                                    setHeroForm(
-                                        {
-                                            ...heroForm,
-                                            subtext:
-                                                e
-                                                    .target
-                                                    .value,
-                                        }
-                                    )
-                                }
-                                className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold resize-none"
-                            />
-
-                            <input
-                                type="text"
-                                placeholder="Backdrop image URL"
-                                value={
-                                    heroForm.backdropImage
-                                }
-                                onChange={(e) =>
-                                    setHeroForm(
-                                        {
-                                            ...heroForm,
-                                            backdropImage:
-                                                e
-                                                    .target
-                                                    .value,
-                                        }
-                                    )
-                                }
-                                className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
-                            />
-
-                            <button
-                                onClick={() =>
-                                    updateHero(
-                                        heroForm
-                                    )
-                                }
-                                className="bg-gold text-espresso font-sans font-medium px-6 py-3 rounded-full hover:bg-gold-light transition-colors self-start"
-                            >
-                                Save Homepage Hero
-                            </button>
-
-                        </div>
-                    )}
-
-                {/* CATEGORIES */}
-
-                {tab === 'categories' && (
-                    <div className="max-w-lg">
-
-                        <div className="flex gap-2 mb-8">
-
-                            <input
-                                type="text"
-                                placeholder="New category name (e.g. Sale, New In)"
-                                value={
-                                    newCategoryName
-                                }
-                                onChange={(e) =>
-                                    setNewCategoryName(
-                                        e.target.value
-                                    )
-                                }
-                                className="flex-1 bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
-                            />
-
-                            <button
-                                onClick={
-                                    addCategory
-                                }
-                                className="flex items-center gap-2 bg-gold text-espresso font-sans font-medium px-5 rounded-full hover:bg-gold-light transition-colors"
-                            >
-                                <Plus className="w-4 h-4" />
-                                Add
-                            </button>
-
-                        </div>
-
-                        <div className="flex flex-col gap-3">
-
-                            {categories.map(
-                                (category) => (
-                                    <div
-                                        key={
-                                            category.id
-                                        }
-                                        className="border border-gold/20 rounded-xl p-4"
-                                    >
-
-                                        <div className="flex items-center gap-3 mb-2">
-
-                                            <TagIcon className="w-4 h-4 text-gold flex-shrink-0" />
-
-                                            <span className="flex-1 font-sans text-sm text-espresso dark:text-cream">
-                                                {
-                                                    category.name
-                                                }
-                                            </span>
-
-                                            <button
-                                                onClick={() =>
-                                                    deleteCategory(
-                                                        category.id
-                                                    )
-                                                }
-                                                aria-label="Delete category"
-                                            >
-                                                <Trash2 className="w-4 h-4 text-espresso/40 dark:text-cream/40 hover:text-red-500" />
-                                            </button>
-
-                                        </div>
-
-                                        <textarea
-                                            placeholder="Short introduction for this category page (optional)"
-                                            rows={2}
-                                            defaultValue={
-                                                category.description ||
-                                                ''
-                                            }
-                                            onBlur={async (
-                                                event
-                                            ) => {
-                                                await supabase
-                                                    .from(
-                                                        'categories'
-                                                    )
-                                                    .update(
-                                                        {
-                                                            description:
-                                                                event
-                                                                    .target
-                                                                    .value,
-                                                        }
-                                                    )
-                                                    .eq(
-                                                        'id',
-                                                        category.id
-                                                    )
-                                            }}
-                                            className="w-full bg-transparent border border-gold/20 rounded-lg px-3 py-2 font-sans text-xs text-espresso dark:text-cream outline-none focus:border-gold resize-none"
-                                        />
-
-                                    </div>
-                                )
-                            )}
-
-                        </div>
-
-                    </div>
-                )}
-
-                {/* ORDERS */}
-
-                {tab === 'orders' && (
-                    <div className="flex flex-col gap-4">
-
-                        {ordersLoading ? (
-                            <p className="font-sans text-sm text-espresso/60 dark:text-cream/60">
-                                Loading orders...
-                            </p>
-                        ) : orders.length ===
-                        0 ? (
-                            <div className="flex flex-col items-center gap-3 py-16 text-center">
-
-                                <Package className="w-8 h-8 text-gold" />
-
-                                <p className="font-sans text-sm text-espresso/60 dark:text-cream/60">
-                                    No orders yet.
-                                </p>
-
-                            </div>
-                        ) : (
-                            orders.map(
-                                (order) => (
-                                    <div
-                                        key={
-                                            order.id
-                                        }
-                                        className="border border-gold/20 rounded-2xl p-5"
-                                    >
-
-                                        <div className="flex flex-wrap justify-between gap-2 mb-3">
-
-                                            <span className="font-sans text-sm font-medium text-espresso dark:text-cream">
-                                                {
-                                                    order.order_number
-                                                }
-                                            </span>
-
-                                            <span className="font-sans text-xs text-espresso/50 dark:text-cream/50">
-                                                {new Date(
-                                                    order.created_at
-                                                ).toLocaleDateString(
-                                                    'en-NG',
-                                                    {
-                                                        day: 'numeric',
-                                                        month: 'long',
-                                                        year: 'numeric',
-                                                    }
-                                                )}
-                                            </span>
-
-                                        </div>
-
-                                        <select
-                                            value={
-                                                order.status ||
-                                                'pending'
-                                            }
-                                            onChange={async (
-                                                event
-                                            ) => {
-                                                const newStatus =
-                                                    event
-                                                        .target
-                                                        .value
-
-                                                await supabase
-                                                    .from(
-                                                        'orders'
-                                                    )
-                                                    .update(
-                                                        {
-                                                            status: newStatus,
-                                                        }
-                                                    )
-                                                    .eq(
-                                                        'id',
-                                                        order.id
-                                                    )
-
-                                                setOrders(
-                                                    (
-                                                        previous
-                                                    ) =>
-                                                        previous.map(
-                                                            (
-                                                                currentOrder
-                                                            ) =>
-                                                                currentOrder.id ===
-                                                                order.id
-                                                                    ? {
-                                                                        ...currentOrder,
-                                                                        status: newStatus,
-                                                                    }
-                                                                    : currentOrder
-                                                        )
-                                                )
-                                            }}
-                                            className="bg-transparent border border-gold/30 rounded-full px-3 py-1 font-sans text-xs text-espresso dark:text-cream outline-none focus:border-gold mb-3"
-                                        >
-
-                                            <option value="pending">
-                                                Pending
-                                            </option>
-
-                                            <option value="confirmed">
-                                                Confirmed
-                                            </option>
-
-                                            <option value="shipped">
-                                                Shipped
-                                            </option>
-
-                                            <option value="delivered">
-                                                Delivered
-                                            </option>
-
-                                        </select>
-
-                                        <p className="font-sans text-sm text-espresso/70 dark:text-cream/70 mb-1">
-                                            {
-                                                order.customer_name
-                                            }{' '}
-                                            ·{' '}
-                                            {
-                                                order.customer_phone
-                                            }
-                                        </p>
-
-                                        <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 mb-3">
-                                            {
-                                                order.customer_address
-                                            }
-                                        </p>
-
-                                        <div className="flex flex-col gap-1 mb-3 border-t border-gold/10 pt-3">
-
-                                            {order.items?.map(
-                                                (
-                                                    item
-                                                ) => (
-                                                    <div
-                                                        key={
-                                                            item.id
-                                                        }
-                                                        className="flex justify-between font-sans text-xs text-espresso/60 dark:text-cream/60"
-                                                    >
-
-                                                        <span>
-                                                            {
-                                                                item.name
-                                                            }{' '}
-                                                            x{' '}
-                                                            {
-                                                                item.quantity
-                                                            }
-                                                        </span>
-
-                                                        <span>
-                                                            {formatPrice(
-                                                                item.price *
-                                                                item.quantity
-                                                            )}
-                                                        </span>
-
-                                                    </div>
-                                                )
-                                            )}
-
-                                        </div>
-
-                                        <div className="flex justify-between font-display italic font-semibold text-espresso dark:text-cream">
-
-                                            <span>
-                                                Total
-                                            </span>
-
-                                            <span>
-                                                {formatPrice(
-                                                    order.total
-                                                )}
-                                            </span>
-
-                                        </div>
-
-                                    </div>
-                                )
-                            )
-                        )}
-
-                    </div>
-                )}
-
-                {/* PRODUCTS */}
-
-                {tab === 'products' && (
-                    <>
-
-                        <div className="bg-gold/5 rounded-2xl p-6 mb-12">
-
-                            <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">
-                                {editing
-                                    ? 'Edit Product'
-                                    : 'Add New Product'}
-                            </h2>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-
-                                <input
-                                    type="text"
-                                    placeholder="Product name"
-                                    value={
-                                        form.name
-                                    }
-                                    onChange={(e) =>
-                                        update(
-                                            'name',
-                                            e
-                                                .target
-                                                .value
-                                        )
-                                    }
-                                    className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
-                                />
-
-                                <input
-                                    type="number"
-                                    placeholder="Price (Naira)"
-                                    value={
-                                        form.price
-                                    }
-                                    onChange={(e) =>
-                                        update(
-                                            'price',
-                                            e
-                                                .target
-                                                .value
-                                        )
-                                    }
-                                    className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
-                                />
-
-                                <input
-                                    type="number"
-                                    placeholder="Stock quantity"
-                                    value={
-                                        form.stock
-                                    }
-                                    onChange={(e) =>
-                                        update(
-                                            'stock',
-                                            e
-                                                .target
-                                                .value
-                                        )
-                                    }
-                                    className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
-                                />
-
-                                <select
-                                    value={
-                                        form.status
-                                    }
-                                    onChange={(e) =>
-                                        update(
-                                            'status',
-                                            e
-                                                .target
-                                                .value
-                                        )
-                                    }
-                                    className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
-                                >
-
-                                    <option value="active">
-                                        Active (visible, normal sale)
-                                    </option>
-
-                                    <option value="preorder">
-                                        Preorder (visible, orderable even at 0 stock)
-                                    </option>
-
-                                    <option value="hidden">
-                                        Hidden (not shown anywhere on the site)
-                                    </option>
-
-                                </select>
-
-                                <select
-                                    value={
-                                        form.category
-                                    }
-                                    onChange={(e) =>
-                                        update(
-                                            'category',
-                                            e
-                                                .target
-                                                .value
-                                        )
-                                    }
-                                    className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
-                                >
-
-                                    {categories.map(
-                                        (
-                                            category
-                                        ) => (
-                                            <option
-                                                key={
-                                                    category.id
-                                                }
-                                                value={
-                                                    category.id
-                                                }
-                                            >
-                                                {
-                                                    category.name
-                                                }
-                                            </option>
-                                        )
-                                    )}
-
-                                </select>
-
-                                <input
-                                    type="text"
-                                    placeholder="Main Image URL"
-                                    value={
-                                        form.image
-                                    }
-                                    onChange={(e) =>
-                                        update(
-                                            'image',
-                                            e
-                                                .target
-                                                .value
-                                        )
-                                    }
-                                    className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
-                                />
-
-                            </div>
-
-                            <textarea
-                                placeholder="All image URLs, separated by commas (leave blank to just use the main image above)"
-                                rows={2}
-                                value={
-                                    form.imagesText
-                                }
-                                onChange={(e) =>
-                                    update(
-                                        'imagesText',
-                                        e
-                                            .target
-                                            .value
-                                    )
-                                }
-                                className="w-full bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold resize-none mb-3"
-                            />
-
-                            <label className="flex items-center gap-2 justify-center border-2 border-dashed border-gold/30 rounded-xl px-4 py-4 cursor-pointer hover:border-gold transition-colors mb-4">
-
-                                <Upload className="w-4 h-4 text-gold" />
-
-                                <span className="font-sans text-sm text-espresso dark:text-cream">
-                                    Or upload photos directly from your phone or computer
-                                </span>
-
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    multiple
-                                    onChange={
-                                        handleFileUpload
-                                    }
-                                    className="hidden"
-                                />
-
-                            </label>
-
-                            <div className="flex gap-6 mb-4">
-
-                                <label className="flex items-center gap-2 font-sans text-sm text-espresso dark:text-cream">
-
-                                    <input
-                                        type="checkbox"
-                                        checked={
-                                            form.is_new
-                                        }
-                                        onChange={(
-                                            event
-                                        ) =>
-                                            update(
-                                                'is_new',
-                                                event
-                                                    .target
-                                                    .checked
-                                            )
-                                        }
-                                    />
-
-                                    New Arrival
-
-                                </label>
-
-                                <label className="flex items-center gap-2 font-sans text-sm text-espresso dark:text-cream">
-
-                                    <input
-                                        type="checkbox"
-                                        checked={
-                                            form.is_featured
-                                        }
-                                        onChange={(
-                                            event
-                                        ) =>
-                                            update(
-                                                'is_featured',
-                                                event
-                                                    .target
-                                                    .checked
-                                            )
-                                        }
-                                    />
-
-                                    Featured
-
-                                </label>
-
-                            </div>
-
-                            <div className="flex gap-3">
-
-                                <button
-                                    onClick={
-                                        handleSave
-                                    }
-                                    disabled={
-                                        saving ||
-                                        !form.name ||
-                                        !form.price
-                                    }
-                                    className="flex items-center gap-2 bg-gold text-espresso font-sans font-medium px-6 py-3 rounded-full hover:bg-gold-light transition-colors disabled:opacity-40"
-                                >
-
-                                    <Plus className="w-4 h-4" />
-
-                                    {editing
-                                        ? 'Save Changes'
-                                        : 'Add Product'}
-
-                                </button>
-
-                                {editing && (
-                                    <button
-                                        onClick={
-                                            resetForm
-                                        }
-                                        className="font-sans text-sm text-espresso/60 dark:text-cream/60 hover:text-gold"
-                                    >
-                                        Cancel
-                                    </button>
-                                )}
-
-                            </div>
-
-                        </div>
-
-                        <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">
-                            All Products (
-                            {products.length}
-                            )
-                        </h2>
-
-                        {loading ? (
-                            <p className="font-sans text-sm text-espresso/60 dark:text-cream/60">
-                                Loading...
-                            </p>
-                        ) : error ? (
-                            <p className="font-sans text-sm text-red-500">
-                                Unable to load products.
-                            </p>
-                        ) : (
-                            <div className="flex flex-col gap-3">
-
-                                {products.map(
-                                    (product) => (
-                                        <div
-                                            key={
-                                                product.id
-                                            }
-                                            className="flex items-center gap-4 border border-gold/20 rounded-xl p-4"
-                                        >
-
-                                            <img
-                                                src={
-                                                    product.image
-                                                }
-                                                alt={
-                                                    product.name
-                                                }
-                                                className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
-                                            />
-
-                                            <div className="flex-1 min-w-0">
-
-                                                <p className="font-sans text-sm text-espresso dark:text-cream truncate">
-                                                    {
-                                                        product.name
-                                                    }
-                                                </p>
-
-                                                <p className="font-sans text-xs text-gold">
-
-                                                    {formatPrice(
-                                                        product.price
-                                                    )}
-
-                                                    {' · '}
-
-                                                    {
-                                                        product.category
-                                                    }
-
-                                                    {product.status &&
-                                                        product.status !==
-                                                        'active' && (
-                                                            <span className="ml-2 uppercase tracking-wide text-[10px] opacity-70">
-                                                                ·{' '}
-                                                                {
-                                                                    product.status
-                                                                }
-                                                            </span>
-                                                        )}
-
-                                                </p>
-
-                                            </div>
-
-                                            <button
-                                                onClick={() =>
-                                                    startEdit(
-                                                        product
-                                                    )
-                                                }
-                                                aria-label="Edit"
-                                            >
-                                                <Pencil className="w-4 h-4 text-espresso/50 dark:text-cream/50 hover:text-gold" />
-                                            </button>
-
-                                            <button
-                                                onClick={() =>
-                                                    handleDelete(
-                                                        product.id
-                                                    )
-                                                }
-                                                aria-label="Delete"
-                                            >
-                                                <Trash2 className="w-4 h-4 text-espresso/50 dark:text-cream/50 hover:text-red-500" />
-                                            </button>
-
-                                        </div>
-                                    )
-                                )}
-
-                            </div>
-                        )}
-
-                    </>
-                )}
-
-            </div>
-        </section>
-    )
-}
-
+                                                href={`https://wa.me/${customer.phone.replace( 
+                                                    /\D/g, 
+                                                    '' 
+                                                )}`} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer" 
+                                                aria-label="Message on WhatsApp" 
+                                                className="w-9 h-9 rounded-full bg-gold/10 flex items-center justify-center hover:bg-gold/20 transition-colors flex-shrink-0" 
+                                            > 
+                                                <MessageCircle className="w-4 h-4 text-gold" /> 
+                                            </a> 
+ 
+                                        </div> 
+                                    ) 
+                                )} 
+ 
+                            </div> 
+                        )} 
+ 
+                    </div> 
+                )} 
+ 
+                {/* DISCOUNTS */} 
+ 
+                {tab === 'discounts' && ( 
+                    <div className="max-w-lg flex flex-col gap-8"> 
+ 
+                        <div className="bg-gold/5 rounded-2xl p-6"> 
+ 
+                            <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-4"> 
+                                New Discount Code 
+                            </h2> 
+ 
+                            <div className="flex gap-3 mb-4"> 
+ 
+                                <input 
+                                    type="text" 
+                                    placeholder="CODE (e.g. WELCOME10)" 
+                                    value={ 
+                                        couponForm.code 
+                                    } 
+                                    onChange={(e) => 
+                                        setCouponForm( 
+                                            { 
+                                                ...couponForm, 
+                                                code: e 
+                                                    .target 
+                                                    .value, 
+                                            } 
+                                        ) 
+                                    } 
+                                    className="flex-1 bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold" 
+                                /> 
+ 
+                                <input 
+                                    type="number" 
+                                    placeholder="% off" 
+                                    min="1" 
+                                    max="100" 
+                                    value={ 
+                                        couponForm.percent_off 
+                                    } 
+                                    onChange={(e) => 
+                                        setCouponForm( 
+                                            { 
+                                                ...couponForm, 
+                                                percent_off: 
+                                                    e 
+                                                        .target 
+                                                        .value, 
+                                            } 
+                                        ) 
+                                    } 
+                                    className="w-24 bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold" 
+                                /> 
+ 
+                            </div> 
+ 
+                            <button 
+                                onClick={ 
+                                    addCoupon 
+                                } 
+                                className="bg-gold text-espresso font-sans font-medium px-6 py-3 rounded-full hover:bg-gold-light transition-colors" 
+                            > 
+                                Create Code 
+                            </button> 
+ 
+                        </div> 
+ 
+                        <div> 
+ 
+                            <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-4"> 
+                                All Codes 
+                            </h2> 
+ 
+                            <div className="flex flex-col gap-2"> 
+ 
+                                {coupons.map( 
+                                    (coupon) => ( 
+                                        <div 
+                                            key={ 
+                                                coupon.id 
+                                            } 
+                                            className="flex items-center gap-3 border border-gold/20 rounded-xl p-4" 
+                                        > 
+ 
+                                            <span className="flex-1 font-sans text-sm text-espresso dark:text-cream"> 
+ 
+                                                { 
+                                                    coupon.code 
+                                                }{' '} 
+ 
+                                                <span className="text-gold"> 
+                                                    ( 
+                                                    { 
+                                                        coupon.percent_off 
+                                                    } 
+                                                    % off) 
+                                                </span> 
+ 
+                                            </span> 
+ 
+                                            <button 
+                                                onClick={() => 
+                                                    toggleCoupon( 
+                                                        coupon.id, 
+                                                        coupon.active 
+                                                    ) 
+                                                } 
+                                                className={`text-xs font-sans px-3 py-1 rounded-full ${ 
+                                                    coupon.active 
+                                                        ? 'bg-green-500/10 text-green-500' 
+                                                        : 'bg-gold/10 text-espresso/50 dark:text-cream/50' 
+                                                }`} 
+                                            > 
+                                                {coupon.active 
+                                                    ? 'Active' 
+                                                    : 'Disabled'} 
+                                            </button> 
+ 
+                                            <button 
+                                                onClick={() => 
+                                                    deleteCoupon( 
+                                                        coupon.id 
+                                                    ) 
+                                                } 
+                                                aria-label="Delete code" 
+                                            > 
+                                                <Trash2 className="w-4 h-4 text-espresso/40 dark:text-cream/40 hover:text-red-500" /> 
+                                            </button> 
+ 
+                                        </div> 
+                                    ) 
+                                )} 
+ 
+                                {coupons.length === 
+                                    0 && ( 
+                                        <div className="border border-gold/10 rounded-xl p-6 text-center"> 
+ 
+                                            <Percent className="w-6 h-6 text-gold mx-auto mb-2" /> 
+ 
+                                            <p className="font-sans text-sm text-espresso/60 dark:text-cream/60"> 
+                                                No discount codes yet. 
+                                            </p> 
+ 
+                                        </div> 
+                                    )} 
+ 
+                            </div> 
+ 
+                        </div> 
+ 
+                    </div> 
+                )} 
+ 
+                {/* COLLECTIONS */} 
+ 
+                {tab === 'collections' && ( 
+                    <div className="max-w-2xl flex flex-col gap-8"> 
+ 
+                        <div className="bg-gold/5 rounded-2xl p-6"> 
+ 
+                            <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-4"> 
+                                {editingCollection 
+                                    ? 'Edit Collection' 
+                                    : 'New Collection'} 
+                            </h2> 
+ 
+                            <div className="flex flex-col gap-3 mb-4"> 
+ 
+                                <input 
+                                    type="text" 
+                                    placeholder="Collection name (e.g. Gift Ideas)" 
+                                    value={ 
+                                        collectionForm.name 
+                                    } 
+                                    onChange={(e) => 
+                                        setCollectionForm( 
+                                            { 
+                                                ...collectionForm, 
+                                                name: e 
+                                                    .target 
+                                                    .value, 
+                                            } 
+                                        ) 
+                                    } 
+                                    className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold" 
+                                /> 
+ 
+                                <input 
+                                    type="text" 
+                                    placeholder="Slug (optional, e.g. gift-ideas)" 
+                                    value={ 
+                                        collectionForm.slug 
+                                    } 
+                                    onChange={(e) => 
+                                        setCollectionForm( 
+                                            { 
+                                                ...collectionForm, 
+                                                slug: e 
+                                                    .target 
+                                                    .value, 
+                                            } 
+                                        ) 
+                                    } 
+                                    className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold" 
+                                /> 
+ 
+                                <textarea 
+                                    placeholder="Short description" 
+                                    rows={2} 
+                                    value={ 
+                                        collectionForm.description 
+                                    } 
+                                    onChange={(e) => 
+                                        setCollectionForm( 
+                                            { 
+                                                ...collectionForm, 
+                                                description: 
+                                                    e 
+                                                        .target 
+                                                        .value, 
+                                            } 
+                                        ) 
+                                    } 
+                                    className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold resize-none" 
+                                /> 
+ 
+                                <input 
+                                    type="text" 
+                                    placeholder="Cover image URL (optional)" 
+                                    value={ 
+                                        collectionForm.image 
+                                    } 
+                                    onChange={(e) => 
+                                        setCollectionForm( 
+                                            { 
+                                                ...collectionForm, 
+                                                image: e 
+                                                    .target 
+                                                    .value, 
+                                            } 
+                                        ) 
+                                    } 
+                                    className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold" 
+                                /> 
+ 
+                            </div> 
+ 
+                            <p className="font-sans text-xs uppercase tracking-widest text-gold mb-3"> 
+                                Select Products 
+                            </p> 
+ 
+                            <div className="flex flex-col gap-2 max-h-64 overflow-y-auto mb-4"> 
+ 
+                                {products.length === 
+                                0 ? ( 
+                                    <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 py-4"> 
+                                        No products available yet. 
+                                    </p> 
+                                ) : ( 
+                                    products.map( 
+                                        ( 
+                                            product 
+                                        ) => { 
+                                            const selected = 
+                                                ( 
+                                                    collectionForm.product_ids || 
+                                                    [] 
+                                                ) 
+                                                    .map( 
+                                                        ( 
+                                                            id 
+                                                        ) => 
+                                                            String( 
+                                                                id 
+                                                            ) 
+                                                    ) 
+                                                    .includes( 
+                                                        String( 
+                                                            product.id 
+                                                        ) 
+                                                    ) 
+ 
+                                            return ( 
+                                                <label 
+                                                    key={ 
+                                                        product.id 
+                                                    } 
+                                                    className="flex items-center gap-3 border border-gold/10 rounded-lg p-2 cursor-pointer hover:border-gold/30 transition-colors" 
+                                                > 
+ 
+                                                    <input 
+                                                        type="checkbox" 
+                                                        checked={ 
+                                                            selected 
+                                                        } 
+                                                        onChange={() => 
+                                                            toggleProductInCollection( 
+                                                                product.id 
+                                                            ) 
+                                                        } 
+                                                    /> 
+ 
+                                                    <img 
+                                                        src={ 
+                                                            product.image 
+                                                        } 
+                                                        alt={ 
+                                                            product.name 
+                                                        } 
+                                                        className="w-8 h-8 rounded object-cover flex-shrink-0" 
+                                                    /> 
+ 
+                                                    <span className="font-sans text-xs text-espresso dark:text-cream truncate"> 
+                                                        { 
+                                                            product.name 
+                                                        } 
+                                                    </span> 
+ 
+                                                </label> 
+                                            ) 
+                                        } 
+                                    ) 
+                                )} 
+ 
+                            </div> 
+ 
+                            <div className="flex items-center gap-3"> 
+ 
+                                <button 
+                                    onClick={ 
+                                        saveCollection 
+                                    } 
+                                    disabled={ 
+                                        !collectionForm.name.trim() 
+                                    } 
+                                    className="bg-gold text-espresso font-sans font-medium px-6 py-3 rounded-full hover:bg-gold-light transition-colors disabled:opacity-40" 
+                                > 
+                                    {editingCollection 
+                                        ? 'Save Changes' 
+                                        : 'Create Collection'} 
+                                </button> 
+ 
+                                {editingCollection && ( 
+                                    <button 
+                                        onClick={ 
+                                            resetCollectionForm 
+                                        } 
+                                        className="font-sans text-sm text-espresso/60 dark:text-cream/60 hover:text-gold" 
+                                    > 
+                                        Cancel 
+                                    </button> 
+                                )} 
+ 
+                            </div> 
+ 
+                        </div> 
+ 
+                        <div> 
+ 
+                            <div className="flex items-center justify-between mb-4"> 
+ 
+                                <h2 className="font-sans text-sm uppercase tracking-widest text-gold"> 
+                                    Existing Collections 
+                                </h2> 
+ 
+                                <span className="font-sans text-xs text-espresso/40 dark:text-cream/40"> 
+                                    { 
+                                        collections.length 
+                                    }{' '} 
+                                    total 
+                                </span> 
+ 
+                            </div> 
+ 
+                            {collections.length === 
+                            0 ? ( 
+                                <div className="border border-gold/10 rounded-2xl p-8 text-center"> 
+ 
+                                    <Layers className="w-8 h-8 text-gold mx-auto mb-3" /> 
+ 
+                                    <p className="font-sans text-sm text-espresso/60 dark:text-cream/60"> 
+                                        No collections created yet. 
+                                    </p> 
+ 
+                                    <p className="font-sans text-xs text-espresso/40 dark:text-cream/40 mt-1"> 
+                                        Create your first curated product collection above. 
+                                    </p> 
+ 
+                                </div> 
+                            ) : ( 
+                                <div className="flex flex-col gap-2"> 
+ 
+                                    {collections.map( 
+                                        ( 
+                                            collection 
+                                        ) => ( 
+                                            <div 
+                                                key={ 
+                                                    collection.id 
+                                                } 
+                                                className="flex items-center gap-3 border border-gold/20 rounded-xl p-4" 
+                                            > 
+ 
+                                                {collection.image ? ( 
+                                                    <img 
+                                                        src={ 
+                                                            collection.image 
+                                                        } 
+                                                        alt={ 
+                                                            collection.name 
+                                                        } 
+                                                        className="w-10 h-10 rounded-lg object-cover flex-shrink-0" 
+                                                    /> 
+                                                ) : ( 
+                                                    <div className="w-10 h-10 rounded-lg bg-gold/10 flex items-center justify-center flex-shrink-0"> 
+                                                        <Layers className="w-4 h-4 text-gold" /> 
+                                                    </div> 
+                                                )} 
+ 
+                                                <span className="flex-1 font-sans text-sm text-espresso dark:text-cream min-w-0 truncate"> 
+ 
+                                                    { 
+                                                        collection.name 
+                                                    } 
+ 
+                                                    <span className="text-espresso/40 dark:text-cream/40 ml-1"> 
+                                                        ( 
+                                                        { 
+                                                            collection.product_ids?.length || 
+                                                            0 
+                                                        }{' '} 
+                                                        items) 
+                                                    </span> 
+ 
+                                                </span> 
+ 
+                                                <button 
+                                                    onClick={() => 
+                                                        startEditCollection( 
+                                                            collection 
+                                                        ) 
+                                                    } 
+                                                    aria-label="Edit collection" 
+                                                > 
+                                                    <Pencil className="w-4 h-4 text-espresso/50 dark:text-cream/50 hover:text-gold" /> 
+                                                </button> 
+ 
+                                                <button 
+                                                    onClick={() => 
+                                                        deleteCollection( 
+                                                            collection.id 
+                                                        ) 
+                                                    } 
+                                                    aria-label="Delete collection" 
+                                                > 
+                                                    <Trash2 className="w-4 h-4 text-espresso/50 dark:text-cream/50 hover:text-red-500" /> 
+                                                </button> 
+ 
+                                            </div> 
+                                        ) 
+                                    )} 
+ 
+                                </div> 
+                            )} 
+ 
+                        </div> 
+ 
+                    </div> 
+                )} 
+ 
+                {/* HOMEPAGE */} 
+ 
+                {tab === 'content' && 
+                    heroForm && ( 
+                        <div className="max-w-lg flex flex-col gap-4"> 
+ 
+                            <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-2"> 
+                                Hero Section 
+                            </h2> 
+ 
+                            <input 
+                                type="text" 
+                                placeholder="Small label (e.g. The Next Chapter)" 
+                                value={ 
+                                    heroForm.label 
+                                } 
+                                onChange={(e) => 
+                                    setHeroForm( 
+                                        { 
+                                            ...heroForm, 
+                                            label: e 
+                                                .target 
+                                                .value, 
+                                        } 
+                                    ) 
+                                } 
+                                className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold" 
+                            /> 
+ 
+                            <textarea 
+                                placeholder="Headline" 
+                                rows={2} 
+                                value={ 
+                                    heroForm.headline 
+                                } 
+                                onChange={(e) => 
+                                    setHeroForm( 
+                                        { 
+                                            ...heroForm, 
+                                            headline: 
+                                                e 
+                                                    .target 
+                                                    .value, 
+                                        } 
+                                    ) 
+                                } 
+                                className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold resize-none" 
+                            /> 
+ 
+                            <textarea 
+                                placeholder="Supporting text" 
+                                rows={2} 
+                                value={ 
+                                    heroForm.subtext 
+                                } 
+                                onChange={(e) => 
+                                    setHeroForm( 
+                                        { 
+                                            ...heroForm, 
+                                            subtext: 
+                                                e 
+                                                    .target 
+                                                    .value, 
+                                        } 
+                                    ) 
+                                } 
+                                className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold resize-none" 
+                            /> 
+ 
+                            <input 
+                                type="text" 
+                                placeholder="Backdrop image URL" 
+                                value={ 
+                                    heroForm.backdropImage 
+                                } 
+                                onChange={(e) => 
+                                    setHeroForm( 
+                                        { 
+                                            ...heroForm, 
+                                            backdropImage: 
+                                                e 
+                                                    .target 
+                                                    .value, 
+                                        } 
+                                    ) 
+                                } 
+                                className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold" 
+                            /> 
+ 
+                            <button 
+                                onClick={() => 
+                                    updateHero( 
+                                        heroForm 
+                                    ) 
+                                } 
+                                className="bg-gold text-espresso font-sans font-medium px-6 py-3 rounded-full hover:bg-gold-light transition-colors self-start" 
+                            > 
+                                Save Homepage Hero 
+                            </button> 
+ 
+                        </div> 
+                    )} 
+ 
+                {/* CATEGORIES */} 
+ 
+                {tab === 'categories' && ( 
+                    <div className="max-w-lg"> 
+ 
+                        <div className="flex gap-2 mb-8"> 
+ 
+                            <input 
+                                type="text" 
+                                placeholder="New category name (e.g. Sale, New In)" 
+                                value={ 
+                                    newCategoryName 
+                                } 
+                                onChange={(e) => 
+                                    setNewCategoryName( 
+                                        e.target.value 
+                                    ) 
+                                } 
+                                className="flex-1 bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold" 
+                            /> 
+ 
+                            <button 
+                                onClick={ 
+                                    addCategory 
+                                } 
+                                className="flex items-center gap-2 bg-gold text-espresso font-sans font-medium px-5 rounded-full hover:bg-gold-light transition-colors" 
+                            > 
+                                <Plus className="w-4 h-4" /> 
+                                Add 
+                            </button> 
+ 
+                        </div> 
+ 
+                        <div className="flex flex-col gap-3"> 
+ 
+                            {categories.map( 
+                                (category) => ( 
+                                    <div 
+                                        key={ 
+                                            category.id 
+                                        } 
+                                        className="border border-gold/20 rounded-xl p-4" 
+                                    > 
+ 
+                                        <div className="flex items-center gap-3 mb-2"> 
+ 
+                                            <TagIcon className="w-4 h-4 text-gold flex-shrink-0" /> 
+ 
+                                            <span className="flex-1 font-sans text-sm text-espresso dark:text-cream"> 
+                                                { 
+                                                    category.name 
+                                                } 
+                                            </span> 
+ 
+                                            <button 
+                                                onClick={() => 
+                                                    deleteCategory( 
+                                                        category.id 
+                                                    ) 
+                                                } 
+                                                aria-label="Delete category" 
+                                            > 
+                                                <Trash2 className="w-4 h-4 text-espresso/40 dark:text-cream/40 hover:text-red-500" /> 
+                                            </button> 
+ 
+                                        </div> 
+ 
+                                        <textarea 
+                                            placeholder="Short introduction for this category page (optional)" 
+                                            rows={2} 
+                                            defaultValue={ 
+                                                category.description || 
+                                                '' 
+                                            } 
+                                            onBlur={async ( 
+                                                event 
+                                            ) => { 
+                                                await supabase 
+                                                    .from( 
+                                                        'categories' 
+                                                    ) 
+                                                    .update( 
+                                                        { 
+                                                            description: 
+                                                                event 
+                                                                    .target 
+                                                                    .value, 
+                                                        } 
+                                                    ) 
+                                                    .eq( 
+                                                        'id', 
+                                                        category.id 
+                                                    ) 
+                                            }} 
+                                            className="w-full bg-transparent border border-gold/20 rounded-lg px-3 py-2 font-sans text-xs text-espresso dark:text-cream outline-none focus:border-gold resize-none" 
+                                        /> 
+ 
+                                    </div> 
+                                ) 
+                            )} 
+ 
+                        </div> 
+ 
+                    </div> 
+                )} 
+ 
+                {/* ORDERS */} 
+ 
+                {tab === 'orders' && ( 
+                    <div className="flex flex-col gap-4"> 
+ 
+                        {ordersLoading ? ( 
+                            <p className="font-sans text-sm text-espresso/60 dark:text-cream/60"> 
+                                Loading orders... 
+                            </p> 
+                        ) : orders.length === 
+                        0 ? ( 
+                            <div className="flex flex-col items-center gap-3 py-16 text-center"> 
+ 
+                                <Package className="w-8 h-8 text-gold" /> 
+ 
+                                <p className="font-sans text-sm text-espresso/60 dark:text-cream/60"> 
+                                    No orders yet. 
+                                </p> 
+ 
+                            </div> 
+                        ) : ( 
+                            orders.map( 
+                                (order) => ( 
+                                    <div 
+                                        key={ 
+                                            order.id 
+                                        } 
+                                        className="border border-gold/20 rounded-2xl p-5" 
+                                    > 
+ 
+                                        <div className="flex flex-wrap justify-between gap-2 mb-3"> 
+ 
+                                            <span className="font-sans text-sm font-medium text-espresso dark:text-cream"> 
+                                                { 
+                                                    order.order_number 
+                                                } 
+                                            </span> 
+ 
+                                            <span className="font-sans text-xs text-espresso/50 dark:text-cream/50"> 
+                                                {new Date( 
+                                                    order.created_at 
+                                                ).toLocaleDateString( 
+                                                    'en-NG', 
+                                                    { 
+                                                        day: 'numeric', 
+                                                        month: 'long', 
+                                                        year: 'numeric', 
+                                                    } 
+                                                )} 
+                                            </span> 
+ 
+                                        </div> 
+ 
+                                        <select 
+                                            value={ 
+                                                order.status || 
+                                                'pending' 
+                                            } 
+                                            onChange={async ( 
+                                                event 
+                                            ) => { 
+                                                const newStatus = 
+                                                    event 
+                                                        .target 
+                                                        .value 
+ 
+                                                await supabase 
+                                                    .from( 
+                                                        'orders' 
+                                                    ) 
+                                                    .update( 
+                                                        { 
+                                                            status: newStatus, 
+                                                        } 
+                                                    ) 
+                                                    .eq( 
+                                                        'id', 
+                                                        order.id 
+                                                    ) 
+ 
+                                                setOrders( 
+                                                    ( 
+                                                        previous 
+                                                    ) => 
+                                                        previous.map( 
+                                                            ( 
+                                                                currentOrder 
+                                                            ) => 
+                                                                currentOrder.id === 
+                                                                order.id 
+                                                                    ? { 
+                                                                        ...currentOrder, 
+                                                                        status: newStatus, 
+                                                                    } 
+                                                                    : currentOrder 
+                                                        ) 
+                                                ) 
+                                            }} 
+                                            className="bg-transparent border border-gold/30 rounded-full px-3 py-1 font-sans text-xs text-espresso dark:text-cream outline-none focus:border-gold mb-3" 
+                                        > 
+ 
+                                            <option value="pending"> 
+                                                Pending 
+                                            </option> 
+ 
+                                            <option value="confirmed"> 
+                                                Confirmed 
+                                            </option> 
+ 
+                                            <option value="shipped"> 
+                                                Shipped 
+                                            </option> 
+ 
+                                            <option value="delivered"> 
+                                                Delivered 
+                                            </option> 
+ 
+                                        </select> 
+ 
+                                        <p className="font-sans text-sm text-espresso/70 dark:text-cream/70 mb-1"> 
+                                            { 
+                                                order.customer_name 
+                                            }{' '} 
+                                            ·{' '} 
+                                            { 
+                                                order.customer_phone 
+                                            } 
+                                        </p> 
+ 
+                                        <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 mb-3"> 
+                                            { 
+                                                order.customer_address 
+                                            } 
+                                        </p> 
+ 
+                                        <div className="flex flex-col gap-1 mb-3 border-t border-gold/10 pt-3"> 
+ 
+                                            {order.items?.map( 
+                                                ( 
+                                                    item 
+                                                ) => ( 
+                                                    <div 
+                                                        key={ 
+                                                            item.id 
+                                                        } 
+                                                        className="flex justify-between font-sans text-xs text-espresso/60 dark:text-cream/60" 
+                                                    > 
+ 
+                                                        <span> 
+                                                            { 
+                                                                item.name 
+                                                            }{' '} 
+                                                            x{' '} 
+                                                            { 
+                                                                item.quantity 
+                                                            } 
+                                                        </span> 
+ 
+                                                        <span> 
+                                                            {formatPrice( 
+                                                                item.price * 
+                                                                item.quantity 
+                                                            )} 
+                                                        </span> 
+ 
+                                                    </div> 
+                                                ) 
+                                            )} 
+ 
+                                        </div> 
+ 
+                                        <div className="flex justify-between font-display italic font-semibold text-espresso dark:text-cream"> 
+ 
+                                            <span> 
+                                                Total 
+                                            </span> 
+ 
+                                            <span> 
+                                                {formatPrice( 
+                                                    order.total 
+                                                )} 
+                                            </span> 
+ 
+                                        </div> 
+ 
+                                    </div> 
+                                ) 
+                            ) 
+                        )} 
+ 
+                    </div> 
+                )} 
+ 
+                {/* PRODUCTS */} 
+ 
+                {tab === 'products' && ( 
+                    <> 
+ 
+                        <div className="bg-gold/5 rounded-2xl p-6 mb-12"> 
+ 
+                            <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-4"> 
+                                {editing 
+                                    ? 'Edit Product' 
+                                    : 'Add New Product'} 
+                            </h2> 
+ 
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"> 
+ 
+                                <input 
+                                    type="text" 
+                                    placeholder="Product name" 
+                                    value={ 
+                                        form.name 
+                                    } 
+                                    onChange={(e) => 
+                                        update( 
+                                            'name', 
+                                            e 
+                                                .target 
+                                                .value 
+                                        ) 
+                                    } 
+                                    className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold" 
+                                /> 
+ 
+                                <input 
+                                    type="number" 
+                                    placeholder="Price (Naira)" 
+                                    value={ 
+                                        form.price 
+                                    } 
+                                    onChange={(e) => 
+                                        update( 
+                                            'price', 
+                                            e 
+                                                .target 
+                                                .value 
+                                        ) 
+                                    } 
+                                    className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold" 
+                                /> 
+ 
+                                <input 
+                                    type="number" 
+                                    placeholder="Stock quantity" 
+                                    value={ 
+                                        form.stock 
+                                    } 
+                                    onChange={(e) => 
+                                        update( 
+                                            'stock', 
+                                            e 
+                                                .target 
+                                                .value 
+                                        ) 
+                                    } 
+                                    className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold" 
+                                /> 
+ 
+                                <select 
+                                    value={ 
+                                        form.status 
+                                    } 
+                                    onChange={(e) => 
+                                        update( 
+                                            'status', 
+                                            e 
+                                                .target 
+                                                .value 
+                                        ) 
+                                    } 
+                                    className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold" 
+                                > 
+ 
+                                    <option value="active"> 
+                                        Active (visible, normal sale) 
+                                    </option> 
+ 
+                                    <option value="preorder"> 
+                                        Preorder (visible, orderable even at 0 stock) 
+                                    </option> 
+ 
+                                    <option value="hidden"> 
+                                        Hidden (not shown anywhere on the site) 
+                                    </option> 
+ 
+                                </select> 
+ 
+                                <select 
+                                    value={ 
+                                        form.category 
+                                    } 
+                                    onChange={(e) => 
+                                        update( 
+                                            'category', 
+                                            e 
+                                                .target 
+                                                .value 
+                                        ) 
+                                    } 
+                                    className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold" 
+                                > 
+ 
+                                    {categories.map( 
+                                        ( 
+                                            category 
+                                        ) => ( 
+                                            <option 
+                                                key={ 
+                                                    category.id 
+                                                } 
+                                                value={ 
+                                                    category.id 
+                                                } 
+                                            > 
+                                                { 
+                                                    category.name 
+                                                } 
+                                            </option> 
+                                        ) 
+                                    )} 
+ 
+                                </select> 
+ 
+                                <input 
+                                    type="text" 
+                                    placeholder="Main Image URL" 
+                                    value={ 
+                                        form.image 
+                                    } 
+                                    onChange={(e) => 
+                                        update( 
+                                            'image', 
+                                            e 
+                                                .target 
+                                                .value 
+                                        ) 
+                                    } 
+                                    className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold" 
+                                /> 
+ 
+                            </div> 
+ 
+                            <textarea 
+                                placeholder="All image URLs, separated by commas (leave blank to just use the main image above)" 
+                                rows={2} 
+                                value={ 
+                                    form.imagesText 
+                                } 
+                                onChange={(e) => 
+                                    update( 
+                                        'imagesText', 
+                                        e 
+                                            .target 
+                                            .value 
+                                    ) 
+                                } 
+                                className="w-full bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold resize-none mb-3" 
+                            /> 
+ 
+                            <label className="flex items-center gap-2 justify-center border-2 border-dashed border-gold/30 rounded-xl px-4 py-4 cursor-pointer hover:border-gold transition-colors mb-4"> 
+ 
+                                <Upload className="w-4 h-4 text-gold" /> 
+ 
+                                <span className="font-sans text-sm text-espresso dark:text-cream"> 
+                                    Or upload photos directly from your phone or computer 
+                                </span> 
+ 
+                                <input 
+                                    type="file" 
+                                    accept="image/*" 
+                                    multiple 
+                                    onChange={ 
+                                        handleFileUpload 
+                                    } 
+                                    className="hidden" 
+                                /> 
+ 
+                            </label> 
+ 
+                            <div className="flex gap-6 mb-4"> 
+ 
+                                <label className="flex items-center gap-2 font-sans text-sm text-espresso dark:text-cream"> 
+ 
+                                    <input 
+                                        type="checkbox" 
+                                        checked={ 
+                                            form.is_new 
+                                        } 
+                                        onChange={( 
+                                            event 
+                                        ) => 
+                                            update( 
+                                                'is_new', 
+                                                event 
+                                                    .target 
+                                                    .checked 
+                                            ) 
+                                        } 
+                                    /> 
+ 
+                                    New Arrival 
+ 
+                                </label> 
+ 
+                                <label className="flex items-center gap-2 font-sans text-sm text-espresso dark:text-cream"> 
+ 
+                                    <input 
+                                        type="checkbox" 
+                                        checked={ 
+                                            form.is_featured 
+                                        } 
+                                        onChange={( 
+                                            event 
+                                        ) => 
+                                            update( 
+                                                'is_featured', 
+                                                event 
+                                                    .target 
+                                                    .checked 
+                                            ) 
+                                        } 
+                                    /> 
+ 
+                                    Featured 
+ 
+                                </label> 
+ 
+                            </div> 
+ 
+                            <div className="flex gap-3"> 
+ 
+                                <button 
+                                    onClick={ 
+                                        handleSave 
+                                    } 
+                                    disabled={ 
+                                        saving || 
+                                        !form.name || 
+                                        !form.price 
+                                    } 
+                                    className="flex items-center gap-2 bg-gold text-espresso font-sans font-medium px-6 py-3 rounded-full hover:bg-gold-light transition-colors disabled:opacity-40" 
+                                > 
+ 
+                                    <Plus className="w-4 h-4" /> 
+ 
+                                    {editing 
+                                        ? 'Save Changes' 
+                                        : 'Add Product'} 
+ 
+                                </button> 
+ 
+                                {editing && ( 
+                                    <button 
+                                        onClick={ 
+                                            resetForm 
+                                        } 
+                                        className="font-sans text-sm text-espresso/60 dark:text-cream/60 hover:text-gold" 
+                                    > 
+                                        Cancel 
+                                    </button> 
+                                )} 
+ 
+                            </div> 
+ 
+                        </div> 
+ 
+                        <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-4"> 
+                            All Products ( 
+                            {products.length} 
+                            ) 
+                        </h2> 
+ 
+                        {loading ? ( 
+                            <p className="font-sans text-sm text-espresso/60 dark:text-cream/60"> 
+                                Loading... 
+                            </p> 
+                        ) : error ? ( 
+                            <p className="font-sans text-sm text-red-500"> 
+                                Unable to load products. 
+                            </p> 
+                        ) : ( 
+                            <div className="flex flex-col gap-3"> 
+ 
+                                {products.map( 
+                                    (product) => ( 
+                                        <div 
+                                            key={ 
+                                                product.id 
+                                            } 
+                                            className="flex items-center gap-4 border border-gold/20 rounded-xl p-4" 
+                                        > 
+ 
+                                            <img 
+                                                src={ 
+                                                    product.image 
+                                                } 
+                                                alt={ 
+                                                    product.name 
+                                                } 
+                                                className="w-14 h-14 rounded-lg object-cover flex-shrink-0" 
+                                            /> 
+ 
+                                            <div className="flex-1 min-w-0"> 
+ 
+                                                <p className="font-sans text-sm text-espresso dark:text-cream truncate"> 
+                                                    { 
+                                                        product.name 
+                                                    } 
+                                                </p> 
+ 
+                                                <p className="font-sans text-xs text-gold"> 
+ 
+                                                    {formatPrice( 
+                                                        product.price 
+                                                    )} 
+ 
+                                                    {' · '} 
+ 
+                                                    { 
+                                                        product.category 
+                                                    } 
+ 
+                                                    {product.status && 
+                                                        product.status !== 
+                                                        'active' && ( 
+                                                            <span className="ml-2 uppercase tracking-wide text-[10px] opacity-70"> 
+                                                                ·{' '} 
+                                                                { 
+                                                                    product.status 
+                                                                } 
+                                                            </span> 
+                                                        )} 
+ 
+                                                </p> 
+ 
+                                            </div> 
+ 
+                                            <button 
+                                                onClick={() => 
+                                                    startEdit( 
+                                                        product 
+                                                    ) 
+                                                } 
+                                                aria-label="Edit" 
+                                            > 
+                                                <Pencil className="w-4 h-4 text-espresso/50 dark:text-cream/50 hover:text-gold" /> 
+                                            </button> 
+ 
+                                            <button 
+                                                onClick={() => 
+                                                    handleDelete( 
+                                                        product.id 
+                                                    ) 
+                                                } 
+                                                aria-label="Delete" 
+                                            > 
+                                                <Trash2 className="w-4 h-4 text-espresso/50 dark:text-cream/50 hover:text-red-500" /> 
+                                            </button> 
+ 
+                                        </div> 
+                                    ) 
+                                )} 
+ 
+                            </div> 
+                        )} 
+ 
+                    </> 
+                )} 
+ 
+            </div> 
+        </section> 
+    ) 
+} 
+ 
 export default Admin
