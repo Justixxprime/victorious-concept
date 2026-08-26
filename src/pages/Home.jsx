@@ -7,6 +7,7 @@ import FeaturedProducts from '../components/FeaturedProducts'
 import SourceTeaser from '../components/SourceTeaser'
 import Newsletter from '../components/Newsletter'
 import ShopTheLook from '../components/ShopTheLook'
+import CustomerLove from '../components/CustomerLove'
 import { useProducts } from '../hooks/useProducts'
 
 function Home() {
@@ -39,6 +40,7 @@ function Home() {
       <CategoryGrid />
       <FounderTeaser />
       <FeaturedProducts />
+      <CustomerLove />
       <ShopTheLook products={lookProducts} />
       <SourceTeaser />
       <Newsletter />
