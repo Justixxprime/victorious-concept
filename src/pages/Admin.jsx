@@ -26,27 +26,40 @@ import {
     Percent,
     Users,
     MessageCircle,
+    Mail,
 } from 'lucide-react'
 
 function Admin() {
     const isAdmin = useIsAdmin()
-    const { products, loading, error } = useProducts({ includeHidden: true })
+
+    const { products, loading, error } = useProducts({
+        includeHidden: true,
+    })
+
     const { categories } = useCategories()
+
     const {
         collections,
         refetch: refetchCollections,
     } = useCollections()
-    const { value: heroValue, updateSetting: updateHero } =
-        useSiteSettings('hero')
+
+    const {
+        value: heroValue,
+        updateSetting: updateHero,
+    } = useSiteSettings('hero')
 
     const [heroForm, setHeroForm] = useState(null)
     const [refreshKey, setRefreshKey] = useState(0)
     const [editing, setEditing] = useState(null)
     const [tab, setTab] = useState('products')
+
     const [orders, setOrders] = useState([])
     const [ordersLoading, setOrdersLoading] = useState(true)
 
+    const [messages, setMessages] = useState([])
+
     const [coupons, setCoupons] = useState([])
+
     const [couponForm, setCouponForm] = useState({
         code: '',
         percent_off: '',
@@ -78,12 +91,18 @@ function Admin() {
     const [saving, setSaving] = useState(false)
     const [newCategoryName, setNewCategoryName] = useState('')
 
+    /*
+     * FETCH ORDERS
+     */
+
     useEffect(() => {
         async function fetchAllOrders() {
             const { data } = await supabase
                 .from('orders')
                 .select('*')
-                .order('created_at', { ascending: false })
+                .order('created_at', {
+                    ascending: false,
+                })
 
             setOrders(data || [])
             setOrdersLoading(false)
@@ -93,6 +112,10 @@ function Admin() {
             fetchAllOrders()
         }
     }, [isAdmin])
+
+    /*
+     * FETCH COUPONS
+     */
 
     useEffect(() => {
         async function fetchCoupons() {
@@ -109,6 +132,41 @@ function Admin() {
         }
     }, [isAdmin])
 
+    /*
+     * FETCH CONTACT MESSAGES
+     */
+
+    useEffect(() => {
+        async function fetchMessages() {
+            const { data, error } = await supabase
+                .from('contact_messages')
+                .select('*')
+                .order('created_at', {
+                    ascending: false,
+                })
+
+            if (error) {
+                console.error(
+                    'Unable to load contact messages:',
+                    error
+                )
+
+                setMessages([])
+                return
+            }
+
+            setMessages(data || [])
+        }
+
+        if (isAdmin) {
+            fetchMessages()
+        }
+    }, [isAdmin])
+
+    /*
+     * HERO SETTINGS
+     */
+
     useEffect(() => {
         if (heroValue && !heroForm) {
             setHeroForm(heroValue)
@@ -117,10 +175,8 @@ function Admin() {
 
     /*
      * CUSTOMER AGGREGATION
-     *
-     * Customers are derived directly from real orders.
-     * No additional database table is required.
      */
+
     const customerMap = {}
 
     orders.forEach((o) => {
@@ -145,6 +201,10 @@ function Admin() {
         (a, b) => b.totalSpent - a.totalSpent
     )
 
+    /*
+     * ADMIN ACCESS
+     */
+
     if (!isAdmin) {
         return (
             <div className="min-h-screen bg-cream dark:bg-espresso flex flex-col items-center justify-center gap-4 px-6 text-center">
@@ -154,6 +214,10 @@ function Admin() {
             </div>
         )
     }
+
+    /*
+     * PRODUCT FORM
+     */
 
     function update(field, value) {
         setForm((prev) => ({
@@ -170,7 +234,9 @@ function Admin() {
             price: product.price,
             category: product.category,
             image: product.image,
-            imagesText: (product.images || [product.image]).join(', '),
+            imagesText: (
+                product.images || [product.image]
+            ).join(', '),
             stock: product.stock,
             status: product.status || 'active',
             is_new: product.isNew,
@@ -194,8 +260,12 @@ function Admin() {
         })
     }
 
+    /*
+     * PRODUCT IMAGE UPLOAD
+     */
+
     async function handleFileUpload(e) {
-        const files = Array.from(e.target.files)
+        const files = Array.from(e.target.files || [])
 
         if (files.length === 0) return
 
@@ -204,11 +274,12 @@ function Admin() {
         for (const file of files) {
             const fileName = `${Date.now()}-${file.name}`
 
-            const { error } = await supabase.storage
-                .from('product-images')
-                .upload(fileName, file)
+            const { error: uploadError } =
+                await supabase.storage
+                    .from('product-images')
+                    .upload(fileName, file)
 
-            if (!error) {
+            if (!uploadError) {
                 const { data } = supabase.storage
                     .from('product-images')
                     .getPublicUrl(fileName)
@@ -225,15 +296,27 @@ function Admin() {
                     .filter(Boolean)
                 : []
 
-            const combined = [...existing, ...uploadedUrls]
+            const combined = [
+                ...existing,
+                ...uploadedUrls,
+            ]
 
-            update('imagesText', combined.join(', '))
+            update(
+                'imagesText',
+                combined.join(', ')
+            )
 
             if (!form.image) {
                 update('image', combined[0])
             }
         }
+
+        e.target.value = ''
     }
+
+    /*
+     * SAVE PRODUCT
+     */
 
     async function handleSave() {
         setSaving(true)
@@ -243,7 +326,9 @@ function Admin() {
                 .split(',')
                 .map((s) => s.trim())
                 .filter(Boolean)
-            : [form.image]
+            : form.image
+                ? [form.image]
+                : []
 
         const payload = {
             name: form.name,
@@ -251,7 +336,7 @@ function Admin() {
             category: form.category,
             image: form.image,
             images: imagesArray,
-            stock: form.stock,
+            stock: Number(form.stock) || 0,
             status: form.status,
             is_new: form.is_new,
             is_featured: form.is_featured,
@@ -275,8 +360,18 @@ function Admin() {
         window.location.reload()
     }
 
+    /*
+     * DELETE PRODUCT
+     */
+
     async function handleDelete(id) {
-        if (!confirm('Delete this product permanently?')) return
+        if (
+            !confirm(
+                'Delete this product permanently?'
+            )
+        ) {
+            return
+        }
 
         await supabase
             .from('products')
@@ -285,6 +380,10 @@ function Admin() {
 
         window.location.reload()
     }
+
+    /*
+     * CATEGORIES
+     */
 
     async function addCategory() {
         if (!newCategoryName.trim()) return
@@ -303,6 +402,7 @@ function Admin() {
             })
 
         setNewCategoryName('')
+
         window.location.reload()
     }
 
@@ -323,14 +423,29 @@ function Admin() {
         window.location.reload()
     }
 
-    async function addCoupon() {
-        if (!couponForm.code || !couponForm.percent_off) return
+    /*
+     * COUPONS
+     */
 
-        await supabase.from('coupons').insert({
-            code: couponForm.code.trim().toUpperCase(),
-            percent_off: Number(couponForm.percent_off),
-            active: true,
-        })
+    async function addCoupon() {
+        if (
+            !couponForm.code ||
+            !couponForm.percent_off
+        ) {
+            return
+        }
+
+        await supabase
+            .from('coupons')
+            .insert({
+                code: couponForm.code
+                    .trim()
+                    .toUpperCase(),
+                percent_off: Number(
+                    couponForm.percent_off
+                ),
+                active: true,
+            })
 
         setCouponForm({
             code: '',
@@ -349,7 +464,9 @@ function Admin() {
     async function toggleCoupon(id, active) {
         await supabase
             .from('coupons')
-            .update({ active: !active })
+            .update({
+                active: !active,
+            })
             .eq('id', id)
 
         const { data } = await supabase
@@ -361,7 +478,13 @@ function Admin() {
     }
 
     async function deleteCoupon(id) {
-        if (!confirm('Delete this discount code?')) return
+        if (
+            !confirm(
+                'Delete this discount code?'
+            )
+        ) {
+            return
+        }
 
         await supabase
             .from('coupons')
@@ -376,27 +499,76 @@ function Admin() {
         setCoupons(data || [])
     }
 
-    function toggleProductInCollection(productId) {
+    /*
+     * MESSAGES
+     */
+
+    async function markRead(id) {
+        const { error } = await supabase
+            .from('contact_messages')
+            .update({
+                read: true,
+            })
+            .eq('id', id)
+
+        if (error) {
+            console.error(
+                'Unable to mark message as read:',
+                error
+            )
+
+            return
+        }
+
+        setMessages((prev) =>
+            prev.map((message) =>
+                message.id === id
+                    ? {
+                        ...message,
+                        read: true,
+                    }
+                    : message
+            )
+        )
+    }
+
+    /*
+     * COLLECTIONS
+     */
+
+    function toggleProductInCollection(
+        productId
+    ) {
         setCollectionForm((prev) => {
             const id = String(productId)
 
-            const existingIds = (prev.product_ids || []).map((p) =>
-                String(p)
-            )
+            const existingIds = (
+                prev.product_ids || []
+            ).map((p) => String(p))
 
-            const exists = existingIds.includes(id)
+            const exists =
+                existingIds.includes(id)
 
             return {
                 ...prev,
                 product_ids: exists
-                    ? existingIds.filter((p) => p !== id)
-                    : [...existingIds, id],
+                    ? existingIds.filter(
+                        (p) => p !== id
+                    )
+                    : [
+                        ...existingIds,
+                        id,
+                    ],
             }
         })
     }
 
     async function saveCollection() {
-        if (!collectionForm.name.trim()) return
+        if (
+            !collectionForm.name.trim()
+        ) {
+            return
+        }
 
         const slug =
             collectionForm.slug.trim() ||
@@ -409,16 +581,20 @@ function Admin() {
             ...collectionForm,
             name: collectionForm.name.trim(),
             slug,
-            product_ids: (collectionForm.product_ids || []).map((id) =>
-                String(id)
-            ),
+            product_ids: (
+                collectionForm.product_ids ||
+                []
+            ).map((id) => String(id)),
         }
 
         if (editingCollection) {
             await supabase
                 .from('collections')
                 .update(payload)
-                .eq('id', editingCollection)
+                .eq(
+                    'id',
+                    editingCollection
+                )
         } else {
             await supabase
                 .from('collections')
@@ -444,11 +620,12 @@ function Admin() {
         setCollectionForm({
             name: col.name || '',
             slug: col.slug || '',
-            description: col.description || '',
+            description:
+                col.description || '',
             image: col.image || '',
-            product_ids: (col.product_ids || []).map((id) =>
-                String(id)
-            ),
+            product_ids: (
+                col.product_ids || []
+            ).map((id) => String(id)),
         })
     }
 
@@ -465,7 +642,13 @@ function Admin() {
     }
 
     async function deleteCollection(id) {
-        if (!confirm('Delete this collection?')) return
+        if (
+            !confirm(
+                'Delete this collection?'
+            )
+        ) {
+            return
+        }
 
         await supabase
             .from('collections')
@@ -479,12 +662,21 @@ function Admin() {
         }
     }
 
+    /*
+     * TAB BUTTON STYLE
+     */
+
     const tabButtonClass = (tabName) =>
         `group relative flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-sans uppercase tracking-wide border transition-all duration-300 whitespace-nowrap ${
             tab === tabName
                 ? 'bg-gold text-espresso border-gold shadow-[0_0_24px_rgba(212,175,55,0.18)]'
                 : 'border-gold/30 text-espresso dark:text-cream hover:border-gold/60 hover:bg-gold/5'
         }`
+
+    const unreadMessages =
+        messages.filter(
+            (message) => !message.read
+        ).length
 
     return (
         <section className="bg-cream dark:bg-espresso transition-colors min-h-screen py-12 px-6">
@@ -495,7 +687,7 @@ function Admin() {
 
             <div className="max-w-5xl mx-auto">
 
-                {/* ========== BRANDED ADMIN HEADER ========== */}
+                {/* HEADER */}
 
                 <div className="flex items-center justify-between mb-8">
                     <div>
@@ -517,71 +709,128 @@ function Admin() {
                     </div>
                 </div>
 
-                {/* ========== TABS ========== */}
+                {/* TABS */}
 
                 <div className="flex gap-2 mb-10 overflow-x-auto pb-2">
 
                     <button
-                        onClick={() => setTab('products')}
-                        className={tabButtonClass('products')}
+                        onClick={() =>
+                            setTab('products')
+                        }
+                        className={tabButtonClass(
+                            'products'
+                        )}
                     >
                         <Package className="w-3.5 h-3.5" />
                         Products
                     </button>
 
                     <button
-                        onClick={() => setTab('orders')}
-                        className={tabButtonClass('orders')}
+                        onClick={() =>
+                            setTab('orders')
+                        }
+                        className={tabButtonClass(
+                            'orders'
+                        )}
                     >
                         <ClipboardList className="w-3.5 h-3.5" />
                         Orders ({orders.length})
                     </button>
 
                     <button
-                        onClick={() => setTab('content')}
-                        className={tabButtonClass('content')}
+                        onClick={() =>
+                            setTab('content')
+                        }
+                        className={tabButtonClass(
+                            'content'
+                        )}
                     >
                         <LayoutDashboard className="w-3.5 h-3.5" />
                         Homepage
                     </button>
 
                     <button
-                        onClick={() => setTab('categories')}
-                        className={tabButtonClass('categories')}
+                        onClick={() =>
+                            setTab('categories')
+                        }
+                        className={tabButtonClass(
+                            'categories'
+                        )}
                     >
                         <Tags className="w-3.5 h-3.5" />
                         Categories
                     </button>
 
                     <button
-                        onClick={() => setTab('collections')}
-                        className={tabButtonClass('collections')}
+                        onClick={() =>
+                            setTab('collections')
+                        }
+                        className={tabButtonClass(
+                            'collections'
+                        )}
                     >
                         <Layers className="w-3.5 h-3.5" />
                         Collections
                     </button>
 
-                    {/* NEW CUSTOMERS TAB */}
+                    {/* MESSAGES */}
 
                     <button
-                        onClick={() => setTab('customers')}
-                        className={tabButtonClass('customers')}
+                        onClick={() =>
+                            setTab('messages')
+                        }
+                        className={tabButtonClass(
+                            'messages'
+                        )}
+                    >
+                        <Mail className="w-3.5 h-3.5" />
+
+                        Messages
+
+                        {unreadMessages > 0 && (
+                            <span>
+                                ({unreadMessages})
+                            </span>
+                        )}
+                    </button>
+
+                    {/* CUSTOMERS */}
+
+                    <button
+                        onClick={() =>
+                            setTab('customers')
+                        }
+                        className={tabButtonClass(
+                            'customers'
+                        )}
                     >
                         <Users className="w-3.5 h-3.5" />
                         Customers
                     </button>
 
+                    {/* DISCOUNTS */}
+
                     <button
-                        onClick={() => setTab('discounts')}
-                        className={tabButtonClass('discounts')}
+                        onClick={() =>
+                            setTab('discounts')
+                        }
+                        className={tabButtonClass(
+                            'discounts'
+                        )}
                     >
                         <Percent className="w-3.5 h-3.5" />
                         Discounts
                     </button>
 
+                    {/* ANALYTICS */}
+
                     <button
-                        onClick={() => setTab('analytics')}
-                        className={tabButtonClass('analytics')}
+                        onClick={() =>
+                            setTab('analytics')
+                        }
+                        className={tabButtonClass(
+                            'analytics'
+                        )}
                     >
                         <BarChart3 className="w-3.5 h-3.5" />
                         Analytics
@@ -589,36 +838,46 @@ function Admin() {
 
                 </div>
 
-                {/* ========== ANALYTICS TAB ========== */}
+                {/* ANALYTICS */}
 
                 {tab === 'analytics' &&
                     (() => {
-                        const totalRevenue = orders.reduce(
-                            (sum, o) => sum + (Number(o.total) || 0),
-                            0
-                        )
+                        const totalRevenue =
+                            orders.reduce(
+                                (sum, o) =>
+                                    sum +
+                                    (Number(
+                                        o.total
+                                    ) || 0),
+                                0
+                            )
 
-                        const totalOrders = orders.length
+                        const totalOrders =
+                            orders.length
 
-                        const lowStock = products.filter(
-                            (p) => p.stock > 0 && p.stock <= 2
-                        )
+                        const lowStock =
+                            products.filter(
+                                (p) =>
+                                    p.stock > 0 &&
+                                    p.stock <= 2
+                            )
 
-                        const outOfStock = products.filter(
-                            (p) => p.stock <= 0
-                        )
+                        const outOfStock =
+                            products.filter(
+                                (p) =>
+                                    p.stock <= 0
+                            )
 
                         const avgOrderValue =
                             totalOrders > 0
                                 ? Math.round(
-                                    totalRevenue / totalOrders
+                                    totalRevenue /
+                                    totalOrders
                                 )
                                 : 0
 
                         return (
                             <div className="flex flex-col gap-8">
-
-                                {/* STAT CARDS */}
 
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
 
@@ -626,7 +885,9 @@ function Admin() {
                                         <DollarSign className="w-5 h-5 text-gold mb-3" />
 
                                         <p className="font-display italic font-semibold text-2xl text-espresso dark:text-cream">
-                                            {formatPrice(totalRevenue)}
+                                            {formatPrice(
+                                                totalRevenue
+                                            )}
                                         </p>
 
                                         <p className="font-sans text-xs text-espresso/50 dark:text-cream/50">
@@ -650,7 +911,9 @@ function Admin() {
                                         <TrendingUp className="w-5 h-5 text-gold mb-3" />
 
                                         <p className="font-display italic font-semibold text-2xl text-espresso dark:text-cream">
-                                            {formatPrice(avgOrderValue)}
+                                            {formatPrice(
+                                                avgOrderValue
+                                            )}
                                         </p>
 
                                         <p className="font-sans text-xs text-espresso/50 dark:text-cream/50">
@@ -673,10 +936,10 @@ function Admin() {
 
                                 </div>
 
-                                {/* NEEDS ATTENTION */}
-
-                                {(lowStock.length > 0 ||
-                                    outOfStock.length > 0) && (
+                                {(lowStock.length >
+                                    0 ||
+                                    outOfStock.length >
+                                    0) && (
                                         <div>
                                             <h3 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">
                                                 Needs Attention
@@ -684,35 +947,51 @@ function Admin() {
 
                                             <div className="flex flex-col gap-2">
 
-                                                {outOfStock.map((p) => (
-                                                    <div
-                                                        key={p.id}
-                                                        className="flex justify-between items-center bg-red-500/5 rounded-xl px-4 py-3"
-                                                    >
-                                                        <span className="font-sans text-sm text-espresso dark:text-cream">
-                                                            {p.name}
-                                                        </span>
+                                                {outOfStock.map(
+                                                    (p) => (
+                                                        <div
+                                                            key={
+                                                                p.id
+                                                            }
+                                                            className="flex justify-between items-center bg-red-500/5 rounded-xl px-4 py-3"
+                                                        >
+                                                            <span className="font-sans text-sm text-espresso dark:text-cream">
+                                                                {
+                                                                    p.name
+                                                                }
+                                                            </span>
 
-                                                        <span className="font-sans text-xs text-red-500">
-                                                            Out of stock
-                                                        </span>
-                                                    </div>
-                                                ))}
+                                                            <span className="font-sans text-xs text-red-500">
+                                                                Out of stock
+                                                            </span>
+                                                        </div>
+                                                    )
+                                                )}
 
-                                                {lowStock.map((p) => (
-                                                    <div
-                                                        key={p.id}
-                                                        className="flex justify-between items-center bg-gold/10 rounded-xl px-4 py-3"
-                                                    >
-                                                        <span className="font-sans text-sm text-espresso dark:text-cream">
-                                                            {p.name}
-                                                        </span>
+                                                {lowStock.map(
+                                                    (p) => (
+                                                        <div
+                                                            key={
+                                                                p.id
+                                                            }
+                                                            className="flex justify-between items-center bg-gold/10 rounded-xl px-4 py-3"
+                                                        >
+                                                            <span className="font-sans text-sm text-espresso dark:text-cream">
+                                                                {
+                                                                    p.name
+                                                                }
+                                                            </span>
 
-                                                        <span className="font-sans text-xs text-gold">
-                                                            Only {p.stock} left
-                                                        </span>
-                                                    </div>
-                                                ))}
+                                                            <span className="font-sans text-xs text-gold">
+                                                                Only{' '}
+                                                                {
+                                                                    p.stock
+                                                                }{' '}
+                                                                left
+                                                            </span>
+                                                        </div>
+                                                    )
+                                                )}
 
                                             </div>
                                         </div>
@@ -722,30 +1001,165 @@ function Admin() {
                         )
                     })()}
 
-                {/* ========== CUSTOMERS TAB ========== */}
+                {/* MESSAGES */}
+
+                {tab === 'messages' && (
+                    <div className="max-w-2xl flex flex-col gap-4">
+
+                        <div className="flex items-center justify-between mb-2">
+                            <div>
+                                <h2 className="font-sans text-sm uppercase tracking-widest text-gold">
+                                    Customer Messages
+                                </h2>
+
+                                <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 mt-1">
+                                    {messages.length}{' '}
+                                    message
+                                    {messages.length !==
+                                    1
+                                        ? 's'
+                                        : ''}{' '}
+                                    received
+                                </p>
+                            </div>
+
+                            <div className="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center">
+                                <Mail className="w-4 h-4 text-gold" />
+                            </div>
+                        </div>
+
+                        {messages.length === 0 ? (
+                            <div className="border border-gold/10 rounded-2xl p-8 text-center">
+
+                                <Mail className="w-8 h-8 text-gold mx-auto mb-3" />
+
+                                <p className="font-sans text-sm text-espresso/60 dark:text-cream/60">
+                                    No messages yet.
+                                </p>
+
+                                <p className="font-sans text-xs text-espresso/40 dark:text-cream/40 mt-1">
+                                    Customer enquiries submitted through the contact form will appear here.
+                                </p>
+
+                            </div>
+                        ) : (
+                            messages.map((message) => (
+                                <div
+                                    key={
+                                        message.id
+                                    }
+                                    className={`border rounded-2xl p-5 transition-colors ${
+                                        message.read
+                                            ? 'border-gold/10'
+                                            : 'border-gold/40 bg-gold/5'
+                                    }`}
+                                >
+
+                                    <div className="flex items-start justify-between gap-4 mb-3">
+
+                                        <div className="min-w-0">
+                                            <div className="flex items-center gap-2">
+
+                                                <p className="font-sans text-sm font-medium text-espresso dark:text-cream">
+                                                    {
+                                                        message.name ||
+                                                        'Customer'
+                                                    }
+                                                </p>
+
+                                                {!message.read && (
+                                                    <span className="text-[9px] uppercase tracking-widest bg-gold text-espresso rounded-full px-2 py-1">
+                                                        New
+                                                    </span>
+                                                )}
+
+                                            </div>
+
+                                            <p className="font-sans text-xs text-gold mt-1 break-all">
+                                                {
+                                                    message.email
+                                                }
+                                            </p>
+                                        </div>
+
+                                        {!message.read && (
+                                            <button
+                                                onClick={() =>
+                                                    markRead(
+                                                        message.id
+                                                    )
+                                                }
+                                                className="font-sans text-xs text-gold hover:underline whitespace-nowrap"
+                                            >
+                                                Mark read
+                                            </button>
+                                        )}
+
+                                    </div>
+
+                                    <p className="font-sans text-sm leading-6 text-espresso/70 dark:text-cream/70 whitespace-pre-wrap">
+                                        {
+                                            message.message
+                                        }
+                                    </p>
+
+                                    {message.created_at && (
+                                        <p className="font-sans text-[10px] uppercase tracking-widest text-espresso/35 dark:text-cream/35 mt-4">
+                                            {new Date(
+                                                message.created_at
+                                            ).toLocaleString(
+                                                'en-NG',
+                                                {
+                                                    day: 'numeric',
+                                                    month: 'short',
+                                                    year: 'numeric',
+                                                    hour: 'numeric',
+                                                    minute: '2-digit',
+                                                }
+                                            )}
+                                        </p>
+                                    )}
+
+                                </div>
+                            ))
+                        )}
+
+                    </div>
+                )}
+
+                {/* CUSTOMERS */}
 
                 {tab === 'customers' && (
                     <div className="max-w-2xl">
 
                         <div className="flex items-center justify-between mb-5">
+
                             <div>
                                 <h2 className="font-sans text-sm uppercase tracking-widest text-gold">
                                     Customers
                                 </h2>
 
                                 <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 mt-1">
-                                    {customersList.length} unique customer
-                                    {customersList.length !== 1 ? 's' : ''} from
-                                    real orders
+                                    {
+                                        customersList.length
+                                    }{' '}
+                                    unique customer
+                                    {customersList.length !==
+                                    1
+                                        ? 's'
+                                        : ''}{' '}
+                                    from real orders
                                 </p>
                             </div>
 
                             <div className="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center">
                                 <Users className="w-4 h-4 text-gold" />
                             </div>
+
                         </div>
 
-                        {customersList.length === 0 ? (
+                        {customersList.length ===
+                        0 ? (
                             <div className="border border-gold/10 rounded-2xl p-8 text-center">
 
                                 <Users className="w-8 h-8 text-gold mx-auto mb-3" />
@@ -755,53 +1169,76 @@ function Admin() {
                                 </p>
 
                                 <p className="font-sans text-xs text-espresso/40 dark:text-cream/40 mt-1">
-                                    Real customer data will appear here once
-                                    orders start coming in.
+                                    Real customer data will appear here once orders start coming in.
                                 </p>
 
                             </div>
                         ) : (
                             <div className="flex flex-col gap-2">
 
-                                {customersList.map((c) => (
-                                    <div
-                                        key={c.phone}
-                                        className="flex items-center gap-4 border border-gold/20 rounded-xl p-4"
-                                    >
-
-                                        <div className="flex-1 min-w-0">
-                                            <p className="font-sans text-sm text-espresso dark:text-cream truncate">
-                                                {c.name || 'Customer'}
-                                            </p>
-
-                                            <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 truncate">
-                                                {c.phone}
-                                            </p>
-                                        </div>
-
-                                        <div className="text-right flex-shrink-0">
-                                            <p className="font-sans text-xs text-espresso/50 dark:text-cream/50">
-                                                {c.orderCount} order
-                                                {c.orderCount > 1 ? 's' : ''}
-                                            </p>
-
-                                            <p className="font-display italic font-semibold text-espresso dark:text-cream">
-                                                {formatPrice(c.totalSpent)}
-                                            </p>
-                                        </div>
-
-                                        <a
-                                            href={`https://wa.me/${c.phone.replace(/\D/g, '')}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            aria-label="Message on WhatsApp"
-                                            className="w-9 h-9 rounded-full bg-gold/10 flex items-center justify-center hover:bg-gold/20 transition-colors flex-shrink-0"
+                                {customersList.map(
+                                    (customer) => (
+                                        <div
+                                            key={
+                                                customer.phone
+                                            }
+                                            className="flex items-center gap-4 border border-gold/20 rounded-xl p-4"
                                         >
-                                            <MessageCircle className="w-4 h-4 text-gold" />
-                                        </a>
 
-                                    </div>
-                                ))}
+                                            <div className="flex-1 min-w-0">
+
+                                                <p className="font-sans text-sm text-espresso dark:text-cream truncate">
+                                                    {
+                                                        customer.name ||
+                                                        'Customer'
+                                                    }
+                                                </p>
+
+                                                <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 truncate">
+                                                    {
+                                                        customer.phone
+                                                    }
+                                                </p>
+
+                                            </div>
+
+                                            <div className="text-right flex-shrink-0">
+
+                                                <p className="font-sans text-xs text-espresso/50 dark:text-cream/50">
+                                                    {
+                                                        customer.orderCount
+                                                    }{' '}
+                                                    order
+                                                    {customer.orderCount >
+                                                    1
+                                                        ? 's'
+                                                        : ''}
+                                                </p>
+
+                                                <p className="font-display italic font-semibold text-espresso dark:text-cream">
+                                                    {formatPrice(
+                                                        customer.totalSpent
+                                                    )}
+                                                </p>
+
+                                            </div>
+
+                                            <a
+                                                href={`https://wa.me/${customer.phone.replace(
+                                                    /\D/g,
+                                                    ''
+                                                )}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                aria-label="Message on WhatsApp"
+                                                className="w-9 h-9 rounded-full bg-gold/10 flex items-center justify-center hover:bg-gold/20 transition-colors flex-shrink-0"
+                                            >
+                                                <MessageCircle className="w-4 h-4 text-gold" />
+                                            </a>
+
+                                        </div>
+                                    )
+                                )}
 
                             </div>
                         )}
@@ -809,7 +1246,7 @@ function Admin() {
                     </div>
                 )}
 
-                {/* ========== DISCOUNTS TAB ========== */}
+                {/* DISCOUNTS */}
 
                 {tab === 'discounts' && (
                     <div className="max-w-lg flex flex-col gap-8">
@@ -825,12 +1262,18 @@ function Admin() {
                                 <input
                                     type="text"
                                     placeholder="CODE (e.g. WELCOME10)"
-                                    value={couponForm.code}
+                                    value={
+                                        couponForm.code
+                                    }
                                     onChange={(e) =>
-                                        setCouponForm({
-                                            ...couponForm,
-                                            code: e.target.value,
-                                        })
+                                        setCouponForm(
+                                            {
+                                                ...couponForm,
+                                                code: e
+                                                    .target
+                                                    .value,
+                                            }
+                                        )
                                     }
                                     className="flex-1 bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
                                 />
@@ -838,12 +1281,21 @@ function Admin() {
                                 <input
                                     type="number"
                                     placeholder="% off"
-                                    value={couponForm.percent_off}
+                                    min="1"
+                                    max="100"
+                                    value={
+                                        couponForm.percent_off
+                                    }
                                     onChange={(e) =>
-                                        setCouponForm({
-                                            ...couponForm,
-                                            percent_off: e.target.value,
-                                        })
+                                        setCouponForm(
+                                            {
+                                                ...couponForm,
+                                                percent_off:
+                                                    e
+                                                        .target
+                                                        .value,
+                                            }
+                                        )
                                     }
                                     className="w-24 bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
                                 />
@@ -851,7 +1303,9 @@ function Admin() {
                             </div>
 
                             <button
-                                onClick={addCoupon}
+                                onClick={
+                                    addCoupon
+                                }
                                 className="bg-gold text-espresso font-sans font-medium px-6 py-3 rounded-full hover:bg-gold-light transition-colors"
                             >
                                 Create Code
@@ -867,58 +1321,76 @@ function Admin() {
 
                             <div className="flex flex-col gap-2">
 
-                                {coupons.map((c) => (
-                                    <div
-                                        key={c.id}
-                                        className="flex items-center gap-3 border border-gold/20 rounded-xl p-4"
-                                    >
+                                {coupons.map(
+                                    (coupon) => (
+                                        <div
+                                            key={
+                                                coupon.id
+                                            }
+                                            className="flex items-center gap-3 border border-gold/20 rounded-xl p-4"
+                                        >
 
-                                        <span className="flex-1 font-sans text-sm text-espresso dark:text-cream">
-                                            {c.code}{' '}
-                                            <span className="text-gold">
-                                                ({c.percent_off}% off)
+                                            <span className="flex-1 font-sans text-sm text-espresso dark:text-cream">
+
+                                                {
+                                                    coupon.code
+                                                }{' '}
+
+                                                <span className="text-gold">
+                                                    (
+                                                    {
+                                                        coupon.percent_off
+                                                    }
+                                                    % off)
+                                                </span>
+
                                             </span>
-                                        </span>
 
-                                        <button
-                                            onClick={() =>
-                                                toggleCoupon(
-                                                    c.id,
-                                                    c.active
-                                                )
-                                            }
-                                            className={`text-xs font-sans px-3 py-1 rounded-full ${
-                                                c.active
-                                                    ? 'bg-green-500/10 text-green-500'
-                                                    : 'bg-gold/10 text-espresso/50 dark:text-cream/50'
-                                            }`}
-                                        >
-                                            {c.active
-                                                ? 'Active'
-                                                : 'Disabled'}
-                                        </button>
+                                            <button
+                                                onClick={() =>
+                                                    toggleCoupon(
+                                                        coupon.id,
+                                                        coupon.active
+                                                    )
+                                                }
+                                                className={`text-xs font-sans px-3 py-1 rounded-full ${
+                                                    coupon.active
+                                                        ? 'bg-green-500/10 text-green-500'
+                                                        : 'bg-gold/10 text-espresso/50 dark:text-cream/50'
+                                                }`}
+                                            >
+                                                {coupon.active
+                                                    ? 'Active'
+                                                    : 'Disabled'}
+                                            </button>
 
-                                        <button
-                                            onClick={() =>
-                                                deleteCoupon(c.id)
-                                            }
-                                            aria-label="Delete code"
-                                        >
-                                            <Trash2 className="w-4 h-4 text-espresso/40 dark:text-cream/40 hover:text-red-500" />
-                                        </button>
+                                            <button
+                                                onClick={() =>
+                                                    deleteCoupon(
+                                                        coupon.id
+                                                    )
+                                                }
+                                                aria-label="Delete code"
+                                            >
+                                                <Trash2 className="w-4 h-4 text-espresso/40 dark:text-cream/40 hover:text-red-500" />
+                                            </button>
 
-                                    </div>
-                                ))}
-
-                                {coupons.length === 0 && (
-                                    <div className="border border-gold/10 rounded-xl p-6 text-center">
-                                        <Percent className="w-6 h-6 text-gold mx-auto mb-2" />
-
-                                        <p className="font-sans text-sm text-espresso/60 dark:text-cream/60">
-                                            No discount codes yet.
-                                        </p>
-                                    </div>
+                                        </div>
+                                    )
                                 )}
+
+                                {coupons.length ===
+                                    0 && (
+                                        <div className="border border-gold/10 rounded-xl p-6 text-center">
+
+                                            <Percent className="w-6 h-6 text-gold mx-auto mb-2" />
+
+                                            <p className="font-sans text-sm text-espresso/60 dark:text-cream/60">
+                                                No discount codes yet.
+                                            </p>
+
+                                        </div>
+                                    )}
 
                             </div>
 
@@ -927,7 +1399,7 @@ function Admin() {
                     </div>
                 )}
 
-                {/* ========== COLLECTIONS TAB ========== */}
+                {/* COLLECTIONS */}
 
                 {tab === 'collections' && (
                     <div className="max-w-2xl flex flex-col gap-8">
@@ -945,12 +1417,18 @@ function Admin() {
                                 <input
                                     type="text"
                                     placeholder="Collection name (e.g. Gift Ideas)"
-                                    value={collectionForm.name}
+                                    value={
+                                        collectionForm.name
+                                    }
                                     onChange={(e) =>
-                                        setCollectionForm({
-                                            ...collectionForm,
-                                            name: e.target.value,
-                                        })
+                                        setCollectionForm(
+                                            {
+                                                ...collectionForm,
+                                                name: e
+                                                    .target
+                                                    .value,
+                                            }
+                                        )
                                     }
                                     className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
                                 />
@@ -958,12 +1436,18 @@ function Admin() {
                                 <input
                                     type="text"
                                     placeholder="Slug (optional, e.g. gift-ideas)"
-                                    value={collectionForm.slug}
+                                    value={
+                                        collectionForm.slug
+                                    }
                                     onChange={(e) =>
-                                        setCollectionForm({
-                                            ...collectionForm,
-                                            slug: e.target.value,
-                                        })
+                                        setCollectionForm(
+                                            {
+                                                ...collectionForm,
+                                                slug: e
+                                                    .target
+                                                    .value,
+                                            }
+                                        )
                                     }
                                     className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
                                 />
@@ -971,12 +1455,19 @@ function Admin() {
                                 <textarea
                                     placeholder="Short description"
                                     rows={2}
-                                    value={collectionForm.description}
+                                    value={
+                                        collectionForm.description
+                                    }
                                     onChange={(e) =>
-                                        setCollectionForm({
-                                            ...collectionForm,
-                                            description: e.target.value,
-                                        })
+                                        setCollectionForm(
+                                            {
+                                                ...collectionForm,
+                                                description:
+                                                    e
+                                                        .target
+                                                        .value,
+                                            }
+                                        )
                                     }
                                     className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold resize-none"
                                 />
@@ -984,12 +1475,18 @@ function Admin() {
                                 <input
                                     type="text"
                                     placeholder="Cover image URL (optional)"
-                                    value={collectionForm.image}
+                                    value={
+                                        collectionForm.image
+                                    }
                                     onChange={(e) =>
-                                        setCollectionForm({
-                                            ...collectionForm,
-                                            image: e.target.value,
-                                        })
+                                        setCollectionForm(
+                                            {
+                                                ...collectionForm,
+                                                image: e
+                                                    .target
+                                                    .value,
+                                            }
+                                        )
                                     }
                                     className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
                                 />
@@ -1002,50 +1499,75 @@ function Admin() {
 
                             <div className="flex flex-col gap-2 max-h-64 overflow-y-auto mb-4">
 
-                                {products.length === 0 ? (
+                                {products.length ===
+                                0 ? (
                                     <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 py-4">
                                         No products available yet.
                                     </p>
                                 ) : (
-                                    products.map((p) => {
-
-                                        const selected =
-                                            (
-                                                collectionForm.product_ids ||
-                                                []
-                                            )
-                                                .map((id) => String(id))
-                                                .includes(
-                                                    String(p.id)
+                                    products.map(
+                                        (
+                                            product
+                                        ) => {
+                                            const selected =
+                                                (
+                                                    collectionForm.product_ids ||
+                                                    []
                                                 )
-
-                                        return (
-                                            <label
-                                                key={p.id}
-                                                className="flex items-center gap-3 border border-gold/10 rounded-lg p-2 cursor-pointer hover:border-gold/30 transition-colors"
-                                            >
-                                                <input
-                                                    type="checkbox"
-                                                    checked={selected}
-                                                    onChange={() =>
-                                                        toggleProductInCollection(
-                                                            p.id
+                                                    .map(
+                                                        (
+                                                            id
+                                                        ) =>
+                                                            String(
+                                                                id
+                                                            )
+                                                    )
+                                                    .includes(
+                                                        String(
+                                                            product.id
                                                         )
+                                                    )
+
+                                            return (
+                                                <label
+                                                    key={
+                                                        product.id
                                                     }
-                                                />
+                                                    className="flex items-center gap-3 border border-gold/10 rounded-lg p-2 cursor-pointer hover:border-gold/30 transition-colors"
+                                                >
 
-                                                <img
-                                                    src={p.image}
-                                                    alt={p.name}
-                                                    className="w-8 h-8 rounded object-cover flex-shrink-0"
-                                                />
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={
+                                                            selected
+                                                        }
+                                                        onChange={() =>
+                                                            toggleProductInCollection(
+                                                                product.id
+                                                            )
+                                                        }
+                                                    />
 
-                                                <span className="font-sans text-xs text-espresso dark:text-cream truncate">
-                                                    {p.name}
-                                                </span>
-                                            </label>
-                                        )
-                                    })
+                                                    <img
+                                                        src={
+                                                            product.image
+                                                        }
+                                                        alt={
+                                                            product.name
+                                                        }
+                                                        className="w-8 h-8 rounded object-cover flex-shrink-0"
+                                                    />
+
+                                                    <span className="font-sans text-xs text-espresso dark:text-cream truncate">
+                                                        {
+                                                            product.name
+                                                        }
+                                                    </span>
+
+                                                </label>
+                                            )
+                                        }
+                                    )
                                 )}
 
                             </div>
@@ -1053,8 +1575,12 @@ function Admin() {
                             <div className="flex items-center gap-3">
 
                                 <button
-                                    onClick={saveCollection}
-                                    disabled={!collectionForm.name.trim()}
+                                    onClick={
+                                        saveCollection
+                                    }
+                                    disabled={
+                                        !collectionForm.name.trim()
+                                    }
                                     className="bg-gold text-espresso font-sans font-medium px-6 py-3 rounded-full hover:bg-gold-light transition-colors disabled:opacity-40"
                                 >
                                     {editingCollection
@@ -1064,7 +1590,9 @@ function Admin() {
 
                                 {editingCollection && (
                                     <button
-                                        onClick={resetCollectionForm}
+                                        onClick={
+                                            resetCollectionForm
+                                        }
                                         className="font-sans text-sm text-espresso/60 dark:text-cream/60 hover:text-gold"
                                     >
                                         Cancel
@@ -1084,12 +1612,16 @@ function Admin() {
                                 </h2>
 
                                 <span className="font-sans text-xs text-espresso/40 dark:text-cream/40">
-                                    {collections.length} total
+                                    {
+                                        collections.length
+                                    }{' '}
+                                    total
                                 </span>
 
                             </div>
 
-                            {collections.length === 0 ? (
+                            {collections.length ===
+                            0 ? (
                                 <div className="border border-gold/10 rounded-2xl p-8 text-center">
 
                                     <Layers className="w-8 h-8 text-gold mx-auto mb-3" />
@@ -1106,57 +1638,75 @@ function Admin() {
                             ) : (
                                 <div className="flex flex-col gap-2">
 
-                                    {collections.map((col) => (
-                                        <div
-                                            key={col.id}
-                                            className="flex items-center gap-3 border border-gold/20 rounded-xl p-4"
-                                        >
+                                    {collections.map(
+                                        (
+                                            collection
+                                        ) => (
+                                            <div
+                                                key={
+                                                    collection.id
+                                                }
+                                                className="flex items-center gap-3 border border-gold/20 rounded-xl p-4"
+                                            >
 
-                                            {col.image ? (
-                                                <img
-                                                    src={col.image}
-                                                    alt={col.name}
-                                                    className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
-                                                />
-                                            ) : (
-                                                <div className="w-10 h-10 rounded-lg bg-gold/10 flex items-center justify-center flex-shrink-0">
-                                                    <Layers className="w-4 h-4 text-gold" />
-                                                </div>
-                                            )}
+                                                {collection.image ? (
+                                                    <img
+                                                        src={
+                                                            collection.image
+                                                        }
+                                                        alt={
+                                                            collection.name
+                                                        }
+                                                        className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
+                                                    />
+                                                ) : (
+                                                    <div className="w-10 h-10 rounded-lg bg-gold/10 flex items-center justify-center flex-shrink-0">
+                                                        <Layers className="w-4 h-4 text-gold" />
+                                                    </div>
+                                                )}
 
-                                            <span className="flex-1 font-sans text-sm text-espresso dark:text-cream min-w-0 truncate">
+                                                <span className="flex-1 font-sans text-sm text-espresso dark:text-cream min-w-0 truncate">
 
-                                                {col.name}
+                                                    {
+                                                        collection.name
+                                                    }
 
-                                                <span className="text-espresso/40 dark:text-cream/40 ml-1">
-                                                    (
-                                                    {col.product_ids?.length ||
-                                                        0}{' '}
-                                                    items)
+                                                    <span className="text-espresso/40 dark:text-cream/40 ml-1">
+                                                        (
+                                                        {
+                                                            collection.product_ids?.length ||
+                                                            0
+                                                        }{' '}
+                                                        items)
+                                                    </span>
+
                                                 </span>
 
-                                            </span>
+                                                <button
+                                                    onClick={() =>
+                                                        startEditCollection(
+                                                            collection
+                                                        )
+                                                    }
+                                                    aria-label="Edit collection"
+                                                >
+                                                    <Pencil className="w-4 h-4 text-espresso/50 dark:text-cream/50 hover:text-gold" />
+                                                </button>
 
-                                            <button
-                                                onClick={() =>
-                                                    startEditCollection(col)
-                                                }
-                                                aria-label="Edit collection"
-                                            >
-                                                <Pencil className="w-4 h-4 text-espresso/50 dark:text-cream/50 hover:text-gold" />
-                                            </button>
+                                                <button
+                                                    onClick={() =>
+                                                        deleteCollection(
+                                                            collection.id
+                                                        )
+                                                    }
+                                                    aria-label="Delete collection"
+                                                >
+                                                    <Trash2 className="w-4 h-4 text-espresso/50 dark:text-cream/50 hover:text-red-500" />
+                                                </button>
 
-                                            <button
-                                                onClick={() =>
-                                                    deleteCollection(col.id)
-                                                }
-                                                aria-label="Delete collection"
-                                            >
-                                                <Trash2 className="w-4 h-4 text-espresso/50 dark:text-cream/50 hover:text-red-500" />
-                                            </button>
-
-                                        </div>
-                                    ))}
+                                            </div>
+                                        )
+                                    )}
 
                                 </div>
                             )}
@@ -1166,78 +1716,110 @@ function Admin() {
                     </div>
                 )}
 
-                {/* ========== HOMEPAGE / CONTENT TAB ========== */}
+                {/* HOMEPAGE */}
 
-                {tab === 'content' && heroForm && (
-                    <div className="max-w-lg flex flex-col gap-4">
+                {tab === 'content' &&
+                    heroForm && (
+                        <div className="max-w-lg flex flex-col gap-4">
 
-                        <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-2">
-                            Hero Section
-                        </h2>
+                            <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-2">
+                                Hero Section
+                            </h2>
 
-                        <input
-                            type="text"
-                            placeholder="Small label (e.g. The Next Chapter)"
-                            value={heroForm.label}
-                            onChange={(e) =>
-                                setHeroForm({
-                                    ...heroForm,
-                                    label: e.target.value,
-                                })
-                            }
-                            className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
-                        />
+                            <input
+                                type="text"
+                                placeholder="Small label (e.g. The Next Chapter)"
+                                value={
+                                    heroForm.label
+                                }
+                                onChange={(e) =>
+                                    setHeroForm(
+                                        {
+                                            ...heroForm,
+                                            label: e
+                                                .target
+                                                .value,
+                                        }
+                                    )
+                                }
+                                className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
+                            />
 
-                        <textarea
-                            placeholder="Headline"
-                            rows={2}
-                            value={heroForm.headline}
-                            onChange={(e) =>
-                                setHeroForm({
-                                    ...heroForm,
-                                    headline: e.target.value,
-                                })
-                            }
-                            className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold resize-none"
-                        />
+                            <textarea
+                                placeholder="Headline"
+                                rows={2}
+                                value={
+                                    heroForm.headline
+                                }
+                                onChange={(e) =>
+                                    setHeroForm(
+                                        {
+                                            ...heroForm,
+                                            headline:
+                                                e
+                                                    .target
+                                                    .value,
+                                        }
+                                    )
+                                }
+                                className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold resize-none"
+                            />
 
-                        <textarea
-                            placeholder="Supporting text"
-                            rows={2}
-                            value={heroForm.subtext}
-                            onChange={(e) =>
-                                setHeroForm({
-                                    ...heroForm,
-                                    subtext: e.target.value,
-                                })
-                            }
-                            className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold resize-none"
-                        />
+                            <textarea
+                                placeholder="Supporting text"
+                                rows={2}
+                                value={
+                                    heroForm.subtext
+                                }
+                                onChange={(e) =>
+                                    setHeroForm(
+                                        {
+                                            ...heroForm,
+                                            subtext:
+                                                e
+                                                    .target
+                                                    .value,
+                                        }
+                                    )
+                                }
+                                className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold resize-none"
+                            />
 
-                        <input
-                            type="text"
-                            placeholder="Backdrop image URL"
-                            value={heroForm.backdropImage}
-                            onChange={(e) =>
-                                setHeroForm({
-                                    ...heroForm,
-                                    backdropImage: e.target.value,
-                                })
-                            }
-                            className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
-                        />
+                            <input
+                                type="text"
+                                placeholder="Backdrop image URL"
+                                value={
+                                    heroForm.backdropImage
+                                }
+                                onChange={(e) =>
+                                    setHeroForm(
+                                        {
+                                            ...heroForm,
+                                            backdropImage:
+                                                e
+                                                    .target
+                                                    .value,
+                                        }
+                                    )
+                                }
+                                className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
+                            />
 
-                        <button
-                            onClick={() => updateHero(heroForm)}
-                            className="bg-gold text-espresso font-sans font-medium px-6 py-3 rounded-full hover:bg-gold-light transition-colors self-start"
-                        >
-                            Save Homepage Hero
-                        </button>
+                            <button
+                                onClick={() =>
+                                    updateHero(
+                                        heroForm
+                                    )
+                                }
+                                className="bg-gold text-espresso font-sans font-medium px-6 py-3 rounded-full hover:bg-gold-light transition-colors self-start"
+                            >
+                                Save Homepage Hero
+                            </button>
 
-                    </div>
-                )}
+                        </div>
+                    )}
 
-                {/* ========== CATEGORIES TAB ========== */}
+                {/* CATEGORIES */}
 
                 {tab === 'categories' && (
                     <div className="max-w-lg">
@@ -1247,15 +1829,21 @@ function Admin() {
                             <input
                                 type="text"
                                 placeholder="New category name (e.g. Sale, New In)"
-                                value={newCategoryName}
+                                value={
+                                    newCategoryName
+                                }
                                 onChange={(e) =>
-                                    setNewCategoryName(e.target.value)
+                                    setNewCategoryName(
+                                        e.target.value
+                                    )
                                 }
                                 className="flex-1 bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
                             />
 
                             <button
-                                onClick={addCategory}
+                                onClick={
+                                    addCategory
+                                }
                                 className="flex items-center gap-2 bg-gold text-espresso font-sans font-medium px-5 rounded-full hover:bg-gold-light transition-colors"
                             >
                                 <Plus className="w-4 h-4" />
@@ -1266,58 +1854,78 @@ function Admin() {
 
                         <div className="flex flex-col gap-3">
 
-                            {categories.map((cat) => (
-                                <div
-                                    key={cat.id}
-                                    className="border border-gold/20 rounded-xl p-4"
-                                >
+                            {categories.map(
+                                (category) => (
+                                    <div
+                                        key={
+                                            category.id
+                                        }
+                                        className="border border-gold/20 rounded-xl p-4"
+                                    >
 
-                                    <div className="flex items-center gap-3 mb-2">
+                                        <div className="flex items-center gap-3 mb-2">
 
-                                        <TagIcon className="w-4 h-4 text-gold flex-shrink-0" />
+                                            <TagIcon className="w-4 h-4 text-gold flex-shrink-0" />
 
-                                        <span className="flex-1 font-sans text-sm text-espresso dark:text-cream">
-                                            {cat.name}
-                                        </span>
+                                            <span className="flex-1 font-sans text-sm text-espresso dark:text-cream">
+                                                {
+                                                    category.name
+                                                }
+                                            </span>
 
-                                        <button
-                                            onClick={() =>
-                                                deleteCategory(cat.id)
+                                            <button
+                                                onClick={() =>
+                                                    deleteCategory(
+                                                        category.id
+                                                    )
+                                                }
+                                                aria-label="Delete category"
+                                            >
+                                                <Trash2 className="w-4 h-4 text-espresso/40 dark:text-cream/40 hover:text-red-500" />
+                                            </button>
+
+                                        </div>
+
+                                        <textarea
+                                            placeholder="Short introduction for this category page (optional)"
+                                            rows={2}
+                                            defaultValue={
+                                                category.description ||
+                                                ''
                                             }
-                                            aria-label="Delete category"
-                                        >
-                                            <Trash2 className="w-4 h-4 text-espresso/40 dark:text-cream/40 hover:text-red-500" />
-                                        </button>
+                                            onBlur={async (
+                                                event
+                                            ) => {
+                                                await supabase
+                                                    .from(
+                                                        'categories'
+                                                    )
+                                                    .update(
+                                                        {
+                                                            description:
+                                                                event
+                                                                    .target
+                                                                    .value,
+                                                        }
+                                                    )
+                                                    .eq(
+                                                        'id',
+                                                        category.id
+                                                    )
+                                            }}
+                                            className="w-full bg-transparent border border-gold/20 rounded-lg px-3 py-2 font-sans text-xs text-espresso dark:text-cream outline-none focus:border-gold resize-none"
+                                        />
 
                                     </div>
-
-                                    <textarea
-                                        placeholder="Short introduction for this category page (optional)"
-                                        rows={2}
-                                        defaultValue={
-                                            cat.description || ''
-                                        }
-                                        onBlur={async (e) => {
-                                            await supabase
-                                                .from('categories')
-                                                .update({
-                                                    description:
-                                                        e.target.value,
-                                                })
-                                                .eq('id', cat.id)
-                                        }}
-                                        className="w-full bg-transparent border border-gold/20 rounded-lg px-3 py-2 font-sans text-xs text-espresso dark:text-cream outline-none focus:border-gold resize-none"
-                                    />
-
-                                </div>
-                            ))}
+                                )
+                            )}
 
                         </div>
 
                     </div>
                 )}
 
-                {/* ========== ORDERS TAB ========== */}
+                {/* ORDERS */}
 
                 {tab === 'orders' && (
                     <div className="flex flex-col gap-4">
@@ -1326,7 +1934,8 @@ function Admin() {
                             <p className="font-sans text-sm text-espresso/60 dark:text-cream/60">
                                 Loading orders...
                             </p>
-                        ) : orders.length === 0 ? (
+                        ) : orders.length ===
+                        0 ? (
                             <div className="flex flex-col items-center gap-3 py-16 text-center">
 
                                 <Package className="w-8 h-8 text-gold" />
@@ -1337,134 +1946,179 @@ function Admin() {
 
                             </div>
                         ) : (
-                            orders.map((order) => (
-                                <div
-                                    key={order.id}
-                                    className="border border-gold/20 rounded-2xl p-5"
-                                >
-
-                                    <div className="flex flex-wrap justify-between gap-2 mb-3">
-
-                                        <span className="font-sans text-sm font-medium text-espresso dark:text-cream">
-                                            {order.order_number}
-                                        </span>
-
-                                        <span className="font-sans text-xs text-espresso/50 dark:text-cream/50">
-                                            {new Date(
-                                                order.created_at
-                                            ).toLocaleDateString(
-                                                'en-NG',
-                                                {
-                                                    day: 'numeric',
-                                                    month: 'long',
-                                                    year: 'numeric',
-                                                }
-                                            )}
-                                        </span>
-
-                                    </div>
-
-                                    <select
-                                        value={
-                                            order.status || 'pending'
+                            orders.map(
+                                (order) => (
+                                    <div
+                                        key={
+                                            order.id
                                         }
-                                        onChange={async (e) => {
-                                            await supabase
-                                                .from('orders')
-                                                .update({
-                                                    status: e.target.value,
-                                                })
-                                                .eq(
-                                                    'id',
-                                                    order.id
-                                                )
-
-                                            setOrders((prev) =>
-                                                prev.map((o) =>
-                                                    o.id === order.id
-                                                        ? {
-                                                            ...o,
-                                                            status: e
-                                                                .target
-                                                                .value,
-                                                        }
-                                                        : o
-                                                )
-                                            )
-                                        }}
-                                        className="bg-transparent border border-gold/30 rounded-full px-3 py-1 font-sans text-xs text-espresso dark:text-cream outline-none focus:border-gold mb-3"
+                                        className="border border-gold/20 rounded-2xl p-5"
                                     >
 
-                                        <option value="pending">
-                                            Pending
-                                        </option>
+                                        <div className="flex flex-wrap justify-between gap-2 mb-3">
 
-                                        <option value="confirmed">
-                                            Confirmed
-                                        </option>
+                                            <span className="font-sans text-sm font-medium text-espresso dark:text-cream">
+                                                {
+                                                    order.order_number
+                                                }
+                                            </span>
 
-                                        <option value="shipped">
-                                            Shipped
-                                        </option>
+                                            <span className="font-sans text-xs text-espresso/50 dark:text-cream/50">
+                                                {new Date(
+                                                    order.created_at
+                                                ).toLocaleDateString(
+                                                    'en-NG',
+                                                    {
+                                                        day: 'numeric',
+                                                        month: 'long',
+                                                        year: 'numeric',
+                                                    }
+                                                )}
+                                            </span>
 
-                                        <option value="delivered">
-                                            Delivered
-                                        </option>
+                                        </div>
 
-                                    </select>
+                                        <select
+                                            value={
+                                                order.status ||
+                                                'pending'
+                                            }
+                                            onChange={async (
+                                                event
+                                            ) => {
+                                                const newStatus =
+                                                    event
+                                                        .target
+                                                        .value
 
-                                    <p className="font-sans text-sm text-espresso/70 dark:text-cream/70 mb-1">
-                                        {order.customer_name} ·{' '}
-                                        {order.customer_phone}
-                                    </p>
+                                                await supabase
+                                                    .from(
+                                                        'orders'
+                                                    )
+                                                    .update(
+                                                        {
+                                                            status: newStatus,
+                                                        }
+                                                    )
+                                                    .eq(
+                                                        'id',
+                                                        order.id
+                                                    )
 
-                                    <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 mb-3">
-                                        {order.customer_address}
-                                    </p>
+                                                setOrders(
+                                                    (
+                                                        previous
+                                                    ) =>
+                                                        previous.map(
+                                                            (
+                                                                currentOrder
+                                                            ) =>
+                                                                currentOrder.id ===
+                                                                order.id
+                                                                    ? {
+                                                                        ...currentOrder,
+                                                                        status: newStatus,
+                                                                    }
+                                                                    : currentOrder
+                                                        )
+                                                )
+                                            }}
+                                            className="bg-transparent border border-gold/30 rounded-full px-3 py-1 font-sans text-xs text-espresso dark:text-cream outline-none focus:border-gold mb-3"
+                                        >
 
-                                    <div className="flex flex-col gap-1 mb-3 border-t border-gold/10 pt-3">
+                                            <option value="pending">
+                                                Pending
+                                            </option>
 
-                                        {order.items?.map((item) => (
-                                            <div
-                                                key={item.id}
-                                                className="flex justify-between font-sans text-xs text-espresso/60 dark:text-cream/60"
-                                            >
+                                            <option value="confirmed">
+                                                Confirmed
+                                            </option>
 
-                                                <span>
-                                                    {item.name} x{' '}
-                                                    {item.quantity}
-                                                </span>
+                                            <option value="shipped">
+                                                Shipped
+                                            </option>
 
-                                                <span>
-                                                    {formatPrice(
-                                                        item.price *
-                                                        item.quantity
-                                                    )}
-                                                </span>
+                                            <option value="delivered">
+                                                Delivered
+                                            </option>
 
-                                            </div>
-                                        ))}
+                                        </select>
+
+                                        <p className="font-sans text-sm text-espresso/70 dark:text-cream/70 mb-1">
+                                            {
+                                                order.customer_name
+                                            }{' '}
+                                            ·{' '}
+                                            {
+                                                order.customer_phone
+                                            }
+                                        </p>
+
+                                        <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 mb-3">
+                                            {
+                                                order.customer_address
+                                            }
+                                        </p>
+
+                                        <div className="flex flex-col gap-1 mb-3 border-t border-gold/10 pt-3">
+
+                                            {order.items?.map(
+                                                (
+                                                    item
+                                                ) => (
+                                                    <div
+                                                        key={
+                                                            item.id
+                                                        }
+                                                        className="flex justify-between font-sans text-xs text-espresso/60 dark:text-cream/60"
+                                                    >
+
+                                                        <span>
+                                                            {
+                                                                item.name
+                                                            }{' '}
+                                                            x{' '}
+                                                            {
+                                                                item.quantity
+                                                            }
+                                                        </span>
+
+                                                        <span>
+                                                            {formatPrice(
+                                                                item.price *
+                                                                item.quantity
+                                                            )}
+                                                        </span>
+
+                                                    </div>
+                                                )
+                                            )}
+
+                                        </div>
+
+                                        <div className="flex justify-between font-display italic font-semibold text-espresso dark:text-cream">
+
+                                            <span>
+                                                Total
+                                            </span>
+
+                                            <span>
+                                                {formatPrice(
+                                                    order.total
+                                                )}
+                                            </span>
+
+                                        </div>
 
                                     </div>
-
-                                    <div className="flex justify-between font-display italic font-semibold text-espresso dark:text-cream">
-
-                                        <span>Total</span>
-
-                                        <span>
-                                            {formatPrice(order.total)}
-                                        </span>
-
-                                    </div>
-
-                                </div>
-                            ))
+                                )
+                            )
                         )}
 
                     </div>
                 )}
 
-                {/* ========== PRODUCTS TAB ========== */}
+                {/* PRODUCTS */}
 
                 {tab === 'products' && (
                     <>
@@ -1482,11 +2136,15 @@ function Admin() {
                                 <input
                                     type="text"
                                     placeholder="Product name"
-                                    value={form.name}
+                                    value={
+                                        form.name
+                                    }
                                     onChange={(e) =>
                                         update(
                                             'name',
-                                            e.target.value
+                                            e
+                                                .target
+                                                .value
                                         )
                                     }
                                     className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
@@ -1495,11 +2153,15 @@ function Admin() {
                                 <input
                                     type="number"
                                     placeholder="Price (Naira)"
-                                    value={form.price}
+                                    value={
+                                        form.price
+                                    }
                                     onChange={(e) =>
                                         update(
                                             'price',
-                                            e.target.value
+                                            e
+                                                .target
+                                                .value
                                         )
                                     }
                                     className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
@@ -1508,22 +2170,30 @@ function Admin() {
                                 <input
                                     type="number"
                                     placeholder="Stock quantity"
-                                    value={form.stock}
+                                    value={
+                                        form.stock
+                                    }
                                     onChange={(e) =>
                                         update(
                                             'stock',
-                                            e.target.value
+                                            e
+                                                .target
+                                                .value
                                         )
                                     }
                                     className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
                                 />
 
                                 <select
-                                    value={form.status}
+                                    value={
+                                        form.status
+                                    }
                                     onChange={(e) =>
                                         update(
                                             'status',
-                                            e.target.value
+                                            e
+                                                .target
+                                                .value
                                         )
                                     }
                                     className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
@@ -1544,35 +2214,53 @@ function Admin() {
                                 </select>
 
                                 <select
-                                    value={form.category}
+                                    value={
+                                        form.category
+                                    }
                                     onChange={(e) =>
                                         update(
                                             'category',
-                                            e.target.value
+                                            e
+                                                .target
+                                                .value
                                         )
                                     }
                                     className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
                                 >
 
-                                    {categories.map((c) => (
-                                        <option
-                                            key={c.id}
-                                            value={c.id}
-                                        >
-                                            {c.name}
-                                        </option>
-                                    ))}
+                                    {categories.map(
+                                        (
+                                            category
+                                        ) => (
+                                            <option
+                                                key={
+                                                    category.id
+                                                }
+                                                value={
+                                                    category.id
+                                                }
+                                            >
+                                                {
+                                                    category.name
+                                                }
+                                            </option>
+                                        )
+                                    )}
 
                                 </select>
 
                                 <input
                                     type="text"
                                     placeholder="Main Image URL"
-                                    value={form.image}
+                                    value={
+                                        form.image
+                                    }
                                     onChange={(e) =>
                                         update(
                                             'image',
-                                            e.target.value
+                                            e
+                                                .target
+                                                .value
                                         )
                                     }
                                     className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
@@ -1583,11 +2271,15 @@ function Admin() {
                             <textarea
                                 placeholder="All image URLs, separated by commas (leave blank to just use the main image above)"
                                 rows={2}
-                                value={form.imagesText}
+                                value={
+                                    form.imagesText
+                                }
                                 onChange={(e) =>
                                     update(
                                         'imagesText',
-                                        e.target.value
+                                        e
+                                            .target
+                                            .value
                                     )
                                 }
                                 className="w-full bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold resize-none mb-3"
@@ -1605,7 +2297,9 @@ function Admin() {
                                     type="file"
                                     accept="image/*"
                                     multiple
-                                    onChange={handleFileUpload}
+                                    onChange={
+                                        handleFileUpload
+                                    }
                                     className="hidden"
                                 />
 
@@ -1617,11 +2311,17 @@ function Admin() {
 
                                     <input
                                         type="checkbox"
-                                        checked={form.is_new}
-                                        onChange={(e) =>
+                                        checked={
+                                            form.is_new
+                                        }
+                                        onChange={(
+                                            event
+                                        ) =>
                                             update(
                                                 'is_new',
-                                                e.target.checked
+                                                event
+                                                    .target
+                                                    .checked
                                             )
                                         }
                                     />
@@ -1634,11 +2334,17 @@ function Admin() {
 
                                     <input
                                         type="checkbox"
-                                        checked={form.is_featured}
-                                        onChange={(e) =>
+                                        checked={
+                                            form.is_featured
+                                        }
+                                        onChange={(
+                                            event
+                                        ) =>
                                             update(
                                                 'is_featured',
-                                                e.target.checked
+                                                event
+                                                    .target
+                                                    .checked
                                             )
                                         }
                                     />
@@ -1652,7 +2358,9 @@ function Admin() {
                             <div className="flex gap-3">
 
                                 <button
-                                    onClick={handleSave}
+                                    onClick={
+                                        handleSave
+                                    }
                                     disabled={
                                         saving ||
                                         !form.name ||
@@ -1671,7 +2379,9 @@ function Admin() {
 
                                 {editing && (
                                     <button
-                                        onClick={resetForm}
+                                        onClick={
+                                            resetForm
+                                        }
                                         className="font-sans text-sm text-espresso/60 dark:text-cream/60 hover:text-gold"
                                     >
                                         Cancel
@@ -1683,7 +2393,9 @@ function Admin() {
                         </div>
 
                         <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">
-                            All Products ({products.length})
+                            All Products (
+                            {products.length}
+                            )
                         </h2>
 
                         {loading ? (
@@ -1697,71 +2409,85 @@ function Admin() {
                         ) : (
                             <div className="flex flex-col gap-3">
 
-                                {products.map((product) => (
-                                    <div
-                                        key={product.id}
-                                        className="flex items-center gap-4 border border-gold/20 rounded-xl p-4"
-                                    >
+                                {products.map(
+                                    (product) => (
+                                        <div
+                                            key={
+                                                product.id
+                                            }
+                                            className="flex items-center gap-4 border border-gold/20 rounded-xl p-4"
+                                        >
 
-                                        <img
-                                            src={product.image}
-                                            alt={product.name}
-                                            className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
-                                        />
+                                            <img
+                                                src={
+                                                    product.image
+                                                }
+                                                alt={
+                                                    product.name
+                                                }
+                                                className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
+                                            />
 
-                                        <div className="flex-1 min-w-0">
+                                            <div className="flex-1 min-w-0">
 
-                                            <p className="font-sans text-sm text-espresso dark:text-cream truncate">
-                                                {product.name}
-                                            </p>
+                                                <p className="font-sans text-sm text-espresso dark:text-cream truncate">
+                                                    {
+                                                        product.name
+                                                    }
+                                                </p>
 
-                                            <p className="font-sans text-xs text-gold">
+                                                <p className="font-sans text-xs text-gold">
 
-                                                {formatPrice(
-                                                    product.price
-                                                )}
-
-                                                {' · '}
-
-                                                {product.category}
-
-                                                {product.status &&
-                                                    product.status !==
-                                                    'active' && (
-                                                        <span className="ml-2 uppercase tracking-wide text-[10px] opacity-70">
-                                                            ·{' '}
-                                                            {
-                                                                product.status
-                                                            }
-                                                        </span>
+                                                    {formatPrice(
+                                                        product.price
                                                     )}
 
-                                            </p>
+                                                    {' · '}
+
+                                                    {
+                                                        product.category
+                                                    }
+
+                                                    {product.status &&
+                                                        product.status !==
+                                                        'active' && (
+                                                            <span className="ml-2 uppercase tracking-wide text-[10px] opacity-70">
+                                                                ·{' '}
+                                                                {
+                                                                    product.status
+                                                                }
+                                                            </span>
+                                                        )}
+
+                                                </p>
+
+                                            </div>
+
+                                            <button
+                                                onClick={() =>
+                                                    startEdit(
+                                                        product
+                                                    )
+                                                }
+                                                aria-label="Edit"
+                                            >
+                                                <Pencil className="w-4 h-4 text-espresso/50 dark:text-cream/50 hover:text-gold" />
+                                            </button>
+
+                                            <button
+                                                onClick={() =>
+                                                    handleDelete(
+                                                        product.id
+                                                    )
+                                                }
+                                                aria-label="Delete"
+                                            >
+                                                <Trash2 className="w-4 h-4 text-espresso/50 dark:text-cream/50 hover:text-red-500" />
+                                            </button>
 
                                         </div>
-
-                                        <button
-                                            onClick={() =>
-                                                startEdit(product)
-                                            }
-                                            aria-label="Edit"
-                                        >
-                                            <Pencil className="w-4 h-4 text-espresso/50 dark:text-cream/50 hover:text-gold" />
-                                        </button>
-
-                                        <button
-                                            onClick={() =>
-                                                handleDelete(
-                                                    product.id
-                                                )
-                                            }
-                                            aria-label="Delete"
-                                        >
-                                            <Trash2 className="w-4 h-4 text-espresso/50 dark:text-cream/50 hover:text-red-500" />
-                                        </button>
-
-                                    </div>
-                                ))}
+                                    )
+                                )}
 
                             </div>
                         )}
