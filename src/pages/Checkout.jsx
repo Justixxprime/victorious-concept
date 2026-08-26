@@ -126,7 +126,7 @@ function Checkout() {
     return (
       <section className="bg-cream dark:bg-espresso transition-colors min-h-screen py-16 px-6">
         <SEO title="Order Confirmed" description="Your Victorious Concept order confirmation." />
-        <div className="max-w-md mx-auto text-center mb-8">
+        <div className="print:hidden max-w-md mx-auto text-center mb-8">
           <h1 className="font-display italic font-semibold text-3xl text-espresso dark:text-cream mb-2">
             Order confirmed
           </h1>
@@ -137,7 +137,7 @@ function Checkout() {
 
         <Receipt ref={receiptRef} order={order} />
 
-        <div className="max-w-md mx-auto flex justify-center mt-6">
+        <div className="print:hidden max-w-md mx-auto flex justify-center mt-6">
           <button
             onClick={handlePrint}
             className="flex items-center gap-2 bg-espresso dark:bg-cream text-cream dark:text-espresso font-sans font-medium px-8 py-3 rounded-full hover:opacity-90 transition-opacity"
