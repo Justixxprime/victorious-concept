@@ -100,10 +100,9 @@ function Navbar() {
         <div className="flex items-center gap-3 sm:gap-4 md:gap-5 text-espresso dark:text-cream">
 
           {/* SEARCH */}
-          <Search
-            onClick={() => setSearchOpen(true)}
-            className="hidden sm:block w-5 h-5 cursor-pointer hover:text-gold transition-colors"
-          />
+          <button onClick={() => setSearchOpen(true)} aria-label="Open search" className="hidden sm:block">
+            <Search className="w-5 h-5 cursor-pointer hover:text-gold transition-colors" />
+          </button>
 
           {/* ACCOUNT */}
           <Link to="/account">
