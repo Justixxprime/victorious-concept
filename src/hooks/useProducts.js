@@ -32,6 +32,7 @@ export function useProducts({ includeHidden = false } = {}) {
           sizes: p.sizes || null,
           stock: p.stock ?? 0,
           status: p.status || 'active',
+          videoUrl: p.video_url || null,
           isNew: p.is_new,
           isFeatured: p.is_featured,
         }))

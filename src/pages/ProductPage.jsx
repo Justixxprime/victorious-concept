@@ -97,7 +97,7 @@ function ProductPage() {
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
         <div ref={galleryRef}>
-          <ProductGallery images={product.images} alt={product.name} />
+          <ProductGallery images={product.images} alt={product.name} videoUrl={product.videoUrl} />
         </div>
 
         <div className="flex flex-col gap-6">

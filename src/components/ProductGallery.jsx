@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 
-function ProductGallery({ images, alt }) {
+function ProductGallery({ images, alt, videoUrl }) {
   const [active, setActive] = useState(0)
   const [fullscreen, setFullscreen] = useState(false)
 
@@ -33,6 +33,17 @@ function ProductGallery({ images, alt }) {
           />
         </AnimatePresence>
       </div>
+
+      {videoUrl && (
+        <div className="mt-4">
+          <video controls className="w-full rounded-2xl" poster={images[0]}>
+            <source src={videoUrl} type="video/mp4" />
+          </video>
+        </div>
+      )}
+
+      {images.length > 1 && (
+        <div className="flex gap-2 mt-3">
 
       {images.length > 1 && (
         <div className="flex gap-2 mt-3">
