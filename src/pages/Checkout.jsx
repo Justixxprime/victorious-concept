@@ -15,6 +15,7 @@ import { Printer, CreditCard, Landmark, MessageCircle, Copy, Check } from 'lucid
 function Checkout() {
   const { items, totalPrice, clearCart } = useCart()
   const { user } = useAuth()
+  const { addresses } = useAddresses()
   const navigate = useNavigate()
   const [order, setOrder] = useState(null)
   const [form, setForm] = useState({
@@ -22,7 +23,6 @@ function Checkout() {
     phone: user?.user_metadata?.phone || '',
     address: '',
   })
-  const { addresses } = useAddresses()
   const [method, setMethod] = useState('card')
   const [copied, setCopied] = useState(false)
   const receiptRef = useRef(null)
@@ -61,23 +61,18 @@ function Checkout() {
         payment_reference: paymentReference,
         payment_method: paymentMethod,
       })
+
+      if (user.email) {
+        fetch('/api/send-order-confirmation', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: user.email, orderNumber, items, total: totalPrice }),
+        }).catch(() => {})
+      }
     }
 
     setOrder(newOrder)
     clearCart()
-
-    if (user?.email) {
-      fetch('/api/send-order-confirmation', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: user.email,
-          orderNumber,
-          items,
-          total: totalPrice,
-        }),
-      }).catch(() => {})
-    }
   }
 
   function handlePaystackSuccess(reference) {

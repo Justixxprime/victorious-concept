@@ -173,7 +173,7 @@ function ProductPage() {
             </button>
           </div>
 
-          
+          <a
             href={`https://wa.me/2348122470435?text=${encodeURIComponent(`Hi, I have a question about the ${product.name} (${formatPrice(product.price)})`)}`}
             target="_blank"
             rel="noopener noreferrer"
