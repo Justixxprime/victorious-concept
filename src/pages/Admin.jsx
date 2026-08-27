@@ -178,6 +178,13 @@ function Admin() {
     window.location.reload()
   }
 
+  // ---- Orders ----
+  async function deleteOrder(id) {
+    if (!confirm('Delete this order permanently? This cannot be undone.')) return
+    await supabase.from('orders').delete().eq('id', id)
+    setOrders((prev) => prev.filter((o) => o.id !== id))
+  }
+
   // ---- Categories ----
   async function addCategory() {
     if (!newCategoryName.trim()) return
@@ -437,11 +444,16 @@ function Admin() {
             ) : (
               orders.map((order) => (
                 <div key={order.id} className="border border-gold/20 rounded-2xl p-5">
-                  <div className="flex flex-wrap justify-between gap-2 mb-3">
+                  <div className="flex flex-wrap justify-between items-center gap-2 mb-3">
                     <span className="font-sans text-sm font-medium text-espresso dark:text-cream">{order.order_number}</span>
-                    <span className="font-sans text-xs text-espresso/50 dark:text-cream/50">
-                      {new Date(order.created_at).toLocaleDateString('en-NG', { day: 'numeric', month: 'long', year: 'numeric' })}
-                    </span>
+                    <div className="flex items-center gap-3">
+                      <span className="font-sans text-xs text-espresso/50 dark:text-cream/50">
+                        {new Date(order.created_at).toLocaleDateString('en-NG', { day: 'numeric', month: 'long', year: 'numeric' })}
+                      </span>
+                      <button onClick={() => deleteOrder(order.id)} aria-label="Delete order">
+                        <Trash2 className="w-4 h-4 text-espresso/50 dark:text-cream/50 hover:text-red-500" />
+                      </button>
+                    </div>
                   </div>
                   <select
                     value={order.status || 'pending'}
