@@ -4,7 +4,7 @@ import { useCategories } from '../hooks/useCategories'
 import ProductCard from '../components/ProductCard'
 import RevealImage from '../components/RevealImage'
 import Breadcrumbs from '../components/Breadcrumbs'
-import { siteImages } from '../data/siteImages'
+import { categoryImages, siteImages } from '../data/siteImages'
 import { ShoppingBag, Footprints, Shirt, Droplet, Gem, Tag } from 'lucide-react'
 
 const iconMap = {
@@ -36,7 +36,7 @@ function CategoryPage() {
         ]} />
 
         <RevealImage
-          src={siteImages.categoryBanner}
+          src={categoryImages[categoryId] || siteImages.categoryBanner}
           alt={category ? category.name : 'Category'}
           className="w-full aspect-[21/6] rounded-2xl mb-8"
         />

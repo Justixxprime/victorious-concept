@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { useTheme } from '../hooks/useTheme'
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
 import logoDark from '../assets/logo/logo-dark-text.png'
@@ -30,7 +29,6 @@ const links = [
 ]
 
 function Navbar() {
-  const [mode] = useTheme()
   const [menuOpen, setMenuOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [megaMenuOpen, setMegaMenuOpen] = useState(false)
@@ -100,13 +98,26 @@ function Navbar() {
         <div className="flex items-center gap-3 sm:gap-4 md:gap-5 text-espresso dark:text-cream">
 
           {/* SEARCH */}
-          <button onClick={() => setSearchOpen(true)} aria-label="Open search" className="hidden sm:block">
+          <motion.button
+            onClick={() => setSearchOpen(true)}
+            aria-label="Open search"
+            className="hidden sm:block"
+            whileHover={{ scale: 1.15, rotate: -8 }}
+            whileTap={{ scale: 0.9 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+          >
             <Search className="w-5 h-5 cursor-pointer hover:text-gold transition-colors" />
-          </button>
+          </motion.button>
 
           {/* ACCOUNT */}
           <Link to="/account">
-            <User className="w-5 h-5 cursor-pointer hover:text-gold transition-colors" />
+            <motion.div
+              whileHover={{ scale: 1.15, y: -2 }}
+              whileTap={{ scale: 0.9 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+            >
+              <User className="w-5 h-5 cursor-pointer hover:text-gold transition-colors" />
+            </motion.div>
           </Link>
 
           {/* WISHLIST */}
@@ -114,12 +125,24 @@ function Navbar() {
             to="/wishlist"
             className="relative"
           >
-            <Heart className="w-5 h-5 cursor-pointer hover:text-gold transition-colors" />
+            <motion.div
+              whileHover={{ scale: 1.15 }}
+              whileTap={{ scale: 0.85 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 12 }}
+            >
+              <Heart className="w-5 h-5 cursor-pointer hover:text-gold transition-colors" />
+            </motion.div>
 
             {wishlistItems.length > 0 && (
-              <span className="absolute -top-2 -right-2 bg-gold text-espresso text-[10px] font-sans font-bold w-4 h-4 rounded-full flex items-center justify-center">
+              <motion.span
+                key={wishlistItems.length}
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', stiffness: 500, damping: 12 }}
+                className="absolute -top-2 -right-2 bg-gold text-espresso text-[10px] font-sans font-bold w-4 h-4 rounded-full flex items-center justify-center"
+              >
                 {wishlistItems.length}
-              </span>
+              </motion.span>
             )}
           </Link>
 
@@ -129,12 +152,24 @@ function Navbar() {
             className="relative"
             ref={registerCartIcon}
           >
-            <ShoppingBag className="w-5 h-5 cursor-pointer hover:text-gold transition-colors" />
+            <motion.div
+              whileHover={{ scale: 1.15, rotate: [0, -8, 8, 0] }}
+              whileTap={{ scale: 0.85 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 12 }}
+            >
+              <ShoppingBag className="w-5 h-5 cursor-pointer hover:text-gold transition-colors" />
+            </motion.div>
 
             {totalItems > 0 && (
-              <span className="absolute -top-2 -right-2 bg-gold text-espresso text-[10px] font-sans font-bold w-4 h-4 rounded-full flex items-center justify-center">
+              <motion.span
+                key={totalItems}
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', stiffness: 500, damping: 12 }}
+                className="absolute -top-2 -right-2 bg-gold text-espresso text-[10px] font-sans font-bold w-4 h-4 rounded-full flex items-center justify-center"
+              >
                 {totalItems}
-              </span>
+              </motion.span>
             )}
           </Link>
 

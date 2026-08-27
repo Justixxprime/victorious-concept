@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { useCategories } from '../hooks/useCategories'
 import { ShoppingBag, Footprints, Shirt, Droplet, Gem, Tag } from 'lucide-react'
+import { categoryImages } from '../data/siteImages'
 
 const iconMap = {
   bags: ShoppingBag,
@@ -22,19 +24,35 @@ function CategoryGrid() {
         </h2>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {categories.map((cat) => {
+          {categories.map((cat, i) => {
             const Icon = iconMap[cat.id] || Tag
             return (
-              <Link
+              <motion.div
                 key={cat.id}
-                to={`/category/${cat.id}`}
-                className="group flex flex-col items-center justify-center gap-3 aspect-square rounded-2xl border border-gold/20 hover:border-gold bg-gold/5 hover:bg-gold/10 transition-all"
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
               >
-                <Icon className="w-6 h-6 text-gold group-hover:scale-110 transition-transform" />
-                <span className="font-sans text-sm uppercase tracking-wide text-espresso dark:text-cream group-hover:text-gold transition-colors">
-                  {cat.name}
-                </span>
-              </Link>
+                <Link
+                  to={`/category/${cat.id}`}
+                  className="group relative flex flex-col items-center justify-end gap-2 aspect-square rounded-2xl overflow-hidden"
+                >
+                  {categoryImages[cat.id] && (
+                    <img
+                      src={categoryImages[cat.id]}
+                      alt={cat.name}
+                      className="absolute inset-0 w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-700 ease-out"
+                    />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-espresso/90 via-espresso/30 to-espresso/10 group-hover:from-espresso/95 transition-colors duration-500" />
+
+                  <Icon className="relative w-5 h-5 text-gold-light mb-1 group-hover:-translate-y-1 group-hover:scale-110 transition-transform duration-300" />
+                  <span className="relative font-sans text-xs sm:text-sm uppercase tracking-wide text-cream mb-3 group-hover:text-gold-light transition-colors">
+                    {cat.name}
+                  </span>
+                </Link>
+              </motion.div>
             )
           })}
         </div>
