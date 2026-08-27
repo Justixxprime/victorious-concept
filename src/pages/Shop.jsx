@@ -8,6 +8,8 @@ import ProductCard from '../components/ProductCard'
 import ProductCardSkeleton from '../components/ProductCardSkeleton'
 import Breadcrumbs from '../components/Breadcrumbs'
 import { useSearchParams } from 'react-router-dom'
+import PageHero from '../components/PageHero'
+import { siteImages } from '../data/siteImages'
 
 function Shop() {
   const { products, loading, error } = useProducts()
@@ -60,7 +62,15 @@ function Shop() {
   }
 
   return (
-    <section className="bg-cream dark:bg-espresso transition-colors py-12 px-6 min-h-screen">
+    <>
+      <PageHero
+        label="Shop All"
+        title="Every Piece, One Place"
+        subtitle="Bags, shoes, clothing, perfumes, slippers and accessories — filtered your way."
+        image={siteImages.shopBanner}
+        compact
+      />
+      <section className="bg-cream dark:bg-espresso transition-colors py-12 px-6 min-h-screen">
       <SEO
         title="Shop All"
         description="Browse the full Victorious Concept collection."
@@ -431,7 +441,8 @@ function Shop() {
           </div>
         )}
       </div>
-    </section>
+      </section>
+    </>
   )
 }
 

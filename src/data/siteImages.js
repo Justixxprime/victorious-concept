@@ -7,6 +7,9 @@ export const siteImages = {
   contactBanner: 'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?auto=format&fit=crop&w=1400&q=80',
   categoryBanner: 'https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=1600&q=80',
   megaMenuBackdrop: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1400&q=80',
+  shopBanner: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=2000&q=80',
+  faqBanner: 'https://images.unsplash.com/photo-1520333789090-1afc82db536a?auto=format&fit=crop&w=2000&q=80',
+  shippingBanner: 'https://images.unsplash.com/photo-1580674285054-bed31e145f59?auto=format&fit=crop&w=2000&q=80',
 }
 
 // Real, distinct stock photos per product category (generic placeholders —

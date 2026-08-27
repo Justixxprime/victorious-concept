@@ -1,8 +1,10 @@
 import { useParams, Link } from 'react-router-dom'
 import SEO from '../components/SEO'
+import PageHero from '../components/PageHero'
 import { useCollections } from '../hooks/useCollections'
 import { useProducts } from '../hooks/useProducts'
 import ProductCard from '../components/ProductCard'
+import { siteImages } from '../data/siteImages'
 
 function CollectionDetail() {
   const { slug } = useParams()
@@ -27,18 +29,17 @@ function CollectionDetail() {
   }
 
   return (
-    <section className="bg-cream dark:bg-espresso transition-colors py-12 px-6 min-h-screen">
+    <>
       <SEO title={collection.name} description={collection.description || `${collection.name} collection`} />
+      <PageHero
+        label="Collection"
+        title={collection.name}
+        subtitle={collection.description}
+        image={collection.image || siteImages.lookbookHero}
+        compact
+      />
+      <section className="bg-cream dark:bg-espresso transition-colors py-16 px-6">
       <div className="max-w-7xl mx-auto">
-        <h1 className="font-display italic font-semibold text-4xl text-espresso dark:text-cream mb-2">
-          {collection.name}
-        </h1>
-        {collection.description && (
-          <p className="font-sans text-sm text-espresso/70 dark:text-cream/70 max-w-xl mb-10">
-            {collection.description}
-          </p>
-        )}
-
         {collectionProducts.length === 0 ? (
           <p className="font-sans text-sm text-espresso/60 dark:text-cream/60">
             Products for this collection are being added.
@@ -51,7 +52,8 @@ function CollectionDetail() {
           </div>
         )}
       </div>
-    </section>
+      </section>
+    </>
   )
 }
 

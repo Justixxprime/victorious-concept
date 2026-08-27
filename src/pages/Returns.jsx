@@ -1,15 +1,21 @@
 import SEO from '../components/SEO'
+import PageHero from '../components/PageHero'
+import { siteImages } from '../data/siteImages'
 import { RefreshCw, ShieldCheck, MessageCircle } from 'lucide-react'
 
 function Returns() {
   return (
-    <section className="bg-cream dark:bg-espresso transition-colors min-h-screen py-20 px-6">
+    <>
       <SEO title="Returns" description="Returns and exchange policy for Victorious Concept." />
+      <PageHero
+        label="Policy"
+        title="Returns & Exchanges"
+        subtitle="A real 7 day window and a real conversation, not a ticket system."
+        image={siteImages.shippingBanner}
+        compact
+      />
+      <section className="bg-cream dark:bg-espresso transition-colors py-16 px-6">
       <div className="max-w-2xl mx-auto">
-        <h1 className="font-display italic font-semibold text-4xl text-espresso dark:text-cream mb-10">
-          Returns & Exchanges
-        </h1>
-
         <div className="flex flex-col gap-8">
           <div className="flex gap-4">
             <RefreshCw className="w-5 h-5 text-gold flex-shrink-0 mt-1" />
@@ -53,7 +59,8 @@ function Returns() {
           </div>
         </div>
       </div>
-    </section>
+      </section>
+    </>
   )
 }
 

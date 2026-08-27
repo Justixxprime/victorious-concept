@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { ChevronDown, ShoppingBag, CreditCard, Truck, RefreshCw, ShieldCheck } from 'lucide-react'
+import PageHero from '../components/PageHero'
+import { siteImages } from '../data/siteImages'
 
 const faqs = [
   {
@@ -33,12 +35,16 @@ function FAQ() {
   const [openIndex, setOpenIndex] = useState(null)
 
   return (
-    <section className="bg-cream dark:bg-espresso transition-colors min-h-screen py-20 px-6">
+    <>
+      <PageHero
+        label="Support"
+        title="Questions, Answered"
+        subtitle="Everything you need to know before, during, and after your order."
+        image={siteImages.faqBanner}
+        compact
+      />
+      <section className="bg-cream dark:bg-espresso transition-colors py-16 px-6">
       <div className="max-w-2xl mx-auto">
-        <h1 className="font-display italic font-semibold text-4xl text-espresso dark:text-cream mb-10">
-          Frequently Asked Questions
-        </h1>
-
         <div className="flex flex-col divide-y divide-gold/20">
           {faqs.map((item, i) => (
             <div key={item.q} className="py-5">
@@ -63,7 +69,8 @@ function FAQ() {
           ))}
         </div>
       </div>
-    </section>
+      </section>
+    </>
   )
 }
 

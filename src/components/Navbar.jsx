@@ -1,10 +1,9 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
-import logoDark from '../assets/logo/logo-dark-text.png'
-import logoCream from '../assets/logo/logo-cream-text.png'
+import NavLogo from './NavLogo'
 import {
   Search,
   Heart,
@@ -36,38 +35,30 @@ function Navbar() {
   const { totalItems } = useCart()
   const { registerCartIcon } = useFlyToCart()
   const { items: wishlistItems } = useWishlist()
+  const location = useLocation()
 
-  const isDark = document.documentElement.classList.contains('dark')
+  // On the homepage, the navbar blends directly into the cinematic Hero
+  // below it instead of sitting on a mismatched cream/espresso bar.
+  const isHome = location.pathname === '/'
+  const navTextClass = isHome ? 'text-cream' : 'text-espresso dark:text-cream'
 
   return (
-    <header className="relative w-full bg-cream dark:bg-espresso border-b border-gold/20 transition-colors sticky top-0 z-50">
+    <header
+      className={`relative w-full transition-colors duration-500 sticky top-0 z-50 ${
+        isHome
+          ? 'bg-espresso border-b border-cream/10'
+          : 'bg-cream dark:bg-espresso border-b border-gold/20'
+      }`}
+    >
 
       {/* MAIN NAVBAR */}
       <div className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 py-3">
 
         {/* LOGO */}
-        <Link
-          to="/"
-          className="relative group flex-shrink-0"
-        >
-          <div className="absolute -inset-3 bg-gold/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-          <motion.img
-            src={isDark ? logoCream : logoDark}
-            alt="Victorious Concept"
-            className="relative h-12 sm:h-16 md:h-20 w-auto"
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              duration: 0.7,
-              ease: [0.16, 1, 0.3, 1],
-            }}
-            whileHover={{ scale: 1.03 }}
-          />
-        </Link>
+        <NavLogo light={isHome} />
 
         {/* DESKTOP NAVIGATION */}
-        <nav className="hidden md:flex items-center gap-6 font-sans text-sm uppercase tracking-wide text-espresso dark:text-cream">
+        <nav className={`hidden md:flex items-center gap-6 font-sans text-sm uppercase tracking-wide ${navTextClass}`}>
           {links.map((link) =>
             link.label === 'Shop' ? (
               <div
@@ -77,25 +68,27 @@ function Navbar() {
               >
                 <Link
                   to={link.to}
-                  className="hover:text-gold transition-colors"
+                  className="relative hover:text-gold transition-colors group/nav"
                 >
                   {link.label}
+                  <span className="absolute -bottom-1 left-0 w-0 h-px bg-gold group-hover/nav:w-full transition-all duration-300 ease-out" />
                 </Link>
               </div>
             ) : (
               <Link
                 key={link.label}
                 to={link.to}
-                className="hover:text-gold transition-colors"
+                className="relative hover:text-gold transition-colors group/nav"
               >
                 {link.label}
+                <span className="absolute -bottom-1 left-0 w-0 h-px bg-gold group-hover/nav:w-full transition-all duration-300 ease-out" />
               </Link>
             )
           )}
         </nav>
 
         {/* ACTIONS */}
-        <div className="flex items-center gap-3 sm:gap-4 md:gap-5 text-espresso dark:text-cream">
+        <div className={`flex items-center gap-3 sm:gap-4 md:gap-5 ${navTextClass}`}>
 
           {/* SEARCH */}
           <motion.button
@@ -205,16 +198,7 @@ function Navbar() {
           {/* MOBILE MENU HEADER */}
           <div className="flex justify-between items-center mb-10">
 
-            <Link
-              to="/"
-              onClick={() => setMenuOpen(false)}
-            >
-              <img
-                src={isDark ? logoCream : logoDark}
-                alt="Victorious Concept"
-                className="h-14 w-auto"
-              />
-            </Link>
+            <NavLogo light={false} onClick={() => setMenuOpen(false)} />
 
             <button
               onClick={() => setMenuOpen(false)}

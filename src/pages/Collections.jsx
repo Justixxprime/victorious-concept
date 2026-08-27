@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import SEO from '../components/SEO'
+import PageHero from '../components/PageHero'
 import { useCollections } from '../hooks/useCollections'
 import RevealImage from '../components/RevealImage'
 import { siteImages } from '../data/siteImages'
@@ -8,16 +9,17 @@ function Collections() {
   const { collections, loading } = useCollections()
 
   return (
-    <section className="bg-cream dark:bg-espresso transition-colors py-16 px-6 min-h-screen">
+    <>
       <SEO title="Collections" description="Curated collections from Victorious Concept." />
+      <PageHero
+        label="Curated"
+        title="Collections"
+        subtitle="Pieces grouped with intention, not just category — for moments, moods, and moves."
+        image={siteImages.lookbookHero}
+        compact
+      />
+      <section className="bg-cream dark:bg-espresso transition-colors py-16 px-6">
       <div className="max-w-6xl mx-auto">
-        <p className="font-sans text-xs uppercase tracking-widest text-gold mb-3 text-center">
-          Curated
-        </p>
-        <h1 className="font-display italic font-semibold text-4xl md:text-5xl text-espresso dark:text-cream text-center mb-16">
-          Collections
-        </h1>
-
         {loading ? (
           <p className="font-sans text-sm text-espresso/60 dark:text-cream/60 text-center">Loading...</p>
         ) : collections.length === 0 ? (
@@ -46,7 +48,8 @@ function Collections() {
           </div>
         )}
       </div>
-    </section>
+      </section>
+    </>
   )
 }
 

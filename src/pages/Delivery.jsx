@@ -1,15 +1,21 @@
 import SEO from '../components/SEO'
+import PageHero from '../components/PageHero'
+import { siteImages } from '../data/siteImages'
 import { Truck, Globe, Package } from 'lucide-react'
 
 function Delivery() {
   return (
-    <section className="bg-cream dark:bg-espresso transition-colors min-h-screen py-20 px-6">
+    <>
       <SEO title="Delivery" description="Delivery information for Victorious Concept orders." />
+      <PageHero
+        label="Shipping Info"
+        title="Getting It To You"
+        subtitle="Nationwide and international delivery, coordinated personally for every order."
+        image={siteImages.shippingBanner}
+        compact
+      />
+      <section className="bg-cream dark:bg-espresso transition-colors py-16 px-6">
       <div className="max-w-2xl mx-auto">
-        <h1 className="font-display italic font-semibold text-4xl text-espresso dark:text-cream mb-10">
-          Delivery
-        </h1>
-
         <div className="flex flex-col gap-8">
           <div className="flex gap-4">
             <Truck className="w-5 h-5 text-gold flex-shrink-0 mt-1" />
@@ -54,7 +60,8 @@ function Delivery() {
           </div>
         </div>
       </div>
-    </section>
+      </section>
+    </>
   )
 }
 

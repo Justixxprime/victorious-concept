@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { usePaystackPayment } from 'react-paystack'
+import { motion } from 'framer-motion'
 import SEO from '../components/SEO'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
@@ -9,8 +10,9 @@ import { supabase } from '../lib/supabaseClient'
 import { generateOrderId } from '../utils/generateOrderId'
 import { formatPrice } from '../utils/formatPrice'
 import { bankDetails } from '../data/paymentInfo'
+import { siteImages } from '../data/siteImages'
 import Receipt from '../components/Receipt'
-import { Printer, CreditCard, Landmark, MessageCircle, Copy, Check } from 'lucide-react'
+import { Printer, CreditCard, Landmark, MessageCircle, Copy, Check, PartyPopper } from 'lucide-react'
 
 function Checkout() {
   const { items, totalPrice, clearCart } = useCart()
@@ -132,23 +134,69 @@ function Checkout() {
 
   if (order) {
     return (
-      <section className="bg-cream dark:bg-espresso transition-colors min-h-screen py-16 px-6">
+      <section className="relative min-h-screen py-16 px-6 overflow-hidden print:min-h-0 print:py-6 print:bg-white">
         <SEO title="Order Confirmed" description="Your Victorious Concept order confirmation." />
-        <div className="print:hidden max-w-md mx-auto text-center mb-8">
-          <h1 className="font-display italic font-semibold text-3xl text-espresso dark:text-cream mb-2">
-            Order confirmed
-          </h1>
-          <p className="font-sans text-sm text-espresso/60 dark:text-cream/60">
-            Here is your receipt. Save it or print it for your records.
-          </p>
+
+        {/* Cinematic celebratory backdrop - screen only, never printed */}
+        <div className="absolute inset-0 print:hidden">
+          <img
+            src={siteImages.heroBackdrop}
+            alt=""
+            className="w-full h-full object-cover opacity-20"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-espresso via-espresso/95 to-cream dark:to-espresso" />
+          <motion.div
+            className="absolute top-1/4 left-1/4 w-1.5 h-1.5 rounded-full bg-gold-light"
+            animate={{ opacity: [0.2, 0.9, 0.2], y: [0, -16, 0] }}
+            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+          />
+          <motion.div
+            className="absolute top-1/3 right-1/4 w-1 h-1 rounded-full bg-gold"
+            animate={{ opacity: [0.15, 0.8, 0.15], y: [0, -12, 0] }}
+            transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 0.8 }}
+          />
         </div>
 
-        <Receipt ref={receiptRef} order={order} />
+        <div className="relative print:hidden max-w-md mx-auto text-center mb-8">
+          <motion.div
+            initial={{ scale: 0, rotate: -20 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 16 }}
+            className="w-14 h-14 rounded-full bg-gold/20 flex items-center justify-center mx-auto mb-4"
+          >
+            <PartyPopper className="w-7 h-7 text-gold-light" />
+          </motion.div>
+          <motion.h1
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.15 }}
+            className="font-display italic font-semibold text-3xl text-cream mb-2"
+          >
+            Order confirmed
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.25 }}
+            className="font-sans text-sm text-cream/70"
+          >
+            Here is your receipt. Save it or print it for your records.
+          </motion.p>
+        </div>
 
-        <div className="print:hidden max-w-md mx-auto flex justify-center mt-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          className="relative"
+        >
+          <Receipt ref={receiptRef} order={order} />
+        </motion.div>
+
+        <div className="print:hidden relative max-w-md mx-auto flex justify-center mt-6">
           <button
             onClick={handlePrint}
-            className="flex items-center gap-2 bg-espresso dark:bg-cream text-cream dark:text-espresso font-sans font-medium px-8 py-3 rounded-full hover:opacity-90 transition-opacity"
+            className="flex items-center gap-2 bg-gold text-espresso font-sans font-medium px-8 py-3 rounded-full hover:bg-gold-light transition-colors"
           >
             <Printer className="w-4 h-4" /> Print Receipt
           </button>

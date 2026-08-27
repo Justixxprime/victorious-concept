@@ -12,8 +12,8 @@ function FounderTeaser() {
           Started at university. Built with intention.
         </h2>
         <p className="font-sans text-sm md:text-base text-espresso/70 dark:text-cream/70 max-w-xl">
-          PLACEHOLDER: a short, honest line about how Victorious Concept
-          began, in the founder's own words.
+          It began with friends on campus asking one question — can you find me this? — and
+          Victoria saying yes, then heading to Lagos Island market to make it happen.
         </p>
         <Link
           to="/about"

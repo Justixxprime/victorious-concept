@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import SEO from '../components/SEO'
+import PageHero from '../components/PageHero'
+import { siteImages } from '../data/siteImages'
 import { supabase } from '../lib/supabaseClient'
 import { formatPrice } from '../utils/formatPrice'
-import { Search, Package } from 'lucide-react'
+import { Search } from 'lucide-react'
 
 const statusStyles = {
   pending: 'bg-gold/20 text-gold',
@@ -39,16 +41,17 @@ function TrackOrder() {
   }
 
   return (
-    <section className="bg-cream dark:bg-espresso transition-colors min-h-screen py-20 px-6">
+    <>
       <SEO title="Track Order" description="Track your Victorious Concept order." />
+      <PageHero
+        label="Order Tracking"
+        title="Where's my order?"
+        subtitle="Enter your order number and phone to see live status."
+        image={siteImages.shippingBanner}
+        compact
+      />
+      <section className="bg-cream dark:bg-espresso transition-colors py-16 px-6">
       <div className="max-w-md mx-auto">
-        <p className="font-sans text-xs uppercase tracking-widest text-gold mb-4 text-center">
-          Order Tracking
-        </p>
-        <h1 className="font-display italic font-semibold text-3xl text-espresso dark:text-cream mb-8 text-center">
-          Where's my order?
-        </h1>
-
         <form onSubmit={handleSearch} className="flex flex-col gap-4 mb-8">
           <input
             type="text"
@@ -92,7 +95,7 @@ function TrackOrder() {
               </span>
             </div>
             <div className="flex flex-col gap-1 mb-4">
-              {result.items.map((item) => (
+              {(result.items || []).map((item) => (
                 <div key={item.id} className="flex justify-between font-sans text-xs text-espresso/60 dark:text-cream/60">
                   <span>{item.name} x{item.quantity}</span>
                   <span>{formatPrice(item.price * item.quantity)}</span>
@@ -118,7 +121,8 @@ function TrackOrder() {
           Have an account? <Link to="/account" className="text-gold hover:underline">Sign in</Link> to see all your orders at once.
         </p>
       </div>
-    </section>
+      </section>
+    </>
   )
 }
 
