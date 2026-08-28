@@ -6,6 +6,7 @@ import { useCollections } from '../hooks/useCollections'
 import { useSiteSettings } from '../hooks/useSiteSettings'
 import { supabase } from '../lib/supabaseClient'
 import { formatPrice } from '../utils/formatPrice'
+import { starterCatalog } from '../data/starterCatalog'
 import {
   Trash2, Pencil, Plus, Upload, Tag, Tags, LayoutDashboard, BarChart3,
   Percent, Users, MessageCircle, Mail, Quote, Layers, Package,
@@ -14,10 +15,22 @@ import {
 
 function Admin() {
   const isAdmin = useIsAdmin()
-  const { products, loading, error } = useProducts({ includeHidden: true })
+  const { products, loading } = useProducts({ includeHidden: true })
   const { categories, refetch: refetchCategories } = useCategories()
   const { collections, refetch: refetchCollections } = useCollections()
   const { value: heroValue, updateSetting: updateHero } = useSiteSettings('hero')
+
+  // Runs any Supabase write and, if it failed, shows the REAL reason why
+  // (usually a Row Level Security permission issue) instead of failing silently.
+  async function runWrite(promise, actionLabel) {
+    const { error } = await promise
+    if (error) {
+      alert(`${actionLabel} failed.\n\nReason from the database: ${error.message}`)
+      console.error(`${actionLabel} failed:`, error)
+      return false
+    }
+    return true
+  }
 
   const [tab, setTab] = useState('products')
 
@@ -83,6 +96,30 @@ function Admin() {
   useEffect(() => {
     if (heroValue && !heroForm) setHeroForm(heroValue)
   }, [heroValue])
+
+  async function importStarterCatalog() {
+    if (!confirm(`This will add ${starterCatalog.length} starter products (bags, shoes, slippers, clothing, perfumes, accessories) with stock photos and Nigerian market pricing. Products with names that already exist will be skipped. Continue?`)) return
+    setImporting(true)
+    const existingNames = new Set(products.map((p) => p.name.toLowerCase()))
+    let added = 0
+    let skipped = 0
+    for (const item of starterCatalog) {
+      if (existingNames.has(item.name.toLowerCase())) {
+        skipped++
+        continue
+      }
+      const ok = await runWrite(
+        supabase.from('products').insert({ ...item, images: [item.image] }),
+        `Adding "${item.name}"`
+      )
+      if (ok) added++
+    }
+    setImporting(false)
+    alert(`Import finished. Added ${added} products, skipped ${skipped} (already existed).`)
+    window.location.reload()
+  }
+
+  const [importing, setImporting] = useState(false)
 
   if (!isAdmin) {
     return (
@@ -162,26 +199,30 @@ function Admin() {
       is_new: form.is_new,
       is_featured: form.is_featured,
     }
+    let ok
     if (editing) {
-      await supabase.from('products').update(payload).eq('id', editing)
+      ok = await runWrite(supabase.from('products').update(payload).eq('id', editing), 'Saving product')
     } else {
-      await supabase.from('products').insert(payload)
+      ok = await runWrite(supabase.from('products').insert(payload), 'Adding product')
     }
     setSaving(false)
+    if (!ok) return
     resetForm()
     window.location.reload()
   }
 
   async function handleDelete(id) {
     if (!confirm('Delete this product permanently?')) return
-    await supabase.from('products').delete().eq('id', id)
+    const ok = await runWrite(supabase.from('products').delete().eq('id', id), 'Deleting product')
+    if (!ok) return
     window.location.reload()
   }
 
   // ---- Orders ----
   async function deleteOrder(id) {
     if (!confirm('Delete this order permanently? This cannot be undone.')) return
-    await supabase.from('orders').delete().eq('id', id)
+    const ok = await runWrite(supabase.from('orders').delete().eq('id', id), 'Deleting order')
+    if (!ok) return
     setOrders((prev) => prev.filter((o) => o.id !== id))
   }
 
@@ -189,19 +230,24 @@ function Admin() {
   async function addCategory() {
     if (!newCategoryName.trim()) return
     const id = newCategoryName.trim().toLowerCase().replace(/\s+/g, '-')
-    await supabase.from('categories').insert({ id, name: newCategoryName.trim(), sort_order: categories.length + 1 })
+    const ok = await runWrite(
+      supabase.from('categories').insert({ id, name: newCategoryName.trim(), sort_order: categories.length + 1 }),
+      'Adding category'
+    )
+    if (!ok) return
     setNewCategoryName('')
     refetchCategories()
   }
 
   async function deleteCategory(id) {
     if (!confirm('Delete this category?')) return
-    await supabase.from('categories').delete().eq('id', id)
+    const ok = await runWrite(supabase.from('categories').delete().eq('id', id), 'Deleting category')
+    if (!ok) return
     refetchCategories()
   }
 
   async function saveCategoryDescription(id, description) {
-    await supabase.from('categories').update({ description }).eq('id', id)
+    await runWrite(supabase.from('categories').update({ description }).eq('id', id), 'Saving category description')
   }
 
   // ---- Collections ----
@@ -219,11 +265,13 @@ function Admin() {
   async function saveCollection() {
     const slug = collectionForm.slug || collectionForm.name.toLowerCase().replace(/\s+/g, '-')
     const payload = { ...collectionForm, slug }
+    let ok
     if (editingCollection) {
-      await supabase.from('collections').update(payload).eq('id', editingCollection)
+      ok = await runWrite(supabase.from('collections').update(payload).eq('id', editingCollection), 'Saving collection')
     } else {
-      await supabase.from('collections').insert(payload)
+      ok = await runWrite(supabase.from('collections').insert(payload), 'Adding collection')
     }
+    if (!ok) return
     setCollectionForm({ name: '', slug: '', description: '', image: '', product_ids: [] })
     setEditingCollection(null)
     refetchCollections()
@@ -242,46 +290,58 @@ function Admin() {
 
   async function deleteCollection(id) {
     if (!confirm('Delete this collection?')) return
-    await supabase.from('collections').delete().eq('id', id)
+    const ok = await runWrite(supabase.from('collections').delete().eq('id', id), 'Deleting collection')
+    if (!ok) return
     refetchCollections()
   }
 
   // ---- Coupons ----
   async function addCoupon() {
     if (!couponForm.code || !couponForm.percent_off) return
-    await supabase.from('coupons').insert({
-      code: couponForm.code.trim().toUpperCase(),
-      percent_off: Number(couponForm.percent_off),
-      active: true,
-    })
+    const ok = await runWrite(
+      supabase.from('coupons').insert({
+        code: couponForm.code.trim().toUpperCase(),
+        percent_off: Number(couponForm.percent_off),
+        active: true,
+      }),
+      'Adding discount code'
+    )
+    if (!ok) return
     setCouponForm({ code: '', percent_off: '' })
     const { data } = await supabase.from('coupons').select('*').order('code')
     setCoupons(data || [])
   }
 
   async function toggleCoupon(id, active) {
-    await supabase.from('coupons').update({ active: !active }).eq('id', id)
+    const ok = await runWrite(
+      supabase.from('coupons').update({ active: !active }).eq('id', id),
+      'Updating discount code'
+    )
+    if (!ok) return
     const { data } = await supabase.from('coupons').select('*').order('code')
     setCoupons(data || [])
   }
 
   async function deleteCoupon(id) {
     if (!confirm('Delete this discount code?')) return
-    await supabase.from('coupons').delete().eq('id', id)
+    const ok = await runWrite(supabase.from('coupons').delete().eq('id', id), 'Deleting discount code')
+    if (!ok) return
     const { data } = await supabase.from('coupons').select('*').order('code')
     setCoupons(data || [])
   }
 
   // ---- Messages ----
   async function markRead(id) {
-    await supabase.from('contact_messages').update({ read: true }).eq('id', id)
+    const ok = await runWrite(supabase.from('contact_messages').update({ read: true }).eq('id', id), 'Marking message read')
+    if (!ok) return
     setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, read: true } : m)))
   }
 
   // ---- Testimonials ----
   async function addTestimonial() {
     if (!testimonialForm.customer_name || !testimonialForm.quote) return
-    await supabase.from('testimonials').insert(testimonialForm)
+    const ok = await runWrite(supabase.from('testimonials').insert(testimonialForm), 'Adding testimonial')
+    if (!ok) return
     setTestimonialForm({ customer_name: '', quote: '', source: '' })
     const { data } = await supabase.from('testimonials').select('*')
     setTestimonials(data || [])
@@ -289,7 +349,8 @@ function Admin() {
 
   async function deleteTestimonial(id) {
     if (!confirm('Delete this testimonial?')) return
-    await supabase.from('testimonials').delete().eq('id', id)
+    const ok = await runWrite(supabase.from('testimonials').delete().eq('id', id), 'Deleting testimonial')
+    if (!ok) return
     const { data } = await supabase.from('testimonials').select('*')
     setTestimonials(data || [])
   }
@@ -357,6 +418,24 @@ function Admin() {
 
         {tab === 'products' && (
           <>
+            <div className="bg-gold/5 rounded-2xl p-6 mb-6 flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-1">
+                  Starter Catalog
+                </h2>
+                <p className="font-sans text-xs text-espresso/60 dark:text-cream/60">
+                  Add {starterCatalog.length} products across all 6 categories in one click (stock photos + Nigerian market pricing).
+                </p>
+              </div>
+              <button
+                onClick={importStarterCatalog}
+                disabled={importing}
+                className="bg-gold text-espresso font-sans text-sm font-medium px-6 py-3 rounded-full hover:bg-gold-light transition-colors disabled:opacity-50 flex-shrink-0"
+              >
+                {importing ? 'Importing…' : 'Import Starter Catalog'}
+              </button>
+            </div>
+
             <div className="bg-gold/5 rounded-2xl p-6 mb-12">
               <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">
                 {editing ? 'Edit Product' : 'Add New Product'}
@@ -458,7 +537,11 @@ function Admin() {
                   <select
                     value={order.status || 'pending'}
                     onChange={async (e) => {
-                      await supabase.from('orders').update({ status: e.target.value }).eq('id', order.id)
+                      const ok = await runWrite(
+                        supabase.from('orders').update({ status: e.target.value }).eq('id', order.id),
+                        'Updating order status'
+                      )
+                      if (!ok) return
                       setOrders((prev) => prev.map((o) => (o.id === order.id ? { ...o, status: e.target.value } : o)))
                     }}
                     className="bg-transparent border border-gold/30 rounded-full px-3 py-1 font-sans text-xs text-espresso dark:text-cream outline-none focus:border-gold mb-3"
@@ -531,7 +614,7 @@ function Admin() {
                     <button onClick={() => deleteCategory(cat.id)} aria-label="Delete category"><Trash2 className="w-4 h-4 text-espresso/40 dark:text-cream/40 hover:text-red-500" /></button>
                   </div>
                   <textarea placeholder="Short introduction (optional)" rows={2} defaultValue={cat.description || ''}
-                    onBlur={async (e) => { await supabase.from('categories').update({ description: e.target.value }).eq('id', cat.id) }}
+                    onBlur={(e) => saveCategoryDescription(cat.id, e.target.value)}
                     className="w-full bg-transparent border border-gold/20 rounded-lg px-3 py-2 font-sans text-xs text-espresso dark:text-cream outline-none focus:border-gold resize-none" />
                 </div>
               ))}

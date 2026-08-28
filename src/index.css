@@ -32,6 +32,18 @@ textarea:focus-visible {
   outline-offset: 2px;
 }
 
+/* Prevent iOS/Android from auto-zooming the whole page when a form field
+   is tapped. Mobile browsers do this automatically whenever a field's
+   font-size is under 16px — this keeps every input/select/textarea at
+   16px ONLY on small screens, so desktop text sizing is untouched. */
+@media (max-width: 767px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
 @media print {
   header, footer, .print\:hidden {
     display: none !important;
