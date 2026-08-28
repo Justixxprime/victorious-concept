@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { usePaystackPayment } from 'react-paystack'
 import { motion } from 'framer-motion'
@@ -7,19 +7,23 @@ import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
 import { useAddresses } from '../hooks/useAddresses'
 import { supabase } from '../lib/supabaseClient'
-import { generateOrderId } from '../utils/generateOrderId'
 import { formatPrice } from '../utils/formatPrice'
 import { bankDetails } from '../data/paymentInfo'
 import { siteImages } from '../data/siteImages'
 import Receipt from '../components/Receipt'
-import { Printer, CreditCard, Landmark, MessageCircle, Copy, Check, PartyPopper } from 'lucide-react'
+import { Printer, CreditCard, Landmark, MessageCircle, Copy, Check, PartyPopper, Loader2 } from 'lucide-react'
 
 function Checkout() {
-  const { items, totalPrice, clearCart } = useCart()
+  const { items, coupon, clearCart } = useCart()
   const { user } = useAuth()
   const { addresses } = useAddresses()
   const navigate = useNavigate()
+
   const [order, setOrder] = useState(null)
+  const [pendingOrder, setPendingOrder] = useState(null)
+  const [confirming, setConfirming] = useState(false)
+  const [creatingOrder, setCreatingOrder] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
   const [form, setForm] = useState({
     name: user?.user_metadata?.full_name || '',
     phone: user?.user_metadata?.phone || '',
@@ -30,9 +34,9 @@ function Checkout() {
   const receiptRef = useRef(null)
 
   const paystackConfig = {
-    reference: new Date().getTime().toString(),
+    reference: pendingOrder?.orderNumber || '',
     email: user?.email || `${Date.now()}@guest.victoriousconcept.com`,
-    amount: totalPrice * 100,
+    amount: pendingOrder ? Math.round(pendingOrder.total * 100) : 0,
     publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
   }
   const initializePayment = usePaystackPayment(paystackConfig)
@@ -41,67 +45,129 @@ function Checkout() {
     setForm((prev) => ({ ...prev, [field]: value }))
   }
 
-  async function placeOrder(paymentReference = null, paymentMethod = method) {
-    const orderNumber = generateOrderId()
-    const newOrder = {
-      id: orderNumber,
+  async function createOrderOnServer(paymentMethod) {
+    setErrorMessage('')
+    setCreatingOrder(true)
+    try {
+      const res = await fetch('/api/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: items.map((i) => ({ id: i.id, quantity: i.quantity, size: i.size || null })),
+          couponCode: coupon?.code || null,
+          customer: form,
+          userId: user?.id || null,
+          email: user?.email || null,
+          paymentMethod,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setErrorMessage(data.error || 'Something went wrong creating your order.')
+        return null
+      }
+      return data
+    } catch {
+      setErrorMessage('Could not reach the server. Check your connection and try again.')
+      return null
+    } finally {
+      setCreatingOrder(false)
+    }
+  }
+
+  function buildReceiptOrder(data) {
+    return {
+      id: data.orderNumber,
       date: new Date().toLocaleDateString('en-NG', { day: 'numeric', month: 'long', year: 'numeric' }),
-      items,
-      total: totalPrice,
+      items: data.items,
+      total: data.total,
       customer: form,
     }
+  }
 
-    if (user) {
-      await supabase.from('orders').insert({
-        user_id: user.id,
-        order_number: orderNumber,
-        items: items,
-        total: totalPrice,
-        customer_name: form.name,
-        customer_phone: form.phone,
-        customer_address: form.address,
-        payment_reference: paymentReference,
-        payment_method: paymentMethod,
+  async function handleCardPay() {
+    const data = await createOrderOnServer('card')
+    if (data) setPendingOrder(data)
+  }
+
+  useEffect(() => {
+    if (pendingOrder) {
+      initializePayment({
+        onSuccess: () => {
+          setConfirming(true)
+          pollForPaymentConfirmation(pendingOrder.orderNumber)
+        },
+        onClose: () => {
+          setPendingOrder(null)
+        },
       })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingOrder])
 
-      if (user.email) {
-        fetch('/api/send-order-confirmation', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: user.email, orderNumber, items, total: totalPrice }),
-        }).catch(() => {})
-      }
+  async function pollForPaymentConfirmation(orderNumber, attempt = 0) {
+    const { data } = await supabase.rpc('get_order_by_reference', {
+      order_num: orderNumber,
+      phone: form.phone.trim(),
+    })
+    const found = data && data[0]
+
+    if (found && found.payment_status === 'paid') {
+      setConfirming(false)
+      setOrder({
+        id: found.order_number,
+        date: new Date(found.created_at || Date.now()).toLocaleDateString('en-NG', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+        }),
+        items: found.items,
+        total: found.total,
+        customer: form,
+      })
+      clearCart()
+      return
     }
 
-    setOrder(newOrder)
-    clearCart()
+    if (attempt >= 15) {
+      setConfirming(false)
+      setErrorMessage(
+        "We're still confirming your payment. If it was successful, you'll see it in your order history shortly — no need to pay again."
+      )
+      return
+    }
+
+    setTimeout(() => pollForPaymentConfirmation(orderNumber, attempt + 1), 2000)
   }
 
-  function handlePaystackSuccess(reference) {
-    placeOrder(reference.reference, 'card')
+  async function handleBankTransferConfirm() {
+    const data = await createOrderOnServer('bank_transfer')
+    if (data) {
+      setOrder(buildReceiptOrder(data))
+      clearCart()
+    }
   }
 
-  function handleBankTransferConfirm() {
-    placeOrder(null, 'bank_transfer')
-  }
+  async function handleWhatsAppOrder() {
+    const data = await createOrderOnServer('whatsapp')
+    if (!data) return
 
-  function handleWhatsAppOrder() {
-    const orderNumber = generateOrderId()
     const lines = [
       `Hi Victorious Concept, I'd like to arrange payment for an order.`,
       ``,
-      `Order Reference: ${orderNumber}`,
+      `Order Reference: ${data.orderNumber}`,
       `Name: ${form.name}`,
       `Phone: ${form.phone}`,
       `Address: ${form.address}`,
       ``,
       `Items:`,
-      ...items.map((i) => `${i.name} x${i.quantity} — ${formatPrice(i.price * i.quantity)}`),
+      ...data.items.map((i) => `${i.name} x${i.quantity} — ${formatPrice(i.price * i.quantity)}`),
       ``,
-      `Total: ${formatPrice(totalPrice)}`,
+      `Total: ${formatPrice(data.total)}`,
     ]
     window.open(`https://wa.me/2348122470435?text=${encodeURIComponent(lines.join('\n'))}`, '_blank')
-    placeOrder(null, 'whatsapp')
+    setOrder(buildReceiptOrder(data))
+    clearCart()
   }
 
   function copyAccount() {
@@ -132,12 +198,25 @@ function Checkout() {
     )
   }
 
+  if (confirming) {
+    return (
+      <div className="min-h-screen bg-cream dark:bg-espresso flex flex-col items-center justify-center gap-4 px-6 text-center">
+        <Loader2 className="w-8 h-8 text-gold animate-spin" />
+        <h1 className="font-display italic text-2xl text-espresso dark:text-cream">
+          Confirming your payment
+        </h1>
+        <p className="font-sans text-sm text-espresso/60 dark:text-cream/60 max-w-xs">
+          This only takes a moment. Please don't close this page.
+        </p>
+      </div>
+    )
+  }
+
   if (order) {
     return (
       <section className="relative min-h-screen py-16 px-6 overflow-hidden print:min-h-0 print:py-6 print:bg-white">
         <SEO title="Order Confirmed" description="Your Victorious Concept order confirmation." />
 
-        {/* Cinematic celebratory backdrop - screen only, never printed */}
         <div className="absolute inset-0 print:hidden">
           <img
             src={siteImages.heroBackdrop}
@@ -256,12 +335,11 @@ function Checkout() {
           />
         </div>
 
-        <div className="flex justify-between items-center border-t border-gold/20 pt-4 mb-6">
-          <span className="font-sans text-espresso dark:text-cream">Total</span>
-          <span className="font-display italic font-semibold text-xl text-espresso dark:text-cream">
-            {formatPrice(totalPrice)}
-          </span>
-        </div>
+        {errorMessage && (
+          <div className="mb-6 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
+            <p className="font-sans text-xs text-red-500">{errorMessage}</p>
+          </div>
+        )}
 
         <p className="font-sans text-xs uppercase tracking-widest text-gold mb-3">
           Payment Method
@@ -298,11 +376,12 @@ function Checkout() {
 
         {method === 'card' && (
           <button
-            onClick={() => canProceed && initializePayment({ onSuccess: handlePaystackSuccess, onClose: () => {} })}
-            disabled={!canProceed}
-            className="w-full bg-gold text-espresso font-sans font-medium px-8 py-4 rounded-full hover:bg-gold-light transition-colors disabled:opacity-40"
+            onClick={() => canProceed && handleCardPay()}
+            disabled={!canProceed || creatingOrder}
+            className="w-full flex items-center justify-center gap-2 bg-gold text-espresso font-sans font-medium px-8 py-4 rounded-full hover:bg-gold-light transition-colors disabled:opacity-40"
           >
-            Pay {formatPrice(totalPrice)}
+            {creatingOrder && <Loader2 className="w-4 h-4 animate-spin" />}
+            {creatingOrder ? 'Preparing your order…' : 'Continue to Payment'}
           </button>
         )}
 
@@ -323,9 +402,10 @@ function Checkout() {
             </div>
             <button
               onClick={handleBankTransferConfirm}
-              disabled={!canProceed}
-              className="w-full bg-gold text-espresso font-sans font-medium px-8 py-4 rounded-full hover:bg-gold-light transition-colors disabled:opacity-40"
+              disabled={!canProceed || creatingOrder}
+              className="w-full flex items-center justify-center gap-2 bg-gold text-espresso font-sans font-medium px-8 py-4 rounded-full hover:bg-gold-light transition-colors disabled:opacity-40"
             >
+              {creatingOrder && <Loader2 className="w-4 h-4 animate-spin" />}
               I've Made the Transfer
             </button>
             <p className="font-sans text-xs text-espresso/40 dark:text-cream/40 text-center">
@@ -341,9 +421,10 @@ function Checkout() {
             </p>
             <button
               onClick={() => canProceed && handleWhatsAppOrder()}
-              disabled={!canProceed}
-              className="w-full bg-gold text-espresso font-sans font-medium px-8 py-4 rounded-full hover:bg-gold-light transition-colors disabled:opacity-40"
+              disabled={!canProceed || creatingOrder}
+              className="w-full flex items-center justify-center gap-2 bg-gold text-espresso font-sans font-medium px-8 py-4 rounded-full hover:bg-gold-light transition-colors disabled:opacity-40"
             >
+              {creatingOrder && <Loader2 className="w-4 h-4 animate-spin" />}
               Continue on WhatsApp
             </button>
           </div>
