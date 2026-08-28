@@ -28,7 +28,7 @@ function MegaMenu({ open }) {
           animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
           exit={{ opacity: 0, y: -14, filter: 'blur(6px)' }}
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="absolute left-0 right-0 top-full overflow-hidden shadow-2xl z-40 border-b border-gold/30"
+          className="absolute left-0 right-0 top-full max-h-[calc(100vh-80px)] overflow-y-auto shadow-2xl z-40 border-b border-gold/30"
         >
           {/* Full cinematic background */}
           <div className="absolute inset-0">

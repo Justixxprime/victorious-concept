@@ -20,6 +20,10 @@ function ProductCard({ product }) {
   function handleWishlist(e) {
     e.preventDefault()
     e.stopPropagation()
+    if (!saved && imageRef.current) {
+      const rect = imageRef.current.getBoundingClientRect()
+      fly(product.image, rect, 'wishlist')
+    }
     toggleWishlist(product)
     showToast(saved ? 'Removed from wishlist' : 'Added to wishlist', 'wishlist')
   }

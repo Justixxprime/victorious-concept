@@ -21,7 +21,7 @@ function AnimatedLogo({ className = 'w-40' }) {
         />
         <motion.path
           d="M65 65 L100 130 L135 65"
-          stroke="url(#vGradient)"
+          stroke="url(#ringGradient)"
           strokeWidth="10"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -41,10 +41,6 @@ function AnimatedLogo({ className = 'w-40' }) {
           <linearGradient id="ringGradient" x1="0" y1="0" x2="200" y2="200">
             <stop offset="0%" stopColor="#a5713c" />
             <stop offset="100%" stopColor="#e8c490" />
-          </linearGradient>
-          <linearGradient id="vGradient" x1="0" y1="0" x2="150" y2="150">
-            <stop offset="0%" stopColor="#fbf3e7" />
-            <stop offset="100%" stopColor="#c58b52" />
           </linearGradient>
         </defs>
       </motion.svg>

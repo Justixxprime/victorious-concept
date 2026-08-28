@@ -7,6 +7,7 @@ import { useSiteSettings } from '../hooks/useSiteSettings'
 import { supabase } from '../lib/supabaseClient'
 import { formatPrice } from '../utils/formatPrice'
 import { starterCatalog } from '../data/starterCatalog'
+import { useToast } from '../context/ToastContext'
 import {
   Trash2, Pencil, Plus, Upload, Tag, Tags, LayoutDashboard, BarChart3,
   Percent, Users, MessageCircle, Mail, Quote, Layers, Package,
@@ -19,16 +20,20 @@ function Admin() {
   const { categories, refetch: refetchCategories } = useCategories()
   const { collections, refetch: refetchCollections } = useCollections()
   const { value: heroValue, updateSetting: updateHero } = useSiteSettings('hero')
+  const { showToast } = useToast()
 
-  // Runs any Supabase write and, if it failed, shows the REAL reason why
-  // (usually a Row Level Security permission issue) instead of failing silently.
-  async function runWrite(promise, actionLabel) {
+  // Runs any Supabase write. On failure, shows the REAL reason why (usually
+  // a Row Level Security permission issue) instead of failing silently.
+  // On success, ALSO shows a visible confirmation - so every click in this
+  // dashboard gives obvious feedback, whether it worked or not.
+  async function runWrite(promise, actionLabel, silent = false) {
     const { error } = await promise
     if (error) {
-      alert(`${actionLabel} failed.\n\nReason from the database: ${error.message}`)
+      if (!silent) showToast(`${actionLabel} failed: ${error.message}`, 'error')
       console.error(`${actionLabel} failed:`, error)
       return false
     }
+    if (!silent) showToast(`${actionLabel} - done`, 'success')
     return true
   }
 
@@ -110,12 +115,13 @@ function Admin() {
       }
       const ok = await runWrite(
         supabase.from('products').insert({ ...item, images: [item.image] }),
-        `Adding "${item.name}"`
+        `Adding "${item.name}"`,
+        true
       )
       if (ok) added++
     }
     setImporting(false)
-    alert(`Import finished. Added ${added} products, skipped ${skipped} (already existed).`)
+    showToast(`Import finished - added ${added}, skipped ${skipped} (already existed)`, added > 0 ? 'success' : 'error')
     window.location.reload()
   }
 

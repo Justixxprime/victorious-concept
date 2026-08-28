@@ -33,7 +33,7 @@ function Navbar() {
   const [megaMenuOpen, setMegaMenuOpen] = useState(false)
 
   const { totalItems } = useCart()
-  const { registerCartIcon } = useFlyToCart()
+  const { registerCartIcon, registerWishlistIcon } = useFlyToCart()
   const { items: wishlistItems } = useWishlist()
   const location = useLocation()
 
@@ -117,6 +117,7 @@ function Navbar() {
           <Link
             to="/wishlist"
             className="relative"
+            ref={registerWishlistIcon}
           >
             <motion.div
               whileHover={{ scale: 1.15 }}

@@ -36,6 +36,16 @@ textarea:focus-visible {
    is tapped. Mobile browsers do this automatically whenever a field's
    font-size is under 16px — this keeps every input/select/textarea at
    16px ONLY on small screens, so desktop text sizing is untouched. */
+/* Native <select> dropdown popups ignore Tailwind's dark: text color in
+   many browsers and default to a plain white popup background - combined
+   with our cream dark-mode text color, options became nearly invisible
+   (white text on white). Force a solid, always-readable style directly
+   on the options themselves so this can never happen regardless of theme. */
+select option {
+  background-color: #3a2318;
+  color: #fbf3e7;
+}
+
 @media (max-width: 767px) {
   input,
   select,

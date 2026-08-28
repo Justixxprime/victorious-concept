@@ -1,10 +1,10 @@
 import { createContext, useContext, useState, useCallback } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ShoppingBag, Heart, Check } from 'lucide-react'
+import { ShoppingBag, Heart, Check, AlertTriangle } from 'lucide-react'
 
 const ToastContext = createContext()
 
-const icons = { cart: ShoppingBag, wishlist: Heart, success: Check }
+const icons = { cart: ShoppingBag, wishlist: Heart, success: Check, error: AlertTriangle }
 
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([])
@@ -14,7 +14,7 @@ export function ToastProvider({ children }) {
     setToasts((prev) => [...prev, { id, message, type }])
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id))
-    }, 2600)
+    }, type === 'error' ? 4500 : 2600)
   }, [])
 
   return (
@@ -31,10 +31,16 @@ export function ToastProvider({ children }) {
                 animate={{ opacity: 1, x: 0, scale: 1 }}
                 exit={{ opacity: 0, x: 40, scale: 0.9 }}
                 transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                className="flex items-center gap-3 bg-espresso dark:bg-cream text-cream dark:text-espresso pl-4 pr-5 py-3 rounded-full shadow-xl"
+                className={`flex items-center gap-3 pl-4 pr-5 py-3 rounded-full shadow-xl ${
+                  toast.type === 'error'
+                    ? 'bg-red-600 text-white'
+                    : 'bg-espresso dark:bg-cream text-cream dark:text-espresso'
+                }`}
               >
-                <div className="w-7 h-7 rounded-full bg-gold flex items-center justify-center flex-shrink-0">
-                  <Icon className="w-3.5 h-3.5 text-espresso" fill={toast.type === 'wishlist' ? 'currentColor' : 'none'} />
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${
+                  toast.type === 'error' ? 'bg-white/20' : 'bg-gold'
+                }`}>
+                  <Icon className={`w-3.5 h-3.5 ${toast.type === 'error' ? 'text-white' : 'text-espresso'}`} fill={toast.type === 'wishlist' ? 'currentColor' : 'none'} />
                 </div>
                 <span className="font-sans text-sm whitespace-nowrap">{toast.message}</span>
               </motion.div>

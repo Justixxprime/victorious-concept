@@ -78,6 +78,13 @@ function ProductPage() {
     addToCart({ ...product, size: selectedSize })
   }
 
+  function handleWishlist() {
+    if (!saved && galleryRef.current) {
+      fly(product.image, galleryRef.current.getBoundingClientRect(), 'wishlist')
+    }
+    toggleWishlist(product)
+  }
+
   const related = products.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 4)
   const recentlyViewed = (viewed || []).filter((p) => p.id !== product.id).slice(0, 4)
 
@@ -165,7 +172,7 @@ function ProductPage() {
               <ShoppingBag className="w-4 h-4" /> {isPreorder ? 'Preorder' : outOfStock ? 'Out of Stock' : 'Add to Cart'}
             </button>
             <button
-              onClick={() => toggleWishlist(product)}
+              onClick={handleWishlist}
               className="w-14 h-14 rounded-full border border-gold/30 flex items-center justify-center hover:border-gold transition-colors"
               aria-label="Add to wishlist"
             >
