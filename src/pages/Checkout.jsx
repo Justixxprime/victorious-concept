@@ -54,7 +54,7 @@ function Checkout() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          items: items.map((i) => ({ id: i.id, quantity: i.quantity, size: i.size || null })),
+          items: items.map((i) => ({ id: i.id, variantId: i.variantId || null, quantity: i.quantity, size: i.size || null })),
           couponCode: coupon?.code || null,
           customer: form,
           userId: user?.id || null,

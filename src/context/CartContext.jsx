@@ -15,28 +15,36 @@ export function CartProvider({ children }) {
     localStorage.setItem('vc-cart', JSON.stringify(items))
   }, [items])
 
-  function addToCart(product) {
+  function addToCart(product, variantId = null) {
     setItems((prev) => {
-      const existing = prev.find((item) => String(item.id) === String(product.id))
+      const existing = prev.find(
+        (item) => String(item.id) === String(product.id) && (item.variantId || null) === variantId
+      )
       if (existing) {
         return prev.map((item) =>
-          String(item.id) === String(product.id)
+          String(item.id) === String(product.id) && (item.variantId || null) === variantId
             ? { ...item, quantity: item.quantity + 1 }
             : item
         )
       }
-      return [...prev, { ...product, quantity: 1 }]
+      return [...prev, { ...product, quantity: 1, variantId }]
     })
   }
 
-  function removeFromCart(id) {
-    setItems((prev) => prev.filter((item) => String(item.id) !== String(id)))
+  function removeFromCart(id, variantId = null) {
+    setItems((prev) =>
+      prev.filter((item) => !(String(item.id) === String(id) && (item.variantId || null) === variantId))
+    )
   }
 
-  function updateQuantity(id, quantity) {
+  function updateQuantity(id, quantity, variantId = null) {
     if (quantity < 1) return
     setItems((prev) =>
-      prev.map((item) => (String(item.id) === String(id) ? { ...item, quantity } : item))
+      prev.map((item) =>
+        String(item.id) === String(id) && (item.variantId || null) === variantId
+          ? { ...item, quantity }
+          : item
+      )
     )
   }
 

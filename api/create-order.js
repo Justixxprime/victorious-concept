@@ -49,13 +49,28 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Could not verify products' })
     }
 
+    // Variants (if any) also always come from the database, never the client.
+    const variantIds = items.map((i) => i.variantId).filter(Boolean)
+    let variantsById = {}
+    if (variantIds.length > 0) {
+      const { data: variantRows } = await supabase
+        .from('product_variants')
+        .select('*')
+        .in('id', variantIds)
+      variantsById = Object.fromEntries((variantRows || []).map((v) => [String(v.id), v]))
+    }
+
     const orderItems = []
     for (const requested of items) {
       const product = products.find((p) => String(p.id) === String(requested.id))
       const quantity = Number(requested.quantity)
+      const variant = requested.variantId ? variantsById[String(requested.variantId)] : null
 
       if (!product) {
         return res.status(400).json({ error: `Product ${requested.id} no longer exists` })
+      }
+      if (requested.variantId && !variant) {
+        return res.status(400).json({ error: `Selected option for ${product.name} no longer exists` })
       }
       if (product.status === 'hidden') {
         return res.status(400).json({ error: `${product.name} is not currently available` })
@@ -63,14 +78,19 @@ export default async function handler(req, res) {
       if (!Number.isInteger(quantity) || quantity < 1) {
         return res.status(400).json({ error: `Invalid quantity for ${product.name}` })
       }
-      if (product.status !== 'preorder' && product.stock < quantity) {
+
+      const availableStock = variant ? variant.stock : product.stock
+      if (product.status !== 'preorder' && availableStock < quantity) {
         return res.status(400).json({ error: `Not enough stock for ${product.name}` })
       }
 
+      const unitPrice = variant?.price_override || product.price
+
       orderItems.push({
         id: product.id,
+        variantId: variant?.id || null,
         name: product.name,
-        price: product.price, // server price, ignoring anything the client sent
+        price: unitPrice, // server price, ignoring anything the client sent
         quantity,
         size: requested.size || null,
       })

@@ -61,7 +61,7 @@ function Cart() {
         <div className="flex flex-col gap-6">
           {items.map((item) => (
             <div
-              key={item.id}
+              key={`${item.id}-${item.variantId || ''}`}
               className="flex items-center gap-4 border-b border-gold/20 pb-6"
             >
               <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-gold/10">
@@ -96,7 +96,7 @@ function Cart() {
 
               <div className="flex items-center gap-3 border border-gold/30 rounded-full px-3 py-1">
                 <button
-                  onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                  onClick={() => updateQuantity(item.id, item.quantity - 1, item.variantId || null)}
                   aria-label="Decrease quantity"
                   className="w-6 h-6 flex items-center justify-center"
                 >
@@ -106,7 +106,7 @@ function Cart() {
                   {item.quantity}
                 </span>
                 <button
-                  onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                  onClick={() => updateQuantity(item.id, item.quantity + 1, item.variantId || null)}
                   aria-label="Increase quantity"
                   className="w-6 h-6 flex items-center justify-center"
                 >
@@ -115,7 +115,7 @@ function Cart() {
               </div>
 
               <button
-                onClick={() => removeFromCart(item.id)}
+                onClick={() => removeFromCart(item.id, item.variantId || null)}
                 aria-label="Remove item"
                 className="text-espresso/40 dark:text-cream/40 hover:text-gold transition-colors"
               >
