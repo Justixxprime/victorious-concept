@@ -8,10 +8,35 @@ import { formatPrice } from '../utils/formatPrice'
 import { Search } from 'lucide-react'
 
 const statusStyles = {
-  pending: 'bg-gold/20 text-gold',
-  confirmed: 'bg-blue-500/10 text-blue-500',
+  pending_payment: 'bg-gold/20 text-gold',
+  processing: 'bg-blue-500/10 text-blue-500',
   shipped: 'bg-purple-500/10 text-purple-500',
   delivered: 'bg-green-500/10 text-green-500',
+  cancelled: 'bg-red-500/10 text-red-500',
+}
+
+const orderStatusLabels = {
+  pending_payment: 'Pending Payment',
+  processing: 'Processing',
+  shipped: 'Shipped',
+  delivered: 'Delivered',
+  cancelled: 'Cancelled',
+}
+
+const paymentBadgeStyles = {
+  paid: 'bg-green-500/10 text-green-600',
+  pending: 'bg-gold/20 text-gold',
+  unpaid: 'bg-espresso/10 text-espresso/60 dark:bg-cream/10 dark:text-cream/60',
+  failed: 'bg-red-500/10 text-red-500',
+  refunded: 'bg-purple-500/10 text-purple-500',
+}
+
+const paymentStatusLabels = {
+  paid: 'Paid',
+  pending: 'Awaiting Verification',
+  unpaid: 'Unpaid',
+  failed: 'Failed',
+  refunded: 'Refunded',
 }
 
 function TrackOrder() {
@@ -90,9 +115,14 @@ function TrackOrder() {
               <span className="font-sans text-sm font-medium text-espresso dark:text-cream">
                 {result.order_number}
               </span>
-              <span className={`font-sans text-xs px-3 py-1 rounded-full capitalize ${statusStyles[result.status] || statusStyles.pending}`}>
-                {result.status || 'pending'}
-              </span>
+              <div className="flex flex-wrap gap-2">
+                <span className={`font-sans text-xs px-3 py-1 rounded-full capitalize ${paymentBadgeStyles[result.payment_status] || paymentBadgeStyles.unpaid}`}>
+                  {paymentStatusLabels[result.payment_status] || result.payment_status || 'Unpaid'}
+                </span>
+                <span className={`font-sans text-xs px-3 py-1 rounded-full capitalize ${statusStyles[result.order_status] || statusStyles.pending_payment}`}>
+                  {orderStatusLabels[result.order_status] || result.order_status || 'Pending Payment'}
+                </span>
+              </div>
             </div>
             <div className="flex flex-col gap-1 mb-4">
               {(result.items || []).map((item) => (

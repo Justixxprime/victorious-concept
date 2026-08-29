@@ -31,11 +31,12 @@ function Checkout() {
   })
   const [method, setMethod] = useState('card')
   const [copied, setCopied] = useState(false)
+  const [guestEmail] = useState(() => `${Date.now()}@guest.victoriousconcept.com`)
   const receiptRef = useRef(null)
 
   const paystackConfig = {
     reference: pendingOrder?.orderNumber || '',
-    email: user?.email || `${Date.now()}@guest.victoriousconcept.com`,
+    email: user?.email || guestEmail,
     amount: pendingOrder ? Math.round(pendingOrder.total * 100) : 0,
     publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
   }
@@ -90,21 +91,6 @@ function Checkout() {
     if (data) setPendingOrder(data)
   }
 
-  useEffect(() => {
-    if (pendingOrder) {
-      initializePayment({
-        onSuccess: () => {
-          setConfirming(true)
-          pollForPaymentConfirmation(pendingOrder.orderNumber)
-        },
-        onClose: () => {
-          setPendingOrder(null)
-        },
-      })
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pendingOrder])
-
   async function pollForPaymentConfirmation(orderNumber, attempt = 0) {
     const { data } = await supabase.rpc('get_order_by_reference', {
       order_num: orderNumber,
@@ -139,6 +125,21 @@ function Checkout() {
 
     setTimeout(() => pollForPaymentConfirmation(orderNumber, attempt + 1), 2000)
   }
+
+  useEffect(() => {
+    if (pendingOrder) {
+      initializePayment({
+        onSuccess: () => {
+          setConfirming(true)
+          pollForPaymentConfirmation(pendingOrder.orderNumber)
+        },
+        onClose: () => {
+          setPendingOrder(null)
+        },
+      })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingOrder])
 
   async function handleBankTransferConfirm() {
     const data = await createOrderOnServer('bank_transfer')

@@ -1,139 +1,150 @@
-import { useState } from 'react'
-import { supabase } from '../lib/supabaseClient'
-import { formatPrice } from '../utils/formatPrice'
-import { Search, Package, Calendar, CreditCard, HelpCircle } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import SEO from '../components/SEO'
+import { supabase } from '../lib/supabaseClient'
+import { useAuth } from '../context/AuthContext'
+import { formatPrice } from '../utils/formatPrice'
+import { Package } from 'lucide-react'
 
 const statusStyles = {
-  pending: 'bg-gold/20 text-gold',
-  confirmed: 'bg-blue-500/10 text-blue-500',
+  pending_payment: 'bg-gold/20 text-gold',
+  processing: 'bg-blue-500/10 text-blue-500',
   shipped: 'bg-purple-500/10 text-purple-500',
   delivered: 'bg-green-500/10 text-green-500',
+  cancelled: 'bg-red-500/10 text-red-500',
 }
 
-function TrackOrder() {
-  const [orderNumber, setOrderNumber] = useState('')
-  const [result, setResult] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
+const orderStatusLabels = {
+  pending_payment: 'Pending Payment',
+  processing: 'Processing',
+  shipped: 'Shipped',
+  delivered: 'Delivered',
+  cancelled: 'Cancelled',
+}
 
-  const handleTrack = async (e) => {
-    e.preventDefault()
-    if (!orderNumber.trim()) return
+const paymentBadgeStyles = {
+  paid: 'bg-green-500/10 text-green-600',
+  pending: 'bg-gold/20 text-gold',
+  unpaid: 'bg-espresso/10 text-espresso/60 dark:bg-cream/10 dark:text-cream/60',
+  failed: 'bg-red-500/10 text-red-500',
+  refunded: 'bg-purple-500/10 text-purple-500',
+}
 
-    setLoading(true)
-    setError(null)
-    setResult(null)
+const paymentStatusLabels = {
+  paid: 'Paid',
+  pending: 'Awaiting Verification',
+  unpaid: 'Unpaid',
+  failed: 'Failed',
+  refunded: 'Refunded',
+}
 
-    try {
-      const { data, error: fetchError } = await supabase
+function OrderHistory() {
+  const { user, loading: authLoading } = useAuth()
+  const [orders, setOrders] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchOrders() {
+      if (!user) {
+        setLoading(false)
+        return
+      }
+      const { data } = await supabase
         .from('orders')
         .select('*')
-        .eq('order_number', orderNumber.trim())
-        .single()
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
 
-      if (fetchError || !data) {
-        setError('Order not found. Please check your order number and try again.')
-      } else {
-        setResult(data)
-      }
-    } catch (err) {
-      setError('An unexpected error occurred. Please try again.')
-    } finally {
+      setOrders(data || [])
       setLoading(false)
     }
+
+    if (!authLoading) fetchOrders()
+  }, [user, authLoading])
+
+  if (!authLoading && !user) {
+    return (
+      <div className="min-h-screen bg-cream dark:bg-espresso flex flex-col items-center justify-center gap-4 px-6 text-center">
+        <h1 className="font-display italic text-3xl text-espresso dark:text-cream">
+          Sign in to view your orders
+        </h1>
+        <Link
+          to="/account"
+          className="mt-4 bg-gold text-espresso font-sans font-medium px-8 py-3 rounded-full hover:bg-gold-light transition-colors"
+        >
+          Sign In
+        </Link>
+      </div>
+    )
   }
 
   return (
     <section className="bg-cream dark:bg-espresso transition-colors min-h-screen py-16 px-6">
-      <SEO title="Track Order" description="Track your Victorious Concept order status in real time." />
-      
-      <div className="max-w-md mx-auto">
-        <h1 className="font-display italic font-semibold text-3xl text-espresso dark:text-cream mb-4 text-center">
-          Track Your Order
+      <SEO title="My Orders" description="Your Victorious Concept order history." />
+      <div className="max-w-2xl mx-auto">
+        <h1 className="font-display italic font-semibold text-3xl text-espresso dark:text-cream mb-10">
+          My Orders
         </h1>
-        <p className="font-sans text-sm text-espresso/60 dark:text-cream/60 text-center mb-8">
-          Enter your order number to look up your purchase details and delivery progress.
-        </p>
 
-        {/* Search Input Form */}
-        <form onSubmit={handleTrack} className="flex flex-col gap-4 mb-10">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="e.g., VCN-12345"
-              value={orderNumber}
-              onChange={(e) => setOrderNumber(e.target.value)}
-              className="w-full bg-transparent border border-gold/30 focus:border-gold rounded-full px-6 py-3 font-sans text-sm text-espresso dark:text-cream placeholder-espresso/40 dark:placeholder-cream/40 outline-none transition-colors"
-            />
-            <button
-              type="submit"
-              disabled={loading}
-              className="absolute right-2 top-1/2 -translate-y-1/2 bg-gold text-espresso p-2 rounded-full hover:bg-gold-light transition-colors disabled:opacity-50"
-            >
-              <Search className="w-4 h-4" />
-            </button>
+        {loading ? (
+          <p className="font-sans text-sm text-espresso/60 dark:text-cream/60">Loading your orders...</p>
+        ) : orders.length === 0 ? (
+          <div className="flex flex-col items-center gap-4 py-20 text-center">
+            <Package className="w-10 h-10 text-gold" />
+            <p className="font-sans text-sm text-espresso/60 dark:text-cream/60">
+              No orders yet. Once you check out, they will appear here.
+            </p>
+            <Link to="/shop" className="text-gold hover:underline font-sans text-sm">
+              Start Shopping
+            </Link>
           </div>
-          {error && (
-            <p className="font-sans text-xs text-red-500 px-4">{error}</p>
-          )}
-        </form>
-
-        {/* Loading Spinner Fallback */}
-        {loading && (
-          <p className="font-sans text-sm text-center text-espresso/60 dark:text-cream/60">
-            Finding order details...
-          </p>
-        )}
-
-        {/* Search Result Card Container */}
-        {result && (
-          <div className="border border-gold/20 rounded-2xl p-6 bg-transparent">
-            {/* Header: Order ID & Tracking Timestamp */}
-            <div className="flex justify-between items-center mb-4">
-              <span className="font-sans text-sm font-medium text-espresso dark:text-cream flex items-center gap-2">
-                <Package className="w-4 h-4 text-gold" /> {result.order_number}
-              </span>
-              <span className="font-sans text-xs text-espresso/50 dark:text-cream/50 flex items-center gap-1">
-                <Calendar className="w-3 h-3" />
-                {new Date(result.created_at).toLocaleDateString('en-NG', {
-                  day: 'numeric',
-                  month: 'short',
-                  year: 'numeric'
-                })}
-              </span>
-            </div>
-
-            {/* Fulfill Status Tracking Badge */}
-            <span className={`inline-block font-sans text-xs px-3 py-1 rounded-full mb-4 capitalize ${statusStyles[result.status] || statusStyles.pending}`}>
-              {result.status || 'pending'}
-            </span>
-
-            {/* Selected Items Array Checklist */}
-            <div className="flex flex-col gap-1 mb-4">
-              {result.items?.map((item) => (
-                <div key={item.id} className="flex justify-between font-sans text-sm text-espresso/70 dark:text-cream/70">
-                  <span>{item.name} x{item.quantity}</span>
-                  <span>{formatPrice(item.price * item.quantity)}</span>
+        ) : (
+          <div className="flex flex-col gap-6">
+            {orders.map((order) => (
+              <div key={order.id} className="border border-gold/20 rounded-2xl p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <span className="font-sans text-sm font-medium text-espresso dark:text-cream">
+                    {order.order_number}
+                  </span>
+                  <span className="font-sans text-xs text-espresso/50 dark:text-cream/50">
+                    {new Date(order.created_at).toLocaleDateString('en-NG', { day: 'numeric', month: 'long', year: 'numeric' })}
+                  </span>
                 </div>
-              ))}
-            </div>
-
-            {/* Total Layout Pricing Boundaries */}
-            <div className="flex justify-between font-display italic font-semibold text-espresso dark:text-cream border-t border-gold/10 pt-3 mb-3">
-              <span>Total</span>
-              <span>{formatPrice(result.total)}</span>
-            </div>
-
-            {/* WhatsApp Integration Button Target */}
-            <a
-              href={`https://wa.me/?text=${encodeURIComponent(`Hi Victoria Obioma, I need help with my order ${result.order_number}`)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 font-sans text-xs text-gold hover:underline mt-4"
-            >
-              <HelpCircle className="w-4 h-4" /> Need help with this order?
-            </a>
+                <div className="flex flex-wrap items-center gap-2 mb-3">
+                  <span className={`inline-block font-sans text-xs px-3 py-1 rounded-full capitalize ${paymentBadgeStyles[order.payment_status] || paymentBadgeStyles.unpaid}`}>
+                    {paymentStatusLabels[order.payment_status] || order.payment_status || 'Unpaid'}
+                  </span>
+                  <span className={`inline-block font-sans text-xs px-3 py-1 rounded-full capitalize ${statusStyles[order.order_status] || statusStyles.pending_payment}`}>
+                    {orderStatusLabels[order.order_status] || order.order_status || 'Pending Payment'}
+                  </span>
+                </div>
+                <div className="flex flex-col gap-1 mb-4">
+                  {order.items.map((item) => (
+                    <div key={item.id} className="flex justify-between font-sans text-sm text-espresso/70 dark:text-cream/70">
+                      <span>{item.name} x{item.quantity}</span>
+                      <span>{formatPrice(item.price * item.quantity)}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex justify-between font-display italic font-semibold text-espresso dark:text-cream border-t border-gold/20 pt-3 mb-3">
+                  <span>Total</span>
+                  <span>{formatPrice(order.total)}</span>
+                </div>
+                <div className="flex items-center justify-between text-xs font-sans text-espresso/50 dark:text-cream/50">
+                  <span className="capitalize">
+                    Paid via {order.payment_method === 'card' ? 'Card' : order.payment_method === 'bank_transfer' ? 'Bank Transfer' : order.payment_method === 'whatsapp' ? 'WhatsApp' : 'Unknown'}
+                  </span>
+                  <a
+                    href={`https://wa.me/2348122470435?text=${encodeURIComponent(`Hi, I need help with my order ${order.order_number}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gold hover:underline"
+                  >
+                    Need help with this order?
+                  </a>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
@@ -141,4 +152,4 @@ function TrackOrder() {
   )
 }
 
-export default TrackOrder
+export default OrderHistory
