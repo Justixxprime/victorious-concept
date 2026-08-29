@@ -64,10 +64,12 @@ export default async function handler(req, res) {
       return res.status(200).json({ received: true })
     }
 
-    // --- Idempotency: if we've already processed this order, stop here ---
-    if (order.payment_status === 'paid') {
-      return res.status(200).json({ received: true })
-    }
+    // --- Log every genuinely-signed event we receive, for audit/debugging ---
+    await supabase.from('payment_events').insert({
+      provider_reference: reference,
+      event_type: event.event,
+      raw_payload: event,
+    })
 
     // --- Double-check with Paystack's own servers, not just this webhook payload ---
     const verifyRes = await fetch(
@@ -90,12 +92,45 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Payment verification failed' })
     }
 
+    // --- Claim this payment reference. The UNIQUE constraint on
+    // provider_reference makes this race-safe even if Paystack sends the
+    // same webhook twice at the exact same instant — only one insert wins. ---
+    const { error: paymentInsertError } = await supabase.from('payments').insert({
+      order_id: order.id,
+      provider: 'paystack',
+      provider_reference: reference,
+      amount: tx.amount,
+      currency: tx.currency,
+      status: 'paid',
+      paid_at: new Date().toISOString(),
+      metadata: { channel: tx.channel, gateway_response: tx.gateway_response },
+    })
+
+    if (paymentInsertError) {
+      // Most likely a duplicate reference — this webhook was already processed.
+      return res.status(200).json({ received: true })
+    }
+
+    // --- Snapshot each line item permanently, so a later product-price change
+    // never rewrites what this customer actually paid ---
+    const orderItemRows = order.items.map((item) => ({
+      order_id: order.id,
+      product_id: item.id,
+      variant_id: item.variantId || null,
+      product_name: item.name,
+      unit_price: item.price,
+      quantity: item.quantity,
+      line_total: item.price * item.quantity,
+    }))
+    await supabase.from('order_items').insert(orderItemRows)
+
     // --- Reduce stock for each item now that payment is genuinely confirmed ---
     for (const item of order.items) {
-      await supabase.rpc('decrement_stock', {
-        product_id: item.id,
-        qty: item.quantity,
-      })
+      if (item.variantId) {
+        await supabase.rpc('decrement_variant_stock', { variant_id: item.variantId, qty: item.quantity })
+      } else {
+        await supabase.rpc('decrement_stock', { product_id: item.id, qty: item.quantity })
+      }
     }
 
     // --- Mark the order paid, based on our own verification, not the client ---
@@ -107,6 +142,12 @@ export default async function handler(req, res) {
         payment_reference: reference,
       })
       .eq('order_number', reference)
+
+    await supabase
+      .from('payment_events')
+      .update({ processed: true })
+      .eq('provider_reference', reference)
+      .eq('event_type', event.event)
 
     await sendConfirmationEmail({
       email: order.customer_email,

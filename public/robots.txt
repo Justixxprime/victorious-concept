@@ -5,4 +5,4 @@ Disallow: /checkout
 Disallow: /account
 Disallow: /orders
 
-Sitemap: https://victorious-concept.vercel.app/sitemap.xml
+Sitemap: https://victorious-concept.vercel.app/api/sitemap

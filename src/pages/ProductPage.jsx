@@ -4,6 +4,7 @@ import { Heart, ShoppingBag, Truck, RefreshCw, ShieldCheck, MessageCircle } from
 import { useProducts } from '../hooks/useProducts'
 import { formatPrice } from '../utils/formatPrice'
 import { useCart } from '../context/CartContext'
+import { supabase } from '../lib/supabaseClient'
 import { useWishlist } from '../context/WishlistContext'
 import { useRecentlyViewed } from '../hooks/useRecentlyViewed'
 import { useFlyToCart } from '../context/FlyToCartContext'
@@ -40,10 +41,21 @@ function ProductPage() {
   const { viewed, addViewed } = useRecentlyViewed()
   const { fly } = useFlyToCart()
   const [selectedSize, setSelectedSize] = useState(null)
+  const [variants, setVariants] = useState([])
+  const [selectedVariant, setSelectedVariant] = useState(null)
   const galleryRef = useRef(null)
 
   useEffect(() => {
     if (product) addViewed(product)
+  }, [product])
+
+  useEffect(() => {
+    if (!product) return
+    supabase
+      .from('product_variants')
+      .select('*')
+      .eq('product_id', product.id)
+      .then(({ data }) => setVariants(data || []))
   }, [product])
 
   if (productsLoading) {
@@ -69,13 +81,25 @@ function ProductPage() {
 
   const saved = isWishlisted(product.id)
   const isPreorder = product.status === 'preorder'
-  const outOfStock = product.stock <= 0 && !isPreorder
+  const hasVariants = variants.length > 0
+  const effectiveStock = hasVariants ? (selectedVariant?.stock ?? 0) : product.stock
+  const effectivePrice = selectedVariant?.price_override || product.price
+  const outOfStock = hasVariants
+    ? selectedVariant && effectiveStock <= 0 && !isPreorder
+    : product.stock <= 0 && !isPreorder
 
   function handleAddToCart() {
     if (galleryRef.current) {
       fly(product.image, galleryRef.current.getBoundingClientRect())
     }
-    addToCart({ ...product, size: selectedSize })
+    if (hasVariants) {
+      addToCart(
+        { ...product, price: effectivePrice, size: [selectedVariant.size, selectedVariant.color].filter(Boolean).join(' / ') },
+        selectedVariant.id
+      )
+    } else {
+      addToCart({ ...product, size: selectedSize })
+    }
   }
 
   function handleWishlist() {
@@ -90,9 +114,12 @@ function ProductPage() {
 
   return (
     <section className="bg-cream dark:bg-espresso transition-colors py-12 px-6 pb-24 md:pb-12 min-h-screen">
-      <SEO title={product.name} description={`${product.name}, available now at Victorious Concept.`} />
-      <script type="application/ld+json">
-        {JSON.stringify({
+      <SEO
+        title={product.name}
+        description={getDescription(product)}
+        image={product.images?.[0] || product.image}
+        url={`https://victorious-concept.vercel.app/product/${product.id}`}
+        jsonLd={{
           '@context': 'https://schema.org/',
           '@type': 'Product',
           name: product.name,
@@ -104,8 +131,8 @@ function ProductPage() {
             price: product.price,
             availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
           },
-        })}
-      </script>
+        }}
+      />
 
       <div className="max-w-7xl mx-auto mb-2 px-0">
         <Breadcrumbs
@@ -132,7 +159,7 @@ function ProductPage() {
               {product.name}
             </h1>
             <p className="font-sans text-xl text-gold mt-3">
-              {formatPrice(product.price)}
+              {formatPrice(effectivePrice)}
             </p>
           </div>
 
@@ -140,33 +167,62 @@ function ProductPage() {
             {getDescription(product)}
           </p>
 
-          {product.sizes && product.sizes.length > 0 && (
+          {hasVariants ? (
             <div>
               <p className="font-sans text-xs uppercase tracking-widest text-espresso/60 dark:text-cream/60 mb-3">
-                Select Size
+                Select Option
               </p>
               <div className="flex gap-2 flex-wrap">
-                {product.sizes.map((size) => (
+                {variants.map((v) => (
                   <button
-                    key={size}
-                    onClick={() => setSelectedSize(size)}
-                    className={`w-12 h-12 rounded-full border font-sans text-sm transition-colors ${
-                      selectedSize === size
+                    key={v.id}
+                    onClick={() => setSelectedVariant(v)}
+                    disabled={v.stock <= 0 && !isPreorder}
+                    className={`px-4 h-12 rounded-full border font-sans text-sm transition-colors disabled:opacity-30 ${
+                      selectedVariant?.id === v.id
                         ? 'bg-gold border-gold text-espresso'
                         : 'border-gold/30 text-espresso dark:text-cream hover:border-gold'
                     }`}
                   >
-                    {size}
+                    {[v.size, v.color].filter(Boolean).join(' / ') || 'Option'}
+                    {v.stock <= 0 && !isPreorder && ' (Out of stock)'}
                   </button>
                 ))}
               </div>
             </div>
+          ) : (
+            product.sizes && product.sizes.length > 0 && (
+              <div>
+                <p className="font-sans text-xs uppercase tracking-widest text-espresso/60 dark:text-cream/60 mb-3">
+                  Select Size
+                </p>
+                <div className="flex gap-2 flex-wrap">
+                  {product.sizes.map((size) => (
+                    <button
+                      key={size}
+                      onClick={() => setSelectedSize(size)}
+                      className={`w-12 h-12 rounded-full border font-sans text-sm transition-colors ${
+                        selectedSize === size
+                          ? 'bg-gold border-gold text-espresso'
+                          : 'border-gold/30 text-espresso dark:text-cream hover:border-gold'
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )
           )}
 
           <div className="flex gap-3">
             <button
               onClick={handleAddToCart}
-              disabled={(outOfStock) || (product.sizes && product.sizes.length > 0 && !selectedSize)}
+              disabled={
+                hasVariants
+                  ? !selectedVariant || outOfStock
+                  : outOfStock || (product.sizes && product.sizes.length > 0 && !selectedSize)
+              }
               className="flex-1 bg-gold text-espresso font-sans font-medium px-8 py-4 rounded-full flex items-center justify-center gap-2 hover:bg-gold-light transition-colors disabled:opacity-40"
             >
               <ShoppingBag className="w-4 h-4" /> {isPreorder ? 'Preorder' : outOfStock ? 'Out of Stock' : 'Add to Cart'}

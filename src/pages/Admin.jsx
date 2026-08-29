@@ -8,6 +8,7 @@ import { supabase } from '../lib/supabaseClient'
 import { formatPrice } from '../utils/formatPrice'
 import { starterCatalog } from '../data/starterCatalog'
 import { useToast } from '../context/ToastContext'
+import AdminVariantManager from '../components/AdminVariantManager'
 import {
   Trash2, Pencil, Plus, Upload, Tag, Tags, LayoutDashboard, BarChart3,
   Percent, Users, MessageCircle, Mail, Quote, Layers, Package,
@@ -38,6 +39,7 @@ function Admin() {
   }
 
   const [tab, setTab] = useState('products')
+  const [expandedVariants, setExpandedVariants] = useState(null)
 
   // Products
   const [editing, setEditing] = useState(null)
@@ -508,14 +510,25 @@ function Admin() {
             ) : (
               <div className="flex flex-col gap-3">
                 {products.map((product) => (
-                  <div key={product.id} className="flex items-center gap-4 border border-gold/20 rounded-xl p-4">
-                    <img src={product.image} alt={product.name} className="w-14 h-14 rounded-lg object-cover flex-shrink-0" />
-                    <div className="flex-1">
-                      <p className="font-sans text-sm text-espresso dark:text-cream">{product.name}</p>
-                      <p className="font-sans text-xs text-gold">{formatPrice(product.price)} · {product.category} · {product.status}</p>
+                  <div key={product.id} className="border border-gold/20 rounded-xl p-4">
+                    <div className="flex items-center gap-4">
+                      <img src={product.image} alt={product.name} className="w-14 h-14 rounded-lg object-cover flex-shrink-0" />
+                      <div className="flex-1">
+                        <p className="font-sans text-sm text-espresso dark:text-cream">{product.name}</p>
+                        <p className="font-sans text-xs text-gold">{formatPrice(product.price)} · {product.category} · {product.status}</p>
+                      </div>
+                      <button
+                        onClick={() => setExpandedVariants(expandedVariants === product.id ? null : product.id)}
+                        className="font-sans text-xs text-espresso/50 dark:text-cream/50 hover:text-gold underline"
+                      >
+                        Variants
+                      </button>
+                      <button onClick={() => startEdit(product)} aria-label="Edit"><Pencil className="w-4 h-4 text-espresso/50 dark:text-cream/50 hover:text-gold" /></button>
+                      <button onClick={() => handleDelete(product.id)} aria-label="Delete"><Trash2 className="w-4 h-4 text-espresso/50 dark:text-cream/50 hover:text-red-500" /></button>
                     </div>
-                    <button onClick={() => startEdit(product)} aria-label="Edit"><Pencil className="w-4 h-4 text-espresso/50 dark:text-cream/50 hover:text-gold" /></button>
-                    <button onClick={() => handleDelete(product.id)} aria-label="Delete"><Trash2 className="w-4 h-4 text-espresso/50 dark:text-cream/50 hover:text-red-500" /></button>
+                    {expandedVariants === product.id && (
+                      <AdminVariantManager productId={product.id} basePrice={product.price} />
+                    )}
                   </div>
                 ))}
               </div>
@@ -557,6 +570,44 @@ function Admin() {
                     'Marking order paid'
                   )
                   if (!ok) return
+
+                  // Record the manual payment, snapshot the line items, and
+                  // protect stock — the same steps the card/webhook path does,
+                  // now that a human has confirmed the money actually arrived.
+                  const { error: paymentInsertError } = await supabase.from('payments').insert({
+                    order_id: order.id,
+                    provider: 'manual',
+                    provider_reference: order.order_number,
+                    amount: order.total,
+                    currency: 'NGN',
+                    status: 'paid',
+                    paid_at: new Date().toISOString(),
+                    metadata: { verified_via: order.payment_method },
+                  })
+
+                  // If this reference was already recorded (e.g. a double-click),
+                  // skip re-inserting line items and re-decrementing stock.
+                  if (!paymentInsertError) {
+                    await supabase.from('order_items').insert(
+                      order.items.map((item) => ({
+                        order_id: order.id,
+                        product_id: item.id,
+                        variant_id: item.variantId || null,
+                        product_name: item.name,
+                        unit_price: item.price,
+                        quantity: item.quantity,
+                        line_total: item.price * item.quantity,
+                      }))
+                    )
+                    for (const item of order.items) {
+                      if (item.variantId) {
+                        await supabase.rpc('decrement_variant_stock', { variant_id: item.variantId, qty: item.quantity })
+                      } else {
+                        await supabase.rpc('decrement_stock', { product_id: item.id, qty: item.quantity })
+                      }
+                    }
+                  }
+
                   setOrders((prev) =>
                     prev.map((o) =>
                       o.id === order.id ? { ...o, payment_status: 'paid', order_status: 'processing' } : o

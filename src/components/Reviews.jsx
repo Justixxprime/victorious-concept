@@ -2,12 +2,14 @@ import { useState } from 'react'
 import { Star } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useReviews } from '../hooks/useReviews'
+import { useToast } from '../context/ToastContext'
 import { BadgeCheck } from 'lucide-react'
 import { Camera } from 'lucide-react'
 
 function Reviews({ productId }) {
   const { user } = useAuth()
   const { reviews, loading, submitReview, average } = useReviews(productId)
+  const { showToast } = useToast()
   const existingReview = reviews.find((r) => r.user_id === user?.id)
   const [rating, setRating] = useState(5)
   const [comment, setComment] = useState('')
@@ -28,13 +30,16 @@ function Reviews({ productId }) {
     e.preventDefault()
     if (!user) return
     setSubmitting(true)
-    await submitReview({
+    const result = await submitReview({
       userId: user.id,
       customerName: name || user.email.split('@')[0],
       rating,
       comment,
       imageFile,
     })
+    if (result.imageUploadFailed) {
+      showToast("Your review was submitted, but the photo couldn't be attached. Please try again.", 'error')
+    }
     setComment('')
     setImageFile(null)
     setImagePreview(null)

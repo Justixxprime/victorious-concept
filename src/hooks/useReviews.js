@@ -21,6 +21,7 @@ export function useReviews(productId) {
 
   async function submitReview({ userId, customerName, rating, comment, imageFile }) {
     let imageUrl = null
+    let imageUploadFailed = false
 
     if (imageFile) {
       const fileName = `${Date.now()}-${imageFile.name}`
@@ -31,6 +32,8 @@ export function useReviews(productId) {
       if (!uploadError) {
         const { data } = supabase.storage.from('review-images').getPublicUrl(fileName)
         imageUrl = data.publicUrl
+      } else {
+        imageUploadFailed = true
       }
     }
     const { data: userOrders } = await supabase
@@ -52,7 +55,7 @@ export function useReviews(productId) {
       image_url: imageUrl,
     }, { onConflict: 'user_id,product_id' })
     if (!error) fetchReviews()
-    return { error }
+    return { error, imageUploadFailed }
   }
 
   const average = reviews.length
