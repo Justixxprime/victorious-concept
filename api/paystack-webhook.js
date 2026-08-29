@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import crypto from 'crypto'
+import { sendConfirmationEmail } from './_lib/sendConfirmationEmail.js'
 
 // This must stay server-only. Vercel needs the raw request body (not
 // pre-parsed JSON) to check Paystack's signature correctly.
@@ -107,8 +108,15 @@ export default async function handler(req, res) {
       })
       .eq('order_number', reference)
 
+    await sendConfirmationEmail({
+      email: order.customer_email,
+      orderNumber: order.order_number,
+      items: order.items,
+      total: order.total,
+    })
+
     return res.status(200).json({ received: true })
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: 'Webhook processing failed' })
   }
 }

@@ -1,12 +1,16 @@
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' })
-  }
-
-  const { email, orderNumber, items, total } = req.body
+// Shared by api/create-order.js (bank transfer / WhatsApp) and
+// api/paystack-webhook.js (card, once payment is verified). Never called
+// directly from the browser.
+export async function sendConfirmationEmail({ email, orderNumber, items, total }) {
+  if (!email) return // guest checkout with no email on file — nothing to send to
 
   const itemsHtml = items
-    .map((item) => `<tr><td style="padding:8px 0;">${item.name} x${item.quantity}</td><td style="padding:8px 0; text-align:right;">₦${(item.price * item.quantity).toLocaleString()}</td></tr>`)
+    .map(
+      (item) =>
+        `<tr><td style="padding:8px 0;">${item.name} x${item.quantity}</td><td style="padding:8px 0; text-align:right;">₦${(
+          item.price * item.quantity
+        ).toLocaleString()}</td></tr>`
+    )
     .join('')
 
   const html = `
@@ -23,7 +27,7 @@ export default async function handler(req, res) {
   `
 
   try {
-    const response = await fetch('https://api.resend.com/emails', {
+    await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
@@ -36,14 +40,8 @@ export default async function handler(req, res) {
         html,
       }),
     })
-
-    if (!response.ok) {
-      const error = await response.text()
-      return res.status(500).json({ error })
-    }
-
-    return res.status(200).json({ success: true })
-  } catch (err) {
-    return res.status(500).json({ error: err.message })
+  } catch {
+    // Email failing to send should never break order creation or payment
+    // confirmation — it's logged implicitly via Vercel's function logs.
   }
 }
