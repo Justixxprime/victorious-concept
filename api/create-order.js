@@ -1,5 +1,9 @@
 import { createClient } from '@supabase/supabase-js'
+import { sendConfirmationEmail } from './_lib/sendConfirmationEmail.js'
 
+// This runs on Vercel's servers only — it uses the secret service-role key,
+// which must NEVER be exposed to the browser. Do not import this file or its
+// env vars into anything under src/.
 const supabase = createClient(
   process.env.VITE_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -22,6 +26,7 @@ export default async function handler(req, res) {
   try {
     const { items, couponCode, customer, userId, email, paymentMethod } = req.body
 
+    // --- Basic input validation ---
     if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ error: 'Cart is empty' })
     }
@@ -32,6 +37,8 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Invalid payment method' })
     }
 
+    // --- Look up REAL product data. The client only sends id + quantity + size;
+    // price and availability always come from the database, never the request body. ---
     const ids = items.map((i) => i.id)
     const { data: products, error: productsError } = await supabase
       .from('products')
@@ -63,7 +70,7 @@ export default async function handler(req, res) {
       orderItems.push({
         id: product.id,
         name: product.name,
-        price: product.price,
+        price: product.price, // server price, ignoring anything the client sent
         quantity,
         size: requested.size || null,
       })
@@ -71,8 +78,10 @@ export default async function handler(req, res) {
 
     const subtotal = orderItems.reduce((sum, i) => sum + i.price * i.quantity, 0)
 
+    // --- Coupon: re-validated server-side, never trusting a client-computed discount ---
     let discount = 0
     let appliedCouponCode = null
+    let matchedCoupon = null
     if (couponCode) {
       const { data: coupon } = await supabase
         .from('coupons')
@@ -81,14 +90,26 @@ export default async function handler(req, res) {
         .eq('active', true)
         .maybeSingle()
 
-      if (coupon) {
+      const now = new Date()
+      const notExpired = !coupon?.expires_at || new Date(coupon.expires_at) > now
+      const underUsageLimit = !coupon?.max_uses || coupon.used_count < coupon.max_uses
+      const meetsMinOrder = !coupon?.min_order_amount || subtotal >= coupon.min_order_amount
+
+      if (coupon && notExpired && underUsageLimit && meetsMinOrder) {
         discount = Math.round(subtotal * (coupon.percent_off / 100))
         appliedCouponCode = coupon.code
+        matchedCoupon = coupon
       }
+      // If the code is invalid, expired, exhausted, or below the minimum order
+      // amount, we silently apply no discount rather than failing the whole order.
     }
 
     const total = subtotal - discount
     const orderNumber = generateOrderNumber()
+
+    // Card payments stay unpaid until the Paystack webhook confirms them.
+    // Bank transfer / WhatsApp orders are "pending" — a human at Victorious Concept
+    // verifies these manually, per your existing process.
     const paymentStatus = paymentMethod === 'card' ? 'unpaid' : 'pending'
 
     const { data: order, error: insertError } = await supabase
@@ -114,12 +135,28 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Could not create order' })
     }
 
+    if (matchedCoupon) {
+      await supabase.rpc('increment_coupon_usage', { coupon_id: matchedCoupon.id })
+    }
+
+    // Card orders get their confirmation email from the webhook, once payment
+    // is genuinely verified. Bank transfer / WhatsApp orders get it now, as an
+    // "we've received your order" notice, since there's no webhook for them.
+    if (paymentMethod !== 'card') {
+      await sendConfirmationEmail({
+        email: order.customer_email,
+        orderNumber: order.order_number,
+        items: order.items,
+        total: order.total,
+      })
+    }
+
     return res.status(200).json({
       orderNumber: order.order_number,
       total: order.total,
       items: order.items,
     })
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: 'Unexpected server error' })
   }
 }
