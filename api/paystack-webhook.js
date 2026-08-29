@@ -154,6 +154,8 @@ export default async function handler(req, res) {
       orderNumber: order.order_number,
       items: order.items,
       total: order.total,
+      shippingFee: order.shipping_fee,
+      shippingZone: order.shipping_zone,
     })
 
     return res.status(200).json({ received: true })

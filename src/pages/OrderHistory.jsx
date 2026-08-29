@@ -12,6 +12,10 @@ const statusStyles = {
   shipped: 'bg-purple-500/10 text-purple-500',
   delivered: 'bg-green-500/10 text-green-500',
   cancelled: 'bg-red-500/10 text-red-500',
+  return_requested: 'bg-gold/20 text-gold',
+  returned: 'bg-espresso/10 text-espresso/60 dark:bg-cream/10 dark:text-cream/60',
+  refund_pending: 'bg-gold/20 text-gold',
+  refunded: 'bg-purple-500/10 text-purple-500',
 }
 
 const orderStatusLabels = {
@@ -20,6 +24,10 @@ const orderStatusLabels = {
   shipped: 'Shipped',
   delivered: 'Delivered',
   cancelled: 'Cancelled',
+  return_requested: 'Return Requested',
+  returned: 'Returned',
+  refund_pending: 'Refund Pending',
+  refunded: 'Refunded',
 }
 
 const paymentBadgeStyles = {
@@ -42,6 +50,9 @@ function OrderHistory() {
   const { user, loading: authLoading } = useAuth()
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
+  const [returningOrderId, setReturningOrderId] = useState(null)
+  const [returnReason, setReturnReason] = useState('')
+  const [submittingReturn, setSubmittingReturn] = useState(false)
 
   useEffect(() => {
     async function fetchOrders() {
@@ -61,6 +72,26 @@ function OrderHistory() {
 
     if (!authLoading) fetchOrders()
   }, [user, authLoading])
+
+  async function submitReturnRequest(order) {
+    if (!returnReason.trim()) return
+    setSubmittingReturn(true)
+    const { error } = await supabase.from('return_requests').insert({
+      order_id: order.id,
+      user_id: user.id,
+      reason: returnReason.trim(),
+      items: order.items,
+    })
+    if (!error) {
+      await supabase.from('orders').update({ order_status: 'return_requested' }).eq('id', order.id)
+      setOrders((prev) =>
+        prev.map((o) => (o.id === order.id ? { ...o, order_status: 'return_requested' } : o))
+      )
+      setReturningOrderId(null)
+      setReturnReason('')
+    }
+    setSubmittingReturn(false)
+  }
 
   if (!authLoading && !user) {
     return (
@@ -143,6 +174,44 @@ function OrderHistory() {
                     Need help with this order?
                   </a>
                 </div>
+
+                {order.order_status === 'delivered' && (
+                  <div className="border-t border-gold/10 mt-4 pt-4">
+                    {returningOrderId === order.id ? (
+                      <div className="flex flex-col gap-2">
+                        <textarea
+                          placeholder="Why would you like to return this order?"
+                          rows={2}
+                          value={returnReason}
+                          onChange={(e) => setReturnReason(e.target.value)}
+                          className="bg-transparent border border-gold/30 rounded-xl px-3 py-2 font-sans text-xs text-espresso dark:text-cream outline-none focus:border-gold resize-none"
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => submitReturnRequest(order)}
+                            disabled={!returnReason.trim() || submittingReturn}
+                            className="bg-gold text-espresso font-sans text-xs font-medium px-4 py-2 rounded-full hover:bg-gold-light transition-colors disabled:opacity-40"
+                          >
+                            {submittingReturn ? 'Submitting...' : 'Submit Request'}
+                          </button>
+                          <button
+                            onClick={() => { setReturningOrderId(null); setReturnReason('') }}
+                            className="font-sans text-xs text-espresso/50 dark:text-cream/50"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setReturningOrderId(order.id)}
+                        className="font-sans text-xs text-gold hover:underline"
+                      >
+                        Request a return
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             ))}
           </div>

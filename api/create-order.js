@@ -24,7 +24,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { items, couponCode, customer, userId, email, paymentMethod } = req.body
+    const { items, couponCode, customer, userId, email, paymentMethod, shippingZoneId } = req.body
 
     // --- Basic input validation ---
     if (!Array.isArray(items) || items.length === 0) {
@@ -35,6 +35,21 @@ export default async function handler(req, res) {
     }
     if (!['card', 'bank_transfer', 'whatsapp'].includes(paymentMethod)) {
       return res.status(400).json({ error: 'Invalid payment method' })
+    }
+    if (!shippingZoneId) {
+      return res.status(400).json({ error: 'Please select a delivery location' })
+    }
+
+    // --- Shipping fee always comes from the database, never the client ---
+    const { data: shippingZone } = await supabase
+      .from('shipping_zones')
+      .select('*')
+      .eq('id', shippingZoneId)
+      .eq('active', true)
+      .maybeSingle()
+
+    if (!shippingZone) {
+      return res.status(400).json({ error: 'That delivery location is no longer available' })
     }
 
     // --- Look up REAL product data. The client only sends id + quantity + size;
@@ -124,7 +139,7 @@ export default async function handler(req, res) {
       // amount, we silently apply no discount rather than failing the whole order.
     }
 
-    const total = subtotal - discount
+    const total = subtotal - discount + shippingZone.fee
     const orderNumber = generateOrderNumber()
 
     // Card payments stay unpaid until the Paystack webhook confirms them.
@@ -147,6 +162,8 @@ export default async function handler(req, res) {
         payment_status: paymentStatus,
         order_status: 'pending_payment',
         coupon_code: appliedCouponCode,
+        shipping_fee: shippingZone.fee,
+        shipping_zone: shippingZone.name,
       })
       .select()
       .single()
@@ -168,6 +185,8 @@ export default async function handler(req, res) {
         orderNumber: order.order_number,
         items: order.items,
         total: order.total,
+        shippingFee: order.shipping_fee,
+        shippingZone: order.shipping_zone,
       })
     }
 
@@ -175,6 +194,8 @@ export default async function handler(req, res) {
       orderNumber: order.order_number,
       total: order.total,
       items: order.items,
+      shippingFee: order.shipping_fee,
+      shippingZone: order.shipping_zone,
     })
   } catch {
     return res.status(500).json({ error: 'Unexpected server error' })

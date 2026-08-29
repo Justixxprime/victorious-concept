@@ -12,7 +12,7 @@ import AdminVariantManager from '../components/AdminVariantManager'
 import {
   Trash2, Pencil, Plus, Upload, Tag, Tags, LayoutDashboard, BarChart3,
   Percent, Users, MessageCircle, Mail, Quote, Layers, Package,
-  TrendingUp, AlertTriangle, DollarSign,
+  TrendingUp, AlertTriangle, DollarSign, Truck, RotateCcw,
 } from 'lucide-react'
 
 function Admin() {
@@ -64,6 +64,14 @@ function Admin() {
   const [coupons, setCoupons] = useState([])
   const [couponForm, setCouponForm] = useState({ code: '', percent_off: '', expires_at: '', max_uses: '', min_order_amount: '' })
 
+  // Shipping zones
+  const [shippingZones, setShippingZones] = useState([])
+  const [shippingForm, setShippingForm] = useState({ name: '', fee: '', estimated_days: '' })
+
+  // Returns
+  const [returns, setReturns] = useState([])
+  const [processingReturn, setProcessingReturn] = useState(null)
+
   // Messages
   const [messages, setMessages] = useState([])
 
@@ -92,11 +100,24 @@ function Admin() {
       const { data } = await supabase.from('testimonials').select('*')
       setTestimonials(data || [])
     }
+    async function fetchShippingZones() {
+      const { data } = await supabase.from('shipping_zones').select('*').order('fee')
+      setShippingZones(data || [])
+    }
+    async function fetchReturns() {
+      const { data } = await supabase
+        .from('return_requests')
+        .select('*, orders(order_number, total, payment_method, payment_status, payment_reference, customer_name, customer_phone)')
+        .order('created_at', { ascending: false })
+      setReturns(data || [])
+    }
     if (isAdmin) {
       fetchAllOrders()
       fetchCoupons()
       fetchMessages()
       fetchTestimonials()
+      fetchShippingZones()
+      fetchReturns()
     }
   }, [isAdmin])
 
@@ -341,6 +362,74 @@ function Admin() {
     setCoupons(data || [])
   }
 
+  // ---- Shipping zones ----
+  async function addShippingZone() {
+    if (!shippingForm.name || !shippingForm.fee) return
+    const ok = await runWrite(
+      supabase.from('shipping_zones').insert({
+        name: shippingForm.name.trim(),
+        fee: Number(shippingForm.fee),
+        estimated_days: shippingForm.estimated_days || null,
+        active: true,
+      }),
+      'Adding shipping zone'
+    )
+    if (!ok) return
+    setShippingForm({ name: '', fee: '', estimated_days: '' })
+    const { data } = await supabase.from('shipping_zones').select('*').order('fee')
+    setShippingZones(data || [])
+  }
+
+  async function toggleShippingZone(id, active) {
+    const ok = await runWrite(
+      supabase.from('shipping_zones').update({ active: !active }).eq('id', id),
+      'Updating shipping zone'
+    )
+    if (!ok) return
+    const { data } = await supabase.from('shipping_zones').select('*').order('fee')
+    setShippingZones(data || [])
+  }
+
+  async function deleteShippingZone(id) {
+    if (!confirm('Delete this shipping zone?')) return
+    const ok = await runWrite(supabase.from('shipping_zones').delete().eq('id', id), 'Deleting shipping zone')
+    if (!ok) return
+    const { data } = await supabase.from('shipping_zones').select('*').order('fee')
+    setShippingZones(data || [])
+  }
+
+  // ---- Returns ----
+  async function decideReturn(returnRequestId, decision) {
+    setProcessingReturn(returnRequestId)
+    const { data: { session } } = await supabase.auth.getSession()
+    try {
+      const res = await fetch('/api/process-refund', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          accessToken: session?.access_token,
+          returnRequestId,
+          decision,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        showToast(data.error || 'Could not process this return', 'error')
+      } else {
+        showToast(decision === 'approve' ? 'Refund issued' : 'Return rejected', 'success')
+        const { data: refreshed } = await supabase
+          .from('return_requests')
+          .select('*, orders(order_number, total, payment_method, payment_status, payment_reference, customer_name, customer_phone)')
+          .order('created_at', { ascending: false })
+        setReturns(refreshed || [])
+      }
+    } catch {
+      showToast('Could not reach the server', 'error')
+    } finally {
+      setProcessingReturn(null)
+    }
+  }
+
   // ---- Messages ----
   async function markRead(id) {
     const ok = await runWrite(supabase.from('contact_messages').update({ read: true }).eq('id', id), 'Marking message read')
@@ -393,6 +482,8 @@ function Admin() {
     { id: 'categories', label: 'Categories', icon: Tags },
     { id: 'collections', label: 'Collections', icon: Layers },
     { id: 'discounts', label: 'Discounts', icon: Percent },
+    { id: 'shipping', label: 'Shipping', icon: Truck },
+    { id: 'returns', label: `Returns${returns.filter((r) => r.status === 'requested').length > 0 ? ` (${returns.filter((r) => r.status === 'requested').length})` : ''}`, icon: RotateCcw },
     { id: 'messages', label: `Messages${messages.filter((m) => !m.read).length > 0 ? ` (${messages.filter((m) => !m.read).length})` : ''}`, icon: Mail },
     { id: 'testimonials', label: 'Testimonials', icon: Quote },
     { id: 'content', label: 'Homepage', icon: LayoutDashboard },
@@ -831,6 +922,96 @@ function Admin() {
                 ))}
               </div>
             </div>
+          </div>
+        )}
+
+        {tab === 'shipping' && (
+          <div className="max-w-lg flex flex-col gap-8">
+            <div className="bg-gold/5 rounded-2xl p-6">
+              <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">New Shipping Zone</h2>
+              <div className="flex flex-col gap-3 mb-4">
+                <input type="text" placeholder="Zone name (e.g. Lagos)" value={shippingForm.name} onChange={(e) => setShippingForm({ ...shippingForm, name: e.target.value })}
+                  className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold" />
+                <input type="number" placeholder="Delivery fee (Naira)" value={shippingForm.fee} onChange={(e) => setShippingForm({ ...shippingForm, fee: e.target.value })}
+                  className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold" />
+                <input type="text" placeholder="Estimated delivery (e.g. 1-2 days)" value={shippingForm.estimated_days} onChange={(e) => setShippingForm({ ...shippingForm, estimated_days: e.target.value })}
+                  className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold" />
+              </div>
+              <button onClick={addShippingZone} className="bg-gold text-espresso font-sans font-medium px-6 py-3 rounded-full hover:bg-gold-light transition-colors">Add Zone</button>
+            </div>
+            <div>
+              <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">All Zones</h2>
+              <div className="flex flex-col gap-2">
+                {shippingZones.map((z) => (
+                  <div key={z.id} className="flex items-center gap-3 border border-gold/20 rounded-xl p-4">
+                    <div className="flex-1">
+                      <span className="font-sans text-sm text-espresso dark:text-cream">{z.name}</span>
+                      <span className="font-sans text-xs text-gold ml-2">{formatPrice(z.fee)}</span>
+                      {z.estimated_days && <span className="font-sans text-xs text-espresso/50 dark:text-cream/50 ml-2">{z.estimated_days}</span>}
+                    </div>
+                    <button onClick={() => toggleShippingZone(z.id, z.active)} className={`text-xs font-sans px-3 py-1 rounded-full ${z.active ? 'bg-green-500/10 text-green-500' : 'bg-gold/10 text-espresso/50 dark:text-cream/50'}`}>
+                      {z.active ? 'Active' : 'Disabled'}
+                    </button>
+                    <button onClick={() => deleteShippingZone(z.id)} aria-label="Delete zone"><Trash2 className="w-4 h-4 text-espresso/40 dark:text-cream/40 hover:text-red-500" /></button>
+                  </div>
+                ))}
+                {shippingZones.length === 0 && (
+                  <p className="font-sans text-sm text-espresso/50 dark:text-cream/50">No shipping zones yet — checkout won't be able to calculate delivery until at least one is added.</p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {tab === 'returns' && (
+          <div className="max-w-2xl flex flex-col gap-3">
+            <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-2">Return Requests</h2>
+            {returns.length === 0 && (
+              <p className="font-sans text-sm text-espresso/50 dark:text-cream/50">No return requests yet.</p>
+            )}
+            {returns.map((r) => (
+              <div key={r.id} className="border border-gold/20 rounded-2xl p-5">
+                <div className="flex flex-wrap justify-between items-center gap-2 mb-2">
+                  <span className="font-sans text-sm font-medium text-espresso dark:text-cream">
+                    {r.orders?.order_number}
+                  </span>
+                  <span className={`font-sans text-xs px-3 py-1 rounded-full capitalize ${
+                    r.status === 'refunded' ? 'bg-purple-500/10 text-purple-500' :
+                    r.status === 'rejected' ? 'bg-red-500/10 text-red-500' :
+                    'bg-gold/20 text-gold'
+                  }`}>
+                    {r.status}
+                  </span>
+                </div>
+                <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 mb-2">
+                  {r.orders?.customer_name} · {r.orders?.customer_phone} · {formatPrice(r.orders?.total)} · via {r.orders?.payment_method}
+                </p>
+                <p className="font-sans text-sm text-espresso/80 dark:text-cream/80 mb-3">"{r.reason}"</p>
+                {r.status === 'requested' && (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => decideReturn(r.id, 'approve')}
+                      disabled={processingReturn === r.id}
+                      className="bg-gold text-espresso font-sans text-xs font-medium px-4 py-2 rounded-full hover:bg-gold-light transition-colors disabled:opacity-40"
+                    >
+                      {processingReturn === r.id ? 'Processing...' : 'Approve & Refund'}
+                    </button>
+                    <button
+                      onClick={() => decideReturn(r.id, 'reject')}
+                      disabled={processingReturn === r.id}
+                      className="border border-gold/30 text-espresso dark:text-cream font-sans text-xs font-medium px-4 py-2 rounded-full hover:border-gold transition-colors disabled:opacity-40"
+                    >
+                      Reject
+                    </button>
+                  </div>
+                )}
+                {r.status === 'refunded' && (
+                  <p className="font-sans text-xs text-espresso/50 dark:text-cream/50">
+                    Refunded {formatPrice(r.refund_amount)}
+                  </p>
+                )}
+              </div>
+            ))}
           </div>
         )}
 

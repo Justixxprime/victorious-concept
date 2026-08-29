@@ -32,7 +32,20 @@ function Checkout() {
   const [method, setMethod] = useState('card')
   const [copied, setCopied] = useState(false)
   const [guestEmail] = useState(() => `${Date.now()}@guest.victoriousconcept.com`)
+  const [shippingZones, setShippingZones] = useState([])
+  const [shippingZoneId, setShippingZoneId] = useState(null)
   const receiptRef = useRef(null)
+
+  useEffect(() => {
+    supabase
+      .from('shipping_zones')
+      .select('*')
+      .eq('active', true)
+      .order('fee')
+      .then(({ data }) => setShippingZones(data || []))
+  }, [])
+
+  const selectedZone = shippingZones.find((z) => z.id === shippingZoneId)
 
   const paystackConfig = {
     reference: pendingOrder?.orderNumber || '',
@@ -60,6 +73,7 @@ function Checkout() {
           userId: user?.id || null,
           email: user?.email || null,
           paymentMethod,
+          shippingZoneId,
         }),
       })
       const data = await res.json()
@@ -164,6 +178,7 @@ function Checkout() {
       `Items:`,
       ...data.items.map((i) => `${i.name} x${i.quantity} — ${formatPrice(i.price * i.quantity)}`),
       ``,
+      `Delivery (${data.shippingZone}): ${formatPrice(data.shippingFee)}`,
       `Total: ${formatPrice(data.total)}`,
     ]
     window.open(`https://wa.me/2348122470435?text=${encodeURIComponent(lines.join('\n'))}`, '_blank')
@@ -181,7 +196,7 @@ function Checkout() {
     window.print()
   }
 
-  const canProceed = form.name && form.phone && form.address
+  const canProceed = form.name && form.phone && form.address && shippingZoneId
 
   if (items.length === 0 && !order) {
     return (
@@ -335,6 +350,48 @@ function Checkout() {
             className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream placeholder:text-espresso/40 dark:placeholder:text-cream/40 outline-none focus:border-gold resize-none"
           />
         </div>
+
+        <p className="font-sans text-xs uppercase tracking-widest text-gold mb-3">
+          Delivery Location
+        </p>
+        <div className="flex flex-col gap-2 mb-8">
+          {shippingZones.map((zone) => (
+            <button
+              key={zone.id}
+              onClick={() => setShippingZoneId(zone.id)}
+              className={`flex items-center justify-between text-left rounded-xl border px-4 py-3 transition-colors ${
+                shippingZoneId === zone.id ? 'bg-gold border-gold text-espresso' : 'border-gold/30 text-espresso dark:text-cream hover:border-gold'
+              }`}
+            >
+              <span className="font-sans text-sm">
+                {zone.name}
+                {zone.estimated_days && <span className="opacity-60"> · {zone.estimated_days}</span>}
+              </span>
+              <span className="font-sans text-sm font-medium">{formatPrice(zone.fee)}</span>
+            </button>
+          ))}
+          {shippingZones.length === 0 && (
+            <p className="font-sans text-xs text-espresso/50 dark:text-cream/50">
+              Delivery locations aren't set up yet — please check back shortly.
+            </p>
+          )}
+        </div>
+
+        {selectedZone && (
+          <div className="bg-gold/5 rounded-2xl p-5 flex flex-col gap-2 mb-6">
+            <div className="flex justify-between font-sans text-sm text-espresso/70 dark:text-cream/70">
+              <span>Subtotal</span>
+              <span>{formatPrice(items.reduce((sum, i) => sum + i.price * i.quantity, 0))}</span>
+            </div>
+            <div className="flex justify-between font-sans text-sm text-espresso/70 dark:text-cream/70">
+              <span>Delivery ({selectedZone.name})</span>
+              <span>{formatPrice(selectedZone.fee)}</span>
+            </div>
+            <p className="font-sans text-xs text-espresso/40 dark:text-cream/40">
+              Final total (including any discount code) is confirmed on the next step.
+            </p>
+          </div>
+        )}
 
         {errorMessage && (
           <div className="mb-6 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
