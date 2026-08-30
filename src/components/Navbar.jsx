@@ -24,6 +24,7 @@ const links = [
   { label: 'Lookbook', to: '/lookbook' },
   { label: 'Journal', to: '/journal' },
   { label: 'Source It', to: '/source' },
+  { label: 'Track Order', to: '/track-order' },
   { label: 'About', to: '/about' },
 ]
 

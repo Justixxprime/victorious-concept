@@ -8,6 +8,7 @@ import FeaturedProducts from '../components/FeaturedProducts'
 import CustomerLove from '../components/CustomerLove'
 import ShopTheLook from '../components/ShopTheLook'
 import SourceTeaser from '../components/SourceTeaser'
+import TrackOrderTeaser from '../components/TrackOrderTeaser'
 import Newsletter from '../components/Newsletter'
 import { useProducts } from '../hooks/useProducts'
 
@@ -34,6 +35,7 @@ function Home() {
       <CustomerLove />
       {lookProducts.length > 0 && <ShopTheLook products={lookProducts} />}
       <SourceTeaser />
+      <TrackOrderTeaser />
       <Newsletter />
     </>
   )
