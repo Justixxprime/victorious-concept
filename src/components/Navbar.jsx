@@ -15,23 +15,44 @@ import {
 import ThemeToggle from './ThemeToggle'
 import SearchOverlay from './SearchOverlay'
 import MegaMenu from './MegaMenu'
+import ExploreMenu from './ExploreMenu'
 import { useFlyToCart } from '../context/FlyToCartContext'
+import {
+  Layers,
+  BookOpen,
+  Sparkles,
+  Heart as HeartOutline,
+  PackageSearch,
+  HelpCircle,
+  Truck,
+  RotateCcw,
+  MessageCircle,
+  Image as ImageIcon,
+} from 'lucide-react'
 
 const links = [
   { label: 'New In', to: '/shop?new=true' },
   { label: 'Shop', to: '/shop' },
   { label: 'Collections', to: '/collections' },
-  { label: 'Lookbook', to: '/lookbook' },
-  { label: 'Journal', to: '/journal' },
-  { label: 'Source It', to: '/source' },
-  { label: 'Track Order', to: '/track-order' },
-  { label: 'About', to: '/about' },
+]
+
+const exploreLinks = [
+  { label: 'Lookbook', to: '/lookbook', icon: ImageIcon },
+  { label: 'Journal', to: '/journal', icon: BookOpen },
+  { label: 'Source It', to: '/source', icon: Sparkles },
+  { label: 'About', to: '/about', icon: HeartOutline },
+  { label: 'Track Order', to: '/track-order', icon: PackageSearch },
+  { label: 'Delivery', to: '/delivery', icon: Truck },
+  { label: 'Returns', to: '/returns', icon: RotateCcw },
+  { label: 'FAQ', to: '/faq', icon: HelpCircle },
+  { label: 'Contact', to: '/contact', icon: MessageCircle },
 ]
 
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [megaMenuOpen, setMegaMenuOpen] = useState(false)
+  const [exploreOpen, setExploreOpen] = useState(false)
 
   const { totalItems } = useCart()
   const { registerCartIcon, registerWishlistIcon } = useFlyToCart()
@@ -86,6 +107,16 @@ function Navbar() {
               </Link>
             )
           )}
+          <div
+            onMouseEnter={() => setExploreOpen(true)}
+            onMouseLeave={() => setExploreOpen(false)}
+          >
+            <button className="relative flex items-center gap-1.5 hover:text-gold transition-colors group/nav">
+              <Layers className="w-3.5 h-3.5" />
+              Explore
+              <span className="absolute -bottom-1 left-0 w-0 h-px bg-gold group-hover/nav:w-full transition-all duration-300 ease-out" />
+            </button>
+          </div>
         </nav>
 
         {/* ACTIONS */}
@@ -193,6 +224,14 @@ function Navbar() {
         <MegaMenu open={megaMenuOpen} />
       </div>
 
+      {/* EXPLORE MENU */}
+      <div
+        onMouseEnter={() => setExploreOpen(true)}
+        onMouseLeave={() => setExploreOpen(false)}
+      >
+        <ExploreMenu open={exploreOpen} onNavigate={() => setExploreOpen(false)} />
+      </div>
+
       {/* MOBILE MENU */}
       {menuOpen && (
         <div className="fixed inset-0 bg-cream dark:bg-espresso z-50 flex flex-col p-6 overflow-y-auto">
@@ -212,8 +251,7 @@ function Navbar() {
           </div>
 
           {/* MOBILE NAVIGATION */}
-          <nav className="flex flex-col gap-6 font-display italic text-3xl text-espresso dark:text-cream mb-8">
-
+          <nav className="flex flex-col gap-5 font-display italic text-3xl text-espresso dark:text-cream mb-8">
             {links.map((link) => (
               <Link
                 key={link.label}
@@ -224,7 +262,30 @@ function Navbar() {
                 {link.label}
               </Link>
             ))}
+          </nav>
 
+          <div className="h-px bg-gold/20 mb-6" />
+
+          <p className="font-sans text-[11px] uppercase tracking-[0.3em] text-gold mb-4">
+            Explore
+          </p>
+          <nav className="flex flex-col gap-4 mb-8">
+            {exploreLinks.map((link) => {
+              const Icon = link.icon
+              return (
+                <Link
+                  key={link.label}
+                  to={link.to}
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-3 font-sans text-base text-espresso dark:text-cream hover:text-gold transition-colors"
+                >
+                  <span className="w-8 h-8 rounded-full bg-gold/10 flex items-center justify-center flex-shrink-0 text-gold">
+                    <Icon className="w-4 h-4" />
+                  </span>
+                  {link.label}
+                </Link>
+              )
+            })}
           </nav>
 
           {/* MOBILE ACTIONS */}

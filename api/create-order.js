@@ -143,6 +143,7 @@ export default async function handler(req, res) {
         coupon_code: appliedCouponCode,
         shipping_fee: shippingZone.fee,
         shipping_zone: shippingZone.name,
+        shipping_is_variable: shippingZone.is_variable,
       })
       .select()
       .single()
@@ -166,6 +167,7 @@ export default async function handler(req, res) {
         total: order.total,
         shippingFee: order.shipping_fee,
         shippingZone: order.shipping_zone,
+        shippingIsVariable: order.shipping_is_variable,
       })
     }
 
@@ -175,6 +177,7 @@ export default async function handler(req, res) {
       items: order.items,
       shippingFee: order.shipping_fee,
       shippingZone: order.shipping_zone,
+      shippingIsVariable: order.shipping_is_variable,
     })
   } catch {
     return res.status(500).json({ error: 'Unexpected server error' })

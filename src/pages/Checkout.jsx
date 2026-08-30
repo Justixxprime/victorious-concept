@@ -179,7 +179,7 @@ function Checkout() {
       `Items:`,
       ...data.items.map((i) => `${i.name} x${i.quantity} — ${formatPrice(i.price * i.quantity)}`),
       ``,
-      `Delivery (${data.shippingZone}): ${formatPrice(data.shippingFee)}`,
+      `Delivery (${data.shippingZone}): ${data.shippingIsVariable ? 'To be confirmed' : formatPrice(data.shippingFee)}`,
       `Total: ${formatPrice(data.total)}`,
     ]
     window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(lines.join('\n'))}`, '_blank')
@@ -368,7 +368,13 @@ function Checkout() {
                 {zone.name}
                 {zone.estimated_days && <span className="opacity-60"> · {zone.estimated_days}</span>}
               </span>
-              <span className="font-sans text-sm font-medium">{formatPrice(zone.fee)}</span>
+              <span className="font-sans text-sm font-medium text-right">
+                {zone.is_variable
+                  ? zone.fee > 0
+                    ? `From ${formatPrice(zone.fee)}`
+                    : 'Confirmed via WhatsApp'
+                  : formatPrice(zone.fee)}
+              </span>
             </button>
           ))}
           {shippingZones.length === 0 && (
@@ -386,8 +392,19 @@ function Checkout() {
             </div>
             <div className="flex justify-between font-sans text-sm text-espresso/70 dark:text-cream/70">
               <span>Delivery ({selectedZone.name})</span>
-              <span>{formatPrice(selectedZone.fee)}</span>
+              <span>
+                {selectedZone.is_variable
+                  ? selectedZone.fee > 0
+                    ? `From ${formatPrice(selectedZone.fee)}`
+                    : 'To be confirmed'
+                  : formatPrice(selectedZone.fee)}
+              </span>
             </div>
+            {selectedZone.is_variable && (
+              <p className="font-sans text-xs text-gold">
+                Delivery for this option is arranged directly with you on WhatsApp once we have a rider/courier quote — you can still pay for your order by card now.
+              </p>
+            )}
             <p className="font-sans text-xs text-espresso/40 dark:text-cream/40">
               Final total (including any discount code) is confirmed on the next step.
             </p>

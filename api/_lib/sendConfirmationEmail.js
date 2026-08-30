@@ -1,7 +1,7 @@
 // Shared by api/create-order.js (bank transfer / WhatsApp) and
 // api/paystack-webhook.js (card, once payment is verified). Never called
 // directly from the browser.
-export async function sendConfirmationEmail({ email, orderNumber, items, total, shippingFee, shippingZone }) {
+export async function sendConfirmationEmail({ email, orderNumber, items, total, shippingFee, shippingZone, shippingIsVariable }) {
   if (!email) return // guest checkout with no email on file — nothing to send to
 
   const itemsHtml = items
@@ -13,7 +13,9 @@ export async function sendConfirmationEmail({ email, orderNumber, items, total, 
     )
     .join('')
 
-  const shippingHtml = shippingFee
+  const shippingHtml = shippingIsVariable
+    ? `<tr><td style="padding:8px 0; color:#888;">Delivery${shippingZone ? ` (${shippingZone})` : ''}</td><td style="padding:8px 0; text-align:right; color:#888;">To be confirmed</td></tr>`
+    : shippingFee
     ? `<tr><td style="padding:8px 0; color:#888;">Delivery${shippingZone ? ` (${shippingZone})` : ''}</td><td style="padding:8px 0; text-align:right; color:#888;">₦${shippingFee.toLocaleString()}</td></tr>`
     : ''
 
