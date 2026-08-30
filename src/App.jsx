@@ -5,6 +5,7 @@ import { CartProvider } from './context/CartContext'
 import { WishlistProvider } from './context/WishlistContext'
 import { AuthProvider } from './context/AuthContext'
 import { ToastProvider } from './context/ToastContext'
+import { BusinessSettingsProvider } from './context/BusinessSettingsContext'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import WhatsAppButton from './components/WhatsAppButton'
@@ -113,6 +114,7 @@ function App() {
     <ErrorBoundary>
       <BrowserRouter>
         <AuthProvider>
+          <BusinessSettingsProvider>
           <CartProvider>
             <WishlistProvider>
               <ToastProvider>
@@ -131,6 +133,7 @@ function App() {
               </ToastProvider>
             </WishlistProvider>
           </CartProvider>
+          </BusinessSettingsProvider>
         </AuthProvider>
       </BrowserRouter>
     </ErrorBoundary>

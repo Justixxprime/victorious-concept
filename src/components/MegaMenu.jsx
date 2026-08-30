@@ -35,6 +35,7 @@ function MegaMenu({ open }) {
             <img
               src={siteImages.megaMenuBackdrop}
               alt=""
+              loading="lazy"
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-espresso/92 backdrop-blur-md" />
@@ -70,6 +71,7 @@ function MegaMenu({ open }) {
                           <img
                             src={categoryImages[cat.id]}
                             alt=""
+                            loading="lazy"
                             className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-70 group-hover:scale-110 transition-all duration-500"
                           />
                         )}
@@ -108,6 +110,7 @@ function MegaMenu({ open }) {
                             <img
                               src={product.image}
                               alt={product.name}
+                              loading="lazy"
                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                             />
                           </div>
@@ -146,6 +149,7 @@ function MegaMenu({ open }) {
                 <img
                   src={siteImages.lookbookHero}
                   alt="Shop the collection"
+                  loading="lazy"
                   className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-espresso/90 via-espresso/20 to-transparent" />

@@ -5,6 +5,7 @@ import { useProducts } from '../hooks/useProducts'
 import { formatPrice } from '../utils/formatPrice'
 import { useCart } from '../context/CartContext'
 import { supabase } from '../lib/supabaseClient'
+import { useBusinessSettings } from '../context/BusinessSettingsContext'
 import { useWishlist } from '../context/WishlistContext'
 import { useRecentlyViewed } from '../hooks/useRecentlyViewed'
 import { useFlyToCart } from '../context/FlyToCartContext'
@@ -37,6 +38,7 @@ function ProductPage() {
   const product = products.find((p) => String(p.id) === id)
 
   const { addToCart } = useCart()
+  const { whatsappNumber } = useBusinessSettings()
   const { toggleWishlist, isWishlisted } = useWishlist()
   const { viewed, addViewed } = useRecentlyViewed()
   const { fly } = useFlyToCart()
@@ -237,7 +239,7 @@ function ProductPage() {
           </div>
 
           <a
-            href={`https://wa.me/2348122470435?text=${encodeURIComponent(`Hi, I have a question about the ${product.name} (${formatPrice(product.price)})`)}`}
+            href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Hi, I have a question about the ${product.name} (${formatPrice(product.price)})`)}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 font-sans text-sm text-gold hover:underline"

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabaseClient'
+import { compressImage } from '../utils/compressImage'
 
 export function useReviews(productId) {
   const [reviews, setReviews] = useState([])
@@ -24,10 +25,11 @@ export function useReviews(productId) {
     let imageUploadFailed = false
 
     if (imageFile) {
-      const fileName = `${Date.now()}-${imageFile.name}`
+      const compressed = await compressImage(imageFile)
+      const fileName = `${Date.now()}-${compressed.name}`
       const { error: uploadError } = await supabase.storage
         .from('review-images')
-        .upload(fileName, imageFile)
+        .upload(fileName, compressed)
 
       if (!uploadError) {
         const { data } = supabase.storage.from('review-images').getPublicUrl(fileName)

@@ -52,7 +52,7 @@ function ProductGallery({ images, alt, videoUrl }) {
                 i === active ? 'border-gold' : 'border-transparent opacity-60 hover:opacity-100'
               }`}
             >
-              <img src={img} alt={`${alt} ${i + 1}`} className="w-full h-full object-cover" />
+              <img src={img} alt={`${alt} ${i + 1}`} loading="lazy" className="w-full h-full object-cover" />
             </button>
           ))}
         </div>

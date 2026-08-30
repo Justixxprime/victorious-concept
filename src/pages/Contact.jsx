@@ -4,8 +4,10 @@ import SEO from '../components/SEO'
 import { siteImages } from '../data/siteImages'
 import { useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
+import { useBusinessSettings } from '../context/BusinessSettingsContext'
 
 function Contact() {
+  const { whatsappNumber } = useBusinessSettings()
   const [form, setForm] = useState({ name: '', email: '', message: '' })
   const [status, setStatus] = useState('idle')
 
@@ -76,7 +78,7 @@ function Contact() {
             </p>
 
             <motion.a
-              href="https://wa.me/2348122470435"
+              href={`https://wa.me/${whatsappNumber}`}
               target="_blank"
               rel="noopener noreferrer"
               whileHover={{ x: 6 }}

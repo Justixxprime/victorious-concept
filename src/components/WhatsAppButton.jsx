@@ -1,10 +1,12 @@
 import { motion } from 'framer-motion'
 import { MessageCircle } from 'lucide-react'
+import { useBusinessSettings } from '../context/BusinessSettingsContext'
 
 function WhatsAppButton() {
+  const { whatsappNumber } = useBusinessSettings()
   return (
     <motion.a
-      href="https://wa.me/2348122470435"
+      href={`https://wa.me/${whatsappNumber}`}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat with us on WhatsApp"

@@ -5,6 +5,7 @@ import PageHero from '../components/PageHero'
 import { siteImages } from '../data/siteImages'
 import { supabase } from '../lib/supabaseClient'
 import { formatPrice } from '../utils/formatPrice'
+import { useBusinessSettings } from '../context/BusinessSettingsContext'
 import { Search } from 'lucide-react'
 
 const statusStyles = {
@@ -40,6 +41,7 @@ const paymentStatusLabels = {
 }
 
 function TrackOrder() {
+  const { whatsappNumber } = useBusinessSettings()
   const [orderNumber, setOrderNumber] = useState('')
   const [phone, setPhone] = useState('')
   const [result, setResult] = useState(null)
@@ -137,7 +139,7 @@ function TrackOrder() {
               <span>{formatPrice(result.total)}</span>
             </div>
             <a
-              href={`https://wa.me/2348122470435?text=${encodeURIComponent(`Hi, I need help with my order ${result.order_number}`)}`}
+              href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Hi, I need help with my order ${result.order_number}`)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 font-sans text-xs text-gold hover:underline"

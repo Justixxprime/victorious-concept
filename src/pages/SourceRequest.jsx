@@ -2,10 +2,12 @@ import { useState } from 'react'
 import SEO from '../components/SEO'
 import { ArrowRight, ArrowLeft, Upload, Check } from 'lucide-react'
 import { siteImages } from '../data/siteImages'
+import { useBusinessSettings } from '../context/BusinessSettingsContext'
 
 const steps = ['What', 'References', 'Budget', 'You']
 
 function SourceRequest() {
+  const { whatsappNumber } = useBusinessSettings()
   const [step, setStep] = useState(0)
   const [form, setForm] = useState({
     item: '',
@@ -46,7 +48,7 @@ function SourceRequest() {
 
   function submit() {
     const message = buildMessage()
-    window.open(`https://wa.me/2348122470435?text=${message}`, '_blank')
+    window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank')
   }
 
   const canNext =

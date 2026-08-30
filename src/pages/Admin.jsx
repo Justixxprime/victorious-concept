@@ -8,12 +8,14 @@ import { supabase } from '../lib/supabaseClient'
 import { formatPrice } from '../utils/formatPrice'
 import { starterCatalog } from '../data/starterCatalog'
 import { useToast } from '../context/ToastContext'
+import { useBusinessSettings } from '../context/BusinessSettingsContext'
+import { compressImage } from '../utils/compressImage'
 import AdminVariantManager from '../components/AdminVariantManager'
 import AdminBulkImport from '../components/AdminBulkImport'
 import {
   Trash2, Pencil, Plus, Upload, Tag, Tags, LayoutDashboard, BarChart3,
   Percent, Users, MessageCircle, Mail, Quote, Layers, Package,
-  TrendingUp, AlertTriangle, DollarSign, Truck, RotateCcw,
+  TrendingUp, AlertTriangle, DollarSign, Truck, RotateCcw, Settings,
 } from 'lucide-react'
 
 function Admin() {
@@ -23,6 +25,9 @@ function Admin() {
   const { collections, refetch: refetchCollections } = useCollections()
   const { value: heroValue, updateSetting: updateHero } = useSiteSettings('hero')
   const { showToast } = useToast()
+  const businessSettings = useBusinessSettings()
+  const [businessForm, setBusinessForm] = useState(null)
+  const [savingBusiness, setSavingBusiness] = useState(false)
 
   // Runs any Supabase write. On failure, shows the REAL reason why (usually
   // a Row Level Security permission issue) instead of failing silently.
@@ -89,21 +94,9 @@ function Admin() {
       setOrders(data || [])
       setOrdersLoading(false)
     }
-    async function fetchCoupons() {
-      const { data } = await supabase.from('coupons').select('*').order('code')
-      setCoupons(data || [])
-    }
     async function fetchMessages() {
       const { data } = await supabase.from('contact_messages').select('*').order('created_at', { ascending: false })
       setMessages(data || [])
-    }
-    async function fetchTestimonials() {
-      const { data } = await supabase.from('testimonials').select('*')
-      setTestimonials(data || [])
-    }
-    async function fetchShippingZones() {
-      const { data } = await supabase.from('shipping_zones').select('*').order('fee')
-      setShippingZones(data || [])
     }
     async function fetchReturns() {
       const { data } = await supabase
@@ -114,17 +107,62 @@ function Admin() {
     }
     if (isAdmin) {
       fetchAllOrders()
-      fetchCoupons()
       fetchMessages()
-      fetchTestimonials()
-      fetchShippingZones()
       fetchReturns()
     }
   }, [isAdmin])
 
+  // Coupons, testimonials, and shipping zones are only used within their own
+  // tab (no badge count depends on them elsewhere), so they're fetched lazily
+  // the first time that tab is opened rather than on every Admin page load —
+  // this meaningfully cuts unnecessary database traffic.
+  const [fetchedLazyTabs, setFetchedLazyTabs] = useState({})
+
+  useEffect(() => {
+    if (!isAdmin || fetchedLazyTabs[tab]) return
+
+    async function fetchCoupons() {
+      const { data } = await supabase.from('coupons').select('*').order('code')
+      setCoupons(data || [])
+    }
+    async function fetchTestimonials() {
+      const { data } = await supabase.from('testimonials').select('*')
+      setTestimonials(data || [])
+    }
+    async function fetchShippingZones() {
+      const { data } = await supabase.from('shipping_zones').select('*').order('fee')
+      setShippingZones(data || [])
+    }
+
+    if (tab === 'discounts') fetchCoupons()
+    else if (tab === 'testimonials') fetchTestimonials()
+    else if (tab === 'shipping') fetchShippingZones()
+    else return // no lazy fetch needed for this tab
+
+    setFetchedLazyTabs((prev) => ({ ...prev, [tab]: true }))
+  }, [tab, isAdmin])
+
   useEffect(() => {
     if (heroValue && !heroForm) setHeroForm(heroValue)
   }, [heroValue])
+
+  useEffect(() => {
+    if (!businessSettings.loading && !businessForm) {
+      setBusinessForm({
+        whatsappNumber: businessSettings.whatsappNumber,
+        bankAccountName: businessSettings.bankAccountName,
+        bankAccountNumber: businessSettings.bankAccountNumber,
+        bankName: businessSettings.bankName,
+      })
+    }
+  }, [businessSettings.loading])
+
+  async function saveBusinessSettings() {
+    setSavingBusiness(true)
+    await businessSettings.updateSettings(businessForm)
+    setSavingBusiness(false)
+    showToast('Business info updated', 'success')
+  }
 
   async function importStarterCatalog() {
     if (!confirm(`This will add ${starterCatalog.length} starter products (bags, shoes, slippers, clothing, perfumes, accessories) with stock photos and Nigerian market pricing. Products with names that already exist will be skipped. Continue?`)) return
@@ -196,8 +234,9 @@ function Admin() {
 
     const uploadedUrls = []
     for (const file of files) {
-      const fileName = `${Date.now()}-${file.name}`
-      const { error: uploadError } = await supabase.storage.from('product-images').upload(fileName, file)
+      const compressed = await compressImage(file)
+      const fileName = `${Date.now()}-${compressed.name}`
+      const { error: uploadError } = await supabase.storage.from('product-images').upload(fileName, compressed)
       if (!uploadError) {
         const { data } = supabase.storage.from('product-images').getPublicUrl(fileName)
         uploadedUrls.push(data.publicUrl)
@@ -488,6 +527,7 @@ function Admin() {
     { id: 'messages', label: `Messages${messages.filter((m) => !m.read).length > 0 ? ` (${messages.filter((m) => !m.read).length})` : ''}`, icon: Mail },
     { id: 'testimonials', label: 'Testimonials', icon: Quote },
     { id: 'content', label: 'Homepage', icon: LayoutDashboard },
+    { id: 'business', label: 'Business Info', icon: Settings },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
   ]
 
@@ -1066,6 +1106,61 @@ function Admin() {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {tab === 'business' && businessForm && (
+          <div className="max-w-md flex flex-col gap-6">
+            <div>
+              <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-2">WhatsApp Number</h2>
+              <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 mb-3">
+                Used across the whole site — floating button, checkout, product questions, order help. Digits only, with country code, no + or spaces (e.g. 2348122470435).
+              </p>
+              <input
+                type="text"
+                value={businessForm.whatsappNumber}
+                onChange={(e) => setBusinessForm({ ...businessForm, whatsappNumber: e.target.value.replace(/[^0-9]/g, '') })}
+                className="w-full bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
+              />
+            </div>
+
+            <div>
+              <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-2">Bank Transfer Details</h2>
+              <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 mb-3">
+                Shown to customers who choose "Bank Transfer" at checkout.
+              </p>
+              <div className="flex flex-col gap-3">
+                <input
+                  type="text"
+                  placeholder="Account name"
+                  value={businessForm.bankAccountName}
+                  onChange={(e) => setBusinessForm({ ...businessForm, bankAccountName: e.target.value })}
+                  className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
+                />
+                <input
+                  type="text"
+                  placeholder="Account number"
+                  value={businessForm.bankAccountNumber}
+                  onChange={(e) => setBusinessForm({ ...businessForm, bankAccountNumber: e.target.value })}
+                  className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
+                />
+                <input
+                  type="text"
+                  placeholder="Bank name"
+                  value={businessForm.bankName}
+                  onChange={(e) => setBusinessForm({ ...businessForm, bankName: e.target.value })}
+                  className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
+                />
+              </div>
+            </div>
+
+            <button
+              onClick={saveBusinessSettings}
+              disabled={savingBusiness}
+              className="bg-gold text-espresso font-sans font-medium px-6 py-3 rounded-full hover:bg-gold-light transition-colors self-start disabled:opacity-50"
+            >
+              {savingBusiness ? 'Saving...' : 'Save Business Info'}
+            </button>
           </div>
         )}
 

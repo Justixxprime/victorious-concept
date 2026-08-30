@@ -8,8 +8,8 @@ import { useAuth } from '../context/AuthContext'
 import { useAddresses } from '../hooks/useAddresses'
 import { supabase } from '../lib/supabaseClient'
 import { formatPrice } from '../utils/formatPrice'
-import { bankDetails } from '../data/paymentInfo'
 import { siteImages } from '../data/siteImages'
+import { useBusinessSettings } from '../context/BusinessSettingsContext'
 import Receipt from '../components/Receipt'
 import { Printer, CreditCard, Landmark, MessageCircle, Copy, Check, PartyPopper, Loader2 } from 'lucide-react'
 
@@ -17,6 +17,7 @@ function Checkout() {
   const { items, coupon, clearCart } = useCart()
   const { user } = useAuth()
   const { addresses } = useAddresses()
+  const { whatsappNumber, bankAccountName, bankAccountNumber, bankName } = useBusinessSettings()
   const navigate = useNavigate()
 
   const [order, setOrder] = useState(null)
@@ -181,13 +182,13 @@ function Checkout() {
       `Delivery (${data.shippingZone}): ${formatPrice(data.shippingFee)}`,
       `Total: ${formatPrice(data.total)}`,
     ]
-    window.open(`https://wa.me/2348122470435?text=${encodeURIComponent(lines.join('\n'))}`, '_blank')
+    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(lines.join('\n'))}`, '_blank')
     setOrder(buildReceiptOrder(data))
     clearCart()
   }
 
   function copyAccount() {
-    navigator.clipboard.writeText(bankDetails.accountNumber)
+    navigator.clipboard.writeText(bankAccountNumber)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -445,22 +446,30 @@ function Checkout() {
 
         {method === 'bank' && (
           <div className="flex flex-col gap-4">
-            <div className="bg-gold/5 rounded-2xl p-5 flex flex-col gap-2">
-              <p className="font-sans text-xs text-espresso/50 dark:text-cream/50">Account Name</p>
-              <p className="font-sans text-sm text-espresso dark:text-cream">{bankDetails.accountName}</p>
-              <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 mt-2">Account Number</p>
-              <div className="flex items-center justify-between">
-                <p className="font-sans text-sm text-espresso dark:text-cream">{bankDetails.accountNumber}</p>
-                <button onClick={copyAccount} className="text-gold" aria-label="Copy account number">
-                  {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                </button>
+            {bankAccountNumber ? (
+              <div className="bg-gold/5 rounded-2xl p-5 flex flex-col gap-2">
+                <p className="font-sans text-xs text-espresso/50 dark:text-cream/50">Account Name</p>
+                <p className="font-sans text-sm text-espresso dark:text-cream">{bankAccountName}</p>
+                <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 mt-2">Account Number</p>
+                <div className="flex items-center justify-between">
+                  <p className="font-sans text-sm text-espresso dark:text-cream">{bankAccountNumber}</p>
+                  <button onClick={copyAccount} className="text-gold" aria-label="Copy account number">
+                    {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  </button>
+                </div>
+                <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 mt-2">Bank</p>
+                <p className="font-sans text-sm text-espresso dark:text-cream">{bankName}</p>
               </div>
-              <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 mt-2">Bank</p>
-              <p className="font-sans text-sm text-espresso dark:text-cream">{bankDetails.bankName}</p>
-            </div>
+            ) : (
+              <div className="bg-gold/5 rounded-2xl p-5">
+                <p className="font-sans text-sm text-espresso/70 dark:text-cream/70">
+                  Bank transfer details aren't set up yet — please choose WhatsApp instead and we'll sort payment directly.
+                </p>
+              </div>
+            )}
             <button
               onClick={handleBankTransferConfirm}
-              disabled={!canProceed || creatingOrder}
+              disabled={!canProceed || creatingOrder || !bankAccountNumber}
               className="w-full flex items-center justify-center gap-2 bg-gold text-espresso font-sans font-medium px-8 py-4 rounded-full hover:bg-gold-light transition-colors disabled:opacity-40"
             >
               {creatingOrder && <Loader2 className="w-4 h-4 animate-spin" />}

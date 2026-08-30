@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom'
 import logoCream from '../assets/logo/logo-cream-text.png'
 import { AtSign, MessageCircle, Mail, ShieldCheck, Truck, CreditCard } from 'lucide-react'
+import { useBusinessSettings } from '../context/BusinessSettingsContext'
 
 function Footer() {
+  const { whatsappNumber } = useBusinessSettings()
   return (
     <footer className="bg-espresso text-cream">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 px-6 py-12 border-b border-cream/10">
@@ -74,7 +76,7 @@ function Footer() {
             <a href="#" aria-label="Instagram" className="hover:text-gold transition-colors">
               <AtSign className="w-5 h-5" />
             </a>
-            <a href="https://wa.me/2348122470435" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="hover:text-gold transition-colors">
+            <a href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="hover:text-gold transition-colors">
               <MessageCircle className="w-5 h-5" />
             </a>
             <a href="mailto:Victoriaobioma31@yahoo.com" aria-label="Email" className="hover:text-gold transition-colors">

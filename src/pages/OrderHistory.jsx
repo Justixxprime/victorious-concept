@@ -4,6 +4,7 @@ import SEO from '../components/SEO'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../context/AuthContext'
 import { formatPrice } from '../utils/formatPrice'
+import { useBusinessSettings } from '../context/BusinessSettingsContext'
 import { Package } from 'lucide-react'
 
 const statusStyles = {
@@ -48,6 +49,7 @@ const paymentStatusLabels = {
 
 function OrderHistory() {
   const { user, loading: authLoading } = useAuth()
+  const { whatsappNumber } = useBusinessSettings()
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
   const [returningOrderId, setReturningOrderId] = useState(null)
@@ -166,7 +168,7 @@ function OrderHistory() {
                     Paid via {order.payment_method === 'card' ? 'Card' : order.payment_method === 'bank_transfer' ? 'Bank Transfer' : order.payment_method === 'whatsapp' ? 'WhatsApp' : 'Unknown'}
                   </span>
                   <a
-                    href={`https://wa.me/2348122470435?text=${encodeURIComponent(`Hi, I need help with my order ${order.order_number}`)}`}
+                    href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Hi, I need help with my order ${order.order_number}`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-gold hover:underline"
