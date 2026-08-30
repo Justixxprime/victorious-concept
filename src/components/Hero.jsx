@@ -119,15 +119,27 @@ function Hero() {
         </motion.div>
       </div>
 
-      {/* Scroll cue */}
-      <motion.div
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+      {/* Scroll cue — actually functional now, and a bit more cinematic */}
+      <motion.button
+        onClick={() => window.scrollBy({ top: window.innerHeight * 0.85, behavior: 'smooth' })}
+        aria-label="Scroll down"
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 cursor-pointer group/scroll"
         animate={{ y: [0, 8, 0] }}
-        transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+        transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
+        whileHover={{ scale: 1.08 }}
+        whileTap={{ scale: 0.92 }}
       >
-        <span className="font-sans text-[10px] uppercase tracking-[0.3em] text-cream/50">Scroll</span>
-        <div className="w-px h-8 bg-gradient-to-b from-cream/50 to-transparent" />
-      </motion.div>
+        <span className="font-sans text-[10px] uppercase tracking-[0.35em] text-cream/50 group-hover/scroll:text-gold-light transition-colors duration-300">
+          Scroll
+        </span>
+        <div className="relative w-px h-10 bg-gradient-to-b from-cream/40 via-cream/15 to-transparent overflow-hidden">
+          <motion.div
+            className="absolute left-0 top-0 w-px h-3 bg-gradient-to-b from-gold-light to-transparent"
+            animate={{ y: ['-20%', '140%'] }}
+            transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+          />
+        </div>
+      </motion.button>
     </section>
   )
 }
