@@ -13,7 +13,8 @@ function SourceTeaser() {
         </h2>
         <p className="font-sans text-sm md:text-base text-espresso/70 dark:text-cream/70 max-w-md">
           This is literally how Victorious Concept started. Tell us what you are looking for,
-          anywhere in Nigeria or the world, and we will go find it.
+          anywhere in Nigeria or the world, and we will go find it — Trade Fair, Lagos Island,
+          wherever it takes.
         </p>
         <Link
           to="/source"

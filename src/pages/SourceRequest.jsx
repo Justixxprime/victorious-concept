@@ -59,7 +59,7 @@ function SourceRequest() {
     <section className="bg-cream dark:bg-espresso transition-colors min-h-screen">
       <SEO
         title="Source It For Me"
-        description="Tell us what you want. We will find it for you, anywhere in Nigeria or the world."
+        description="Tell us what you want. We will find it for you at Trade Fair, Lagos Island, anywhere in Nigeria or the world."
       />
 
       <div className="relative bg-espresso text-cream overflow-hidden">
@@ -80,8 +80,8 @@ function SourceRequest() {
           </h1>
           <p className="font-sans text-sm md:text-base text-cream/70 max-w-lg">
             Before there was a website, there was Victoria, a description, a screenshot, a friend
-            who needed something specific, and a trip to Lagos Island to find it. This page is
-            that same promise, just with better lighting.
+            who needed something specific, and a trip to Trade Fair or Lagos Island to find it.
+            This page is that same promise, just with better lighting.
           </p>
         </div>
       </div>

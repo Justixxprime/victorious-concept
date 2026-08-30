@@ -13,7 +13,7 @@ function FounderTeaser() {
         </h2>
         <p className="font-sans text-sm md:text-base text-espresso/70 dark:text-cream/70 max-w-xl">
           It began with friends on campus asking one question — can you find me this? — and
-          Victoria saying yes, then heading to Lagos Island market to make it happen.
+          Victoria saying yes, then heading to Lagos Island and Trade Fair to make it happen.
         </p>
         <Link
           to="/about"

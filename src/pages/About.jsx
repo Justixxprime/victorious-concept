@@ -5,7 +5,7 @@ import { GraduationCap, MapPin, Users, TrendingUp, Award, Sparkles } from 'lucid
 
 const timeline = [
   { label: 'University', icon: GraduationCap, text: 'Studied History and International Relations at Federal University Otuoke, Bayelsa State.' },
-  { label: 'First Products', icon: MapPin, text: 'Started sourcing bags and shoes from Lagos Island market, drawing on her own Lagos roots.' },
+  { label: 'First Products', icon: MapPin, text: 'Started sourcing bags and shoes from Lagos Island and Trade Fair, drawing on her own Lagos roots.' },
   { label: 'First Customers', icon: Users, text: 'Friends and classmates on campus became her first customers, one WhatsApp order at a time.' },
   { label: 'Growing Business', icon: TrendingUp, text: 'Word spread beyond her immediate circle as the orders, and the trust, kept growing.' },
   { label: 'Graduation', icon: Award, text: 'Graduated from Federal University Otuoke with her degree in hand.' },
@@ -50,7 +50,7 @@ const values = [
   },
   {
     title: 'Nigerian first, without limits.',
-    text: 'Lagos taught Victoria everything she knows about sourcing well. Victorious Concept is proudly Nigerian, proudly Lagos rooted, and building toward a day when that stamp travels well beyond one country.',
+    text: 'Lagos taught Victoria everything she knows about sourcing well, from Lagos Island to Trade Fair. Victorious Concept is proudly Nigerian, proudly Lagos rooted, and building toward a day when that stamp travels well beyond one country.',
   },
   {
     title: 'You are not just a sale.',
@@ -61,7 +61,7 @@ const values = [
 function About() {
   return (
     <section className="bg-cream dark:bg-espresso transition-colors">
-      <SEO title="About" description="The story of Victorious Concept, from Lagos Island market runs to a full fashion brand." />
+      <SEO title="About" description="The story of Victorious Concept, from Lagos Island and Trade Fair market runs to a full fashion brand." />
 
       <div className="max-w-3xl mx-auto px-6 py-20">
         <p className="font-sans text-xs uppercase tracking-widest text-gold mb-4">
@@ -80,11 +80,11 @@ function About() {
             smaller, better dressed empire.
           </p>
           <p>
-            Victoria grew up in Lagos, which meant she grew up around the market, the real one, Lagos Island,
-            loud and chaotic and full of treasure if you know where to look. Most people who pass through it
-            once never learn the language of it. Victoria did. She knew which stall had the good leather. She
-            knew which trader would haggle honestly. She knew the difference between something that looked
-            expensive and something that actually was.
+            Victoria grew up in Lagos, which meant she grew up around the market, the real one, Lagos Island
+            and Trade Fair, loud and chaotic and full of treasure if you know where to look. Most people who
+            pass through it once never learn the language of it. Victoria did. She knew which stall had the
+            good leather. She knew which trader would haggle honestly. She knew the difference between
+            something that looked expensive and something that actually was.
           </p>
           <p>
             So when a friend on campus needed a bag for an event and had no time to travel home to source it
