@@ -32,6 +32,23 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Please select a delivery location' })
     }
 
+    // --- Abuse protection: cap how many unpaid orders one phone number can
+    // create in a short window. This matters most for bank transfer/WhatsApp,
+    // which don't require an actual payment to create an order. ---
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
+    const { count: recentPendingCount } = await supabase
+      .from('orders')
+      .select('id', { count: 'exact', head: true })
+      .eq('customer_phone', customer.phone)
+      .in('payment_status', ['unpaid', 'pending'])
+      .gte('created_at', oneHourAgo)
+
+    if ((recentPendingCount || 0) >= 5) {
+      return res.status(429).json({
+        error: 'Too many pending orders from this number recently. Please contact us on WhatsApp if you need help completing an order.',
+      })
+    }
+
     // --- Shipping fee always comes from the database, never the client ---
     const { data: shippingZone } = await supabase
       .from('shipping_zones')

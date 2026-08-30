@@ -9,6 +9,7 @@ import { formatPrice } from '../utils/formatPrice'
 import { starterCatalog } from '../data/starterCatalog'
 import { useToast } from '../context/ToastContext'
 import AdminVariantManager from '../components/AdminVariantManager'
+import AdminBulkImport from '../components/AdminBulkImport'
 import {
   Trash2, Pencil, Plus, Upload, Tag, Tags, LayoutDashboard, BarChart3,
   Percent, Users, MessageCircle, Mail, Quote, Layers, Package,
@@ -520,7 +521,9 @@ function Admin() {
 
         {tab === 'products' && (
           <>
-            <div className="bg-gold/5 rounded-2xl p-6 mb-6 flex flex-wrap items-center justify-between gap-4">
+            <AdminBulkImport categories={categories} onImported={() => window.location.reload()} />
+
+            <div className="bg-gold/5 rounded-2xl p-6 mb-6 mt-6 flex flex-wrap items-center justify-between gap-4">
               <div>
                 <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-1">
                   Starter Catalog
