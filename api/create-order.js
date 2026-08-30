@@ -101,7 +101,6 @@ export default async function handler(req, res) {
     // --- Coupon: re-validated server-side, never trusting a client-computed discount ---
     let discount = 0
     let appliedCouponCode = null
-    let matchedCoupon = null
     if (couponCode) {
       const { data: coupon } = await supabase
         .from('coupons')
@@ -112,49 +111,61 @@ export default async function handler(req, res) {
 
       const result = calculateCouponDiscount(coupon, subtotal)
       discount = result.discount
-      matchedCoupon = result.coupon
       appliedCouponCode = result.coupon?.code || null
       // If the code is invalid, expired, exhausted, or below the minimum order
       // amount, we silently apply no discount rather than failing the whole order.
     }
 
     const total = calculateTotal(subtotal, discount, shippingZone.fee)
-    const orderNumber = generateOrderNumber()
 
     // Card payments stay unpaid until the Paystack webhook confirms them.
     // Bank transfer / WhatsApp orders are "pending" — a human at Victorious Concept
     // verifies these manually, per your existing process.
     const paymentStatus = paymentMethod === 'card' ? 'unpaid' : 'pending'
 
-    const { data: order, error: insertError } = await supabase
-      .from('orders')
-      .insert({
-        user_id: userId || null,
-        order_number: orderNumber,
-        items: orderItems,
-        total,
-        customer_name: customer.name,
-        customer_phone: customer.phone,
-        customer_address: customer.address,
-        customer_email: email || null,
-        payment_method: paymentMethod,
-        payment_status: paymentStatus,
-        order_status: 'pending_payment',
-        coupon_code: appliedCouponCode,
-        shipping_fee: shippingZone.fee,
-        shipping_zone: shippingZone.name,
-        shipping_is_variable: shippingZone.is_variable,
-      })
-      .select()
-      .single()
+    // order_number has a real UNIQUE constraint in the database now — on the
+    // rare chance two orders generate the same number in the same moment,
+    // retry with a fresh one rather than losing the order.
+    let order, insertError
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const orderNumber = generateOrderNumber()
+      const result = await supabase
+        .from('orders')
+        .insert({
+          user_id: userId || null,
+          order_number: orderNumber,
+          items: orderItems,
+          total,
+          customer_name: customer.name,
+          customer_phone: customer.phone,
+          customer_address: customer.address,
+          customer_email: email || null,
+          payment_method: paymentMethod,
+          payment_status: paymentStatus,
+          order_status: 'pending_payment',
+          coupon_code: appliedCouponCode,
+          shipping_fee: shippingZone.fee,
+          shipping_zone: shippingZone.name,
+          shipping_is_variable: shippingZone.is_variable,
+        })
+        .select()
+        .single()
+
+      order = result.data
+      insertError = result.error
+
+      if (!insertError || insertError.code !== '23505') break // 23505 = unique violation, retry; anything else, stop
+    }
 
     if (insertError) {
       return res.status(500).json({ error: 'Could not create order' })
     }
 
-    if (matchedCoupon) {
-      await supabase.rpc('increment_coupon_usage', { coupon_id: matchedCoupon.id })
-    }
+    // Coupon usage is counted only once payment is actually confirmed — see
+    // process_order_confirmation_items(), called from confirm_paid_order()
+    // (card, via webhook) and confirm_manual_payment() (bank transfer /
+    // WhatsApp, via admin). Counting it here at order creation would let an
+    // abandoned card checkout consume a limited-use code for nothing.
 
     // Card orders get their confirmation email from the webhook, once payment
     // is genuinely verified. Bank transfer / WhatsApp orders get it now, as an

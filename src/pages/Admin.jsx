@@ -697,50 +697,22 @@ function Admin() {
                 const canManuallyVerify = order.payment_method !== 'card' && currentPaymentStatus !== 'paid'
 
                 async function markPaid() {
-                  const ok = await runWrite(
-                    supabase
-                      .from('orders')
-                      .update({ payment_status: 'paid', order_status: 'processing' })
-                      .eq('id', order.id),
-                    'Marking order paid'
-                  )
-                  if (!ok) return
-
-                  // Record the manual payment, snapshot the line items, and
-                  // protect stock — the same steps the card/webhook path does,
-                  // now that a human has confirmed the money actually arrived.
-                  const { error: paymentInsertError } = await supabase.from('payments').insert({
-                    order_id: order.id,
-                    provider: 'manual',
-                    provider_reference: order.order_number,
-                    amount: order.total,
-                    currency: 'NGN',
-                    status: 'paid',
-                    paid_at: new Date().toISOString(),
-                    metadata: { verified_via: order.payment_method },
+                  // One atomic call — records the manual payment, snapshots
+                  // line items, protects stock, counts any coupon usage, and
+                  // marks the order paid, all together or not at all. Also
+                  // naturally guards against a double-click: if this order's
+                  // reference was already confirmed, it's a no-op.
+                  const { error } = await supabase.rpc('confirm_manual_payment', {
+                    p_order_id: order.id,
+                    p_reference: order.order_number,
+                    p_amount: order.total,
+                    p_verified_via: order.payment_method,
+                    p_items: order.items,
                   })
 
-                  // If this reference was already recorded (e.g. a double-click),
-                  // skip re-inserting line items and re-decrementing stock.
-                  if (!paymentInsertError) {
-                    await supabase.from('order_items').insert(
-                      order.items.map((item) => ({
-                        order_id: order.id,
-                        product_id: item.id,
-                        variant_id: item.variantId || null,
-                        product_name: item.name,
-                        unit_price: item.price,
-                        quantity: item.quantity,
-                        line_total: item.price * item.quantity,
-                      }))
-                    )
-                    for (const item of order.items) {
-                      if (item.variantId) {
-                        await supabase.rpc('decrement_variant_stock', { variant_id: item.variantId, qty: item.quantity })
-                      } else {
-                        await supabase.rpc('decrement_stock', { product_id: item.id, qty: item.quantity })
-                      }
-                    }
+                  if (error) {
+                    showToast('Could not confirm this payment — please try again', 'error')
+                    return
                   }
 
                   setOrders((prev) =>
@@ -748,6 +720,7 @@ function Admin() {
                       o.id === order.id ? { ...o, payment_status: 'paid', order_status: 'processing' } : o
                     )
                   )
+                  showToast('Order marked paid', 'success')
                 }
 
                 return (

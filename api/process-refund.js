@@ -48,10 +48,20 @@ export default async function handler(req, res) {
     const order = returnRequest.orders
 
     if (decision === 'reject') {
-      await supabaseAdmin
+      // A single conditional update IS the atomic decision here — no
+      // external side-effect follows it, so nothing more is needed to make
+      // this race-safe against a second simultaneous request.
+      const { data: rejected } = await supabaseAdmin
         .from('return_requests')
         .update({ status: 'rejected', admin_notes: adminNotes || null, updated_at: new Date().toISOString() })
         .eq('id', returnRequestId)
+        .in('status', ['requested', 'received'])
+        .select()
+        .maybeSingle()
+
+      if (!rejected) {
+        return res.status(409).json({ error: 'This request was just decided by someone else' })
+      }
       return res.status(200).json({ status: 'rejected' })
     }
 
@@ -60,6 +70,22 @@ export default async function handler(req, res) {
       return res.status(400).json({
         error: 'Only paid card orders can be refunded automatically. For bank transfer/WhatsApp orders, refund the customer directly and mark this resolved manually.',
       })
+    }
+
+    // --- Atomically claim this return request before calling Paystack. If
+    // two admins click Approve at the same instant, only one of these
+    // updates can match the WHERE clause — the other gets zero rows back
+    // and stops here, before any refund is actually issued. ---
+    const { data: claimed } = await supabaseAdmin
+      .from('return_requests')
+      .update({ status: 'refund_processing', updated_at: new Date().toISOString() })
+      .eq('id', returnRequestId)
+      .in('status', ['requested', 'received'])
+      .select()
+      .maybeSingle()
+
+    if (!claimed) {
+      return res.status(409).json({ error: 'This request is already being processed' })
     }
 
     const refundRes = await fetch('https://api.paystack.co/refund', {
@@ -73,6 +99,12 @@ export default async function handler(req, res) {
     const refundJson = await refundRes.json()
 
     if (!refundRes.ok || !refundJson.status) {
+      // We already own this claim, so it's safe to hand it back for a retry
+      // rather than leaving it stuck in "processing" forever.
+      await supabaseAdmin
+        .from('return_requests')
+        .update({ status: 'requested', admin_notes: `Refund attempt failed: ${refundJson.message || 'unknown error'}`, updated_at: new Date().toISOString() })
+        .eq('id', returnRequestId)
       return res.status(502).json({ error: refundJson.message || 'Paystack refund failed' })
     }
 

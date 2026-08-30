@@ -5,7 +5,7 @@
  * Kept separate specifically so they can be unit tested directly.
  */
 
-export function generateOrderNumber(date = new Date(), random = Math.floor(1000 + Math.random() * 9000)) {
+export function generateOrderNumber(date = new Date(), random = Math.floor(100000 + Math.random() * 900000)) {
   const y = date.getFullYear().toString().slice(-2)
   const m = String(date.getMonth() + 1).padStart(2, '0')
   const d = String(date.getDate()).padStart(2, '0')

@@ -38,22 +38,17 @@ export function useReviews(productId) {
         imageUploadFailed = true
       }
     }
-    const { data: userOrders } = await supabase
-      .from('orders')
-      .select('items')
-      .eq('user_id', userId)
 
-    const purchased = (userOrders || []).some((order) =>
-      order.items.some((item) => String(item.id) === String(productId))
-    )
-
+    // verified_purchase is no longer computed here — a database trigger
+    // (compute_verified_purchase) sets it authoritatively from real paid
+    // orders, overriding anything sent from the client. Whatever value we
+    // send for it is ignored.
     const { error } = await supabase.from('reviews').upsert({
       product_id: productId,
       user_id: userId,
       customer_name: customerName,
       rating,
       comment,
-      verified_purchase: purchased,
       image_url: imageUrl,
     }, { onConflict: 'user_id,product_id' })
     if (!error) fetchReviews()
