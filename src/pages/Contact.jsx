@@ -3,23 +3,34 @@ import { motion } from 'framer-motion'
 import SEO from '../components/SEO'
 import { siteImages } from '../data/siteImages'
 import { useState } from 'react'
-import { supabase } from '../lib/supabaseClient'
 import { useBusinessSettings } from '../context/BusinessSettingsContext'
 
 function Contact() {
   const { whatsappNumber } = useBusinessSettings()
   const [form, setForm] = useState({ name: '', email: '', message: '' })
   const [status, setStatus] = useState('idle')
+  const [errorMessage, setErrorMessage] = useState('')
 
   async function handleSubmit(e) {
     e.preventDefault()
     setStatus('loading')
-    const { error } = await supabase.from('contact_messages').insert(form)
-    if (error) {
-      setStatus('error')
-    } else {
+    try {
+      const res = await fetch('/api/submit-contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setErrorMessage(data.error || 'Could not send your message')
+        setStatus('error')
+        return
+      }
       setStatus('success')
       setForm({ name: '', email: '', message: '' })
+    } catch {
+      setErrorMessage('Could not reach the server')
+      setStatus('error')
     }
   }
 
@@ -187,7 +198,7 @@ function Contact() {
                   {status === 'loading' ? 'Sending...' : 'Send Message'}
                 </motion.button>
                 {status === 'error' && (
-                  <p className="font-sans text-xs text-red-500">Something went wrong, please try again or message us on WhatsApp.</p>
+                  <p className="font-sans text-xs text-red-500">{errorMessage || 'Something went wrong, please try again or message us on WhatsApp.'}</p>
                 )}
               </form>
             )}

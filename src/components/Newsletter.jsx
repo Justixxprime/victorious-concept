@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Mail, Check } from 'lucide-react'
-import { supabase } from '../lib/supabaseClient'
 
 function Newsletter() {
   const [email, setEmail] = useState('')
@@ -10,12 +9,21 @@ function Newsletter() {
   async function handleSubmit(e) {
     e.preventDefault()
     setStatus('loading')
-    const { error } = await supabase.from('subscribers').insert({ email })
-    if (error) {
-      setStatus(error.code === '23505' ? 'already' : 'error')
-    } else {
-      setStatus('success')
+    try {
+      const res = await fetch('/api/submit-newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setStatus('error')
+        return
+      }
+      setStatus(data.alreadySubscribed ? 'already' : 'success')
       setEmail('')
+    } catch {
+      setStatus('error')
     }
   }
 
