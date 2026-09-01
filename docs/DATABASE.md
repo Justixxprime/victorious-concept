@@ -1,48 +1,96 @@
-# Database Schema Documentation
+# Database
 
-## The two things you need for a complete, reconstructable database
+This documents the Victorious Concept Supabase (Postgres) database: how to
+get the schema, what's in it, and how the pieces fit together.
 
-### 1. `supabase/schema_additions.sql` (in this repo)
-Every table, column, function, trigger, and RLS policy added during the
-security/commerce-engine hardening work — the payment system, order
-architecture, variants, shipping, returns, coupon limits, review integrity,
-and abuse protection. This file is idempotent: safe to run again against the
-live project without erroring or duplicating anything.
+## Getting the schema locally
 
-### 2. A full schema export from Supabase (not in this repo yet — you should add one)
-`schema_additions.sql` does **not** define the tables that existed before
-this work began: `products`, `categories`, `collections`, `addresses`,
-`reviews`, `testimonials`, `contact_messages`, `subscribers`,
-`site_settings`, or the original columns on `orders`/`coupons`. Those were
-only ever seen in pieces through the Supabase dashboard during this work —
-never a complete, authoritative definition — so writing them into this repo
-from memory would risk quietly getting something wrong, which is worse than
-not having it at all.
+The full structural schema (tables, functions, triggers, RLS policies -- no
+customer data) lives in `supabase/base_schema.sql`, generated with:
 
-**To get the real, complete, current schema:**
-- Supabase dashboard → **Database** → **Backups**, or
-- Install the Supabase CLI and run `supabase db dump --schema public`, or
-- Your project's **Settings → Database** page may offer a direct schema export
+```
+pg_dump --schema=public --schema-only "<direct-connection-uri>" -f supabase/base_schema.sql
+```
 
-Save that output as `supabase/base_schema.sql` in this repo, right alongside
-`schema_additions.sql`. Together, the two files let you rebuild the entire
-database from git if the Supabase project were ever lost — which is the
-actual goal here, and neither file alone achieves it.
+The direct connection URI is in the Supabase dashboard under
+**Project Settings -> Database -> Connection string -> URI -> Direct
+connection**. Use the *direct* connection (not the pooler) for `pg_dump`.
 
-## What's inside schema_additions.sql, briefly
+If you'd rather use the Supabase CLI instead of `pg_dump` directly, that
+works too, but `supabase db dump` requires Docker Desktop to be installed
+and running locally -- `pg_dump` alone does not.
 
-| Area | What it adds |
+`supabase/schema_additions.sql` is a separate, hand-maintained file: only
+the objects added or changed *during this build session* (atomic payment
+functions, variants, shipping zones, returns, etc). It's idempotent and
+safe to re-run. `base_schema.sql` is the full picture; `schema_additions.sql`
+is the changelog subset of it.
+
+## Tables (18)
+
+| Table | Purpose |
 |---|---|
-| **Orders** | `payment_status`, `order_status`, `shipping_*` columns, a real `UNIQUE` constraint on `order_number` |
-| **Line items** | `order_items` — a permanent snapshot of what was actually bought, unaffected by later price changes |
-| **Payments** | `payments` + `payment_events` — a real audit trail, separate from the order itself |
-| **Variants** | `product_variants` — independent size/color stock and optional price override |
-| **Shipping** | `shipping_zones`, including "fee varies, confirmed via WhatsApp" zones |
-| **Returns** | `return_requests`, with a race-safe atomic claim before any refund is issued |
-| **Coupons** | expiry, usage limits, minimum order amount |
-| **Reviews** | a database-enforced 1–5 rating range, and a trigger that computes "verified purchase" from real paid orders — never trusting the client |
-| **Functions** | `is_admin()`, `confirm_paid_order()`, `confirm_manual_payment()`, `process_order_confirmation_items()`, stock-decrement helpers, `compute_verified_purchase()` |
+| `products` | Core catalog: name, price, category, images, sizes, stock, status |
+| `product_variants` | Size/color/SKU variants with independent stock and optional price override |
+| `categories` | Category metadata (name, description, sort order) |
+| `collections` | Curated product groupings (slug, image, product_ids[]) |
+| `orders` | Order header: customer info, totals, payment method, status |
+| `order_items` | Line-item snapshot of what was actually ordered (price/qty at time of order) |
+| `payments` | Payment records, one per confirmed transaction, idempotent via UNIQUE constraint |
+| `payment_events` | Raw Paystack webhook event log |
+| `coupons` | Discount codes: percent off, expiry, usage limit, minimum order amount |
+| `reviews` | Product reviews with `verified_purchase` computed server-side |
+| `testimonials` | Admin-entered quotes sourced from Instagram/WhatsApp/etc, not tied to a review |
+| `addresses` | Per-user saved delivery addresses |
+| `subscribers` | Newsletter signups |
+| `contact_messages` | Contact form submissions, shown in Admin Messages tab |
+| `shipping_zones` | Delivery fees per zone, with `is_variable` for road/plane quote-on-request |
+| `return_requests` | Return/refund requests, tied to `process-refund.js` |
+| `restock_waitlist` | Customers waiting on an out-of-stock product |
+| `site_settings` | Key/value store: Hero content, WhatsApp number, bank details |
 
-Every write-sensitive table uses `is_admin()` in its RLS policies — the same
-function used everywhere else in the database — rather than a
-frontend-only check.
+## Functions (10)
+
+| Function | Purpose |
+|---|---|
+| `is_admin()` | Shared check used by RLS policies across every sensitive table -- not just a frontend email list |
+| `confirm_paid_order` | Atomic confirmation for card payments: payment record + order_items snapshot + stock decrement + coupon usage + status update, all-or-nothing |
+| `confirm_manual_payment` | Same atomic confirmation, for admin-verified bank transfer / WhatsApp payments |
+| `decrement_stock` | Atomic stock decrement for simple (non-variant) products |
+| `decrement_variant_stock` | Atomic stock decrement for a specific size/color variant |
+| `increment_coupon_usage` | Bumps a coupon's usage count, called only at confirmed payment |
+| `compute_verified_purchase` | Trigger function: sets `reviews.verified_purchase` from real paid `order_items`, overriding whatever the client sends |
+| `process_order_confirmation_items` | Helper used inside the atomic confirmation functions to build the `order_items` snapshot |
+| `get_order_by_reference` | Secure RPC for guest order tracking by phone + order number, without exposing all orders |
+| `rls_auto_enable` | Housekeeping function related to RLS setup |
+
+## Triggers (1)
+
+- `trg_compute_verified_purchase` -- fires `compute_verified_purchase()` on
+  reviews, so `verified_purchase` can never be spoofed from the browser.
+
+## RLS policies
+
+59 policies total across the 18 tables, verified directly via
+`pg_policies` (not just inferred from the frontend). Every sensitive table
+is gated by `is_admin()` at the database level, so even a compromised or
+bypassed frontend `useIsAdmin.js` check can't grant write access -- that
+frontend list only controls UI visibility, not actual authorization.
+
+## Payment integrity model
+
+Card payments (Paystack) and manual payments (bank transfer / WhatsApp,
+confirmed by an admin) both funnel through one of two atomic Postgres
+functions (`confirm_paid_order` / `confirm_manual_payment`) rather than a
+sequence of separate client-driven steps. This means a payment is either
+fully recorded (payment row + order_items + stock decrement + coupon usage
++ status) or not recorded at all -- no partial states from a dropped
+connection or a race between two simultaneous confirmations.
+
+## Local CLI metadata
+
+`supabase/.temp/` is generated automatically by the Supabase CLI when you
+run `supabase link`. It's machine-specific (project ref, pooler URL, CLI
+version) and is gitignored -- it should never be committed. If you ever see
+it show up in `git status`, that's a sign `supabase link` was run before
+the `.gitignore` entry existed; just `git rm -r --cached supabase/.temp`.
