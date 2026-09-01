@@ -54,6 +54,7 @@ export default function AdminProductsTab({ products, loading, categories }) {
     if (files.length === 0) return
 
     const uploadedUrls = []
+    const failures = []
     for (const file of files) {
       const compressed = await compressImage(file)
       const fileName = `${Date.now()}-${compressed.name}`
@@ -61,7 +62,17 @@ export default function AdminProductsTab({ products, loading, categories }) {
       if (!uploadError) {
         const { data } = supabase.storage.from('product-images').getPublicUrl(fileName)
         uploadedUrls.push(data.publicUrl)
+      } else {
+        // Storage now enforces a real size limit and allowed file types
+        // server-side (see supabase/bucket_limits.sql), so a rejection here
+        // is a genuine "too big" or "wrong type" - worth telling the admin
+        // instead of the file just silently vanishing.
+        failures.push(`${file.name}: ${uploadError.message}`)
       }
+    }
+
+    if (failures.length > 0) {
+      showToast(`${failures.length} photo${failures.length > 1 ? 's' : ''} couldn't be uploaded - ${failures[0]}`, 'error')
     }
 
     if (uploadedUrls.length > 0) {
