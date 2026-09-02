@@ -100,6 +100,7 @@ export default async function handler(req, res) {
 
     // --- Coupon: re-validated server-side, never trusting a client-computed discount ---
     let discount = 0
+    let shippingDiscount = 0
     let appliedCouponCode = null
     if (couponCode) {
       const { data: coupon } = await supabase
@@ -109,14 +110,21 @@ export default async function handler(req, res) {
         .eq('active', true)
         .maybeSingle()
 
-      const result = calculateCouponDiscount(coupon, subtotal)
+      const result = calculateCouponDiscount(coupon, orderItems, shippingZone.fee)
       discount = result.discount
+      shippingDiscount = result.shippingDiscount
       appliedCouponCode = result.coupon?.code || null
-      // If the code is invalid, expired, exhausted, or below the minimum order
-      // amount, we silently apply no discount rather than failing the whole order.
+      // If the code is invalid, expired, exhausted, below the minimum order
+      // amount, or restricted to a category with nothing in this cart, we
+      // silently apply no discount rather than failing the whole order.
     }
 
-    const total = calculateTotal(subtotal, discount, shippingZone.fee)
+    const total = calculateTotal(subtotal, discount, shippingZone.fee, shippingDiscount)
+    // The fee actually charged, after any free_shipping coupon — stored as
+    // orders.shipping_fee so every downstream display (confirmation email,
+    // checkout confirmation, admin orders list, customer order history)
+    // shows the real amount with no further changes needed anywhere else.
+    const effectiveShippingFee = Math.max(0, shippingZone.fee - shippingDiscount)
 
     // Card payments stay unpaid until the Paystack webhook confirms them.
     // Bank transfer / WhatsApp orders are "pending" — a human at Victorious Concept
@@ -144,7 +152,7 @@ export default async function handler(req, res) {
           payment_status: paymentStatus,
           order_status: 'pending_payment',
           coupon_code: appliedCouponCode,
-          shipping_fee: shippingZone.fee,
+          shipping_fee: effectiveShippingFee,
           shipping_zone: shippingZone.name,
           shipping_is_variable: shippingZone.is_variable,
         })

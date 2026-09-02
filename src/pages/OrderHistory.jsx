@@ -54,6 +54,7 @@ function OrderHistory() {
   const [loading, setLoading] = useState(true)
   const [returningOrderId, setReturningOrderId] = useState(null)
   const [returnReason, setReturnReason] = useState('')
+  const [returnItemIds, setReturnItemIds] = useState([])
   const [submittingReturn, setSubmittingReturn] = useState(false)
 
   useEffect(() => {
@@ -75,14 +76,29 @@ function OrderHistory() {
     if (!authLoading) fetchOrders()
   }, [user, authLoading])
 
+  function startReturn(order) {
+    setReturningOrderId(order.id)
+    // Default to every line item selected — one tap still gets you the old
+    // "return the whole order" behavior, but a customer only unhappy with
+    // one item out of several can uncheck the rest.
+    setReturnItemIds(order.items.map((item) => item.id))
+  }
+
+  function toggleReturnItem(itemId) {
+    setReturnItemIds((prev) =>
+      prev.includes(itemId) ? prev.filter((id) => id !== itemId) : [...prev, itemId]
+    )
+  }
+
   async function submitReturnRequest(order) {
-    if (!returnReason.trim()) return
+    if (!returnReason.trim() || returnItemIds.length === 0) return
     setSubmittingReturn(true)
+    const itemsToReturn = order.items.filter((item) => returnItemIds.includes(item.id))
     const { error } = await supabase.from('return_requests').insert({
       order_id: order.id,
       user_id: user.id,
       reason: returnReason.trim(),
-      items: order.items,
+      items: itemsToReturn,
     })
     if (!error) {
       await supabase.from('orders').update({ order_status: 'return_requested' }).eq('id', order.id)
@@ -91,6 +107,7 @@ function OrderHistory() {
       )
       setReturningOrderId(null)
       setReturnReason('')
+      setReturnItemIds([])
     }
     setSubmittingReturn(false)
   }
@@ -180,7 +197,31 @@ function OrderHistory() {
                 {order.order_status === 'delivered' && (
                   <div className="border-t border-gold/10 mt-4 pt-4">
                     {returningOrderId === order.id ? (
-                      <div className="flex flex-col gap-2">
+                      <div className="flex flex-col gap-3">
+                        <div>
+                          <p className="font-sans text-xs uppercase tracking-widest text-gold mb-2">
+                            Which item(s) are you returning?
+                          </p>
+                          <div className="flex flex-col gap-1.5">
+                            {order.items.map((item) => (
+                              <label key={item.id} className="flex items-center gap-2 font-sans text-xs text-espresso/80 dark:text-cream/80">
+                                <input
+                                  type="checkbox"
+                                  checked={returnItemIds.includes(item.id)}
+                                  onChange={() => toggleReturnItem(item.id)}
+                                />
+                                <span className="flex-1">{item.name} x{item.quantity}</span>
+                                <span>{formatPrice(item.price * item.quantity)}</span>
+                              </label>
+                            ))}
+                          </div>
+                          {returnItemIds.length > 0 && (
+                            <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 mt-2">
+                              Estimated refund: {formatPrice(order.items.filter((i) => returnItemIds.includes(i.id)).reduce((sum, i) => sum + i.price * i.quantity, 0) + (returnItemIds.length === order.items.length ? order.shipping_fee : 0))}
+                              {returnItemIds.length === order.items.length ? ' (includes delivery fee, since this returns the whole order)' : ' — delivery fee isn\'t refunded on a partial return'}
+                            </p>
+                          )}
+                        </div>
                         <textarea
                           placeholder="Why would you like to return this order?"
                           rows={2}
@@ -191,13 +232,13 @@ function OrderHistory() {
                         <div className="flex gap-2">
                           <button
                             onClick={() => submitReturnRequest(order)}
-                            disabled={!returnReason.trim() || submittingReturn}
+                            disabled={!returnReason.trim() || returnItemIds.length === 0 || submittingReturn}
                             className="bg-gold text-espresso font-sans text-xs font-medium px-4 py-2 rounded-full hover:bg-gold-light transition-colors disabled:opacity-40"
                           >
                             {submittingReturn ? 'Submitting...' : 'Submit Request'}
                           </button>
                           <button
-                            onClick={() => { setReturningOrderId(null); setReturnReason('') }}
+                            onClick={() => { setReturningOrderId(null); setReturnReason(''); setReturnItemIds([]) }}
                             className="font-sans text-xs text-espresso/50 dark:text-cream/50"
                           >
                             Cancel
@@ -206,7 +247,7 @@ function OrderHistory() {
                       </div>
                     ) : (
                       <button
-                        onClick={() => setReturningOrderId(order.id)}
+                        onClick={() => startReturn(order)}
                         className="font-sans text-xs text-gold hover:underline"
                       >
                         Request a return

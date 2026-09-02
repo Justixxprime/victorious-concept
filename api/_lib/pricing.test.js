@@ -20,7 +20,7 @@ describe('buildOrderItem', () => {
   it('builds a valid line item using the server price, ignoring nothing from the client but id/qty/size', () => {
     const { orderItem, error } = buildOrderItem({ id: 1, quantity: 2, size: 'M' }, product, null)
     expect(error).toBeUndefined()
-    expect(orderItem).toEqual({ id: 1, variantId: null, name: 'Off White Bag', price: 24000, quantity: 2, size: 'M' })
+    expect(orderItem).toEqual({ id: 1, variantId: null, name: 'Off White Bag', price: 24000, quantity: 2, size: 'M', category: null })
   })
 
   it('rejects a product that no longer exists', () => {
@@ -66,6 +66,12 @@ describe('buildOrderItem', () => {
     expect(orderItem.price).toBe(24000)
   })
 
+  it('carries the product category onto the line item, for category-restricted coupons', () => {
+    const categorized = { ...product, category: 'bags' }
+    const { orderItem } = buildOrderItem({ id: 1, quantity: 1 }, categorized, null)
+    expect(orderItem.category).toBe('bags')
+  })
+
   describe('with a variant', () => {
     const variant = { id: 55, stock: 3, price_override: 26000, size: 'L', color: 'Black' }
 
@@ -109,50 +115,102 @@ describe('calculateSubtotal', () => {
 
 describe('calculateCouponDiscount', () => {
   const now = new Date('2026-08-28T00:00:00Z')
+  const items = [{ id: 1, price: 10000, quantity: 1, category: 'bags' }]
 
   it('applies no discount when there is no coupon', () => {
-    expect(calculateCouponDiscount(null, 10000, now)).toEqual({ discount: 0, coupon: null })
+    expect(calculateCouponDiscount(null, items, 0, now)).toEqual({ discount: 0, shippingDiscount: 0, coupon: null })
   })
 
   it('applies the percentage discount for a valid coupon', () => {
+    const coupon = { discount_type: 'percent', percent_off: 10, expires_at: null, max_uses: null, min_order_amount: null }
+    expect(calculateCouponDiscount(coupon, items, 0, now).discount).toBe(1000)
+  })
+
+  it('treats a coupon with no discount_type set as percent, for backward compatibility with existing codes', () => {
     const coupon = { percent_off: 10, expires_at: null, max_uses: null, min_order_amount: null }
-    expect(calculateCouponDiscount(coupon, 10000, now).discount).toBe(1000)
+    expect(calculateCouponDiscount(coupon, items, 0, now).discount).toBe(1000)
   })
 
   it('rounds the discount to the nearest whole naira', () => {
-    const coupon = { percent_off: 15, expires_at: null, max_uses: null, min_order_amount: null }
+    const coupon = { discount_type: 'percent', percent_off: 15, expires_at: null, max_uses: null, min_order_amount: null }
     // 15% of 9999 = 1499.85 -> rounds to 1500
-    expect(calculateCouponDiscount(coupon, 9999, now).discount).toBe(1500)
+    const nineNineNineNine = [{ id: 1, price: 9999, quantity: 1, category: 'bags' }]
+    expect(calculateCouponDiscount(coupon, nineNineNineNine, 0, now).discount).toBe(1500)
   })
 
   it('rejects an expired coupon, applying no discount', () => {
-    const coupon = { percent_off: 20, expires_at: '2026-01-01T00:00:00Z', max_uses: null, min_order_amount: null }
-    expect(calculateCouponDiscount(coupon, 10000, now)).toEqual({ discount: 0, coupon: null })
+    const coupon = { discount_type: 'percent', percent_off: 20, expires_at: '2026-01-01T00:00:00Z', max_uses: null, min_order_amount: null }
+    expect(calculateCouponDiscount(coupon, items, 0, now)).toEqual({ discount: 0, shippingDiscount: 0, coupon: null })
   })
 
   it('accepts a coupon that has not yet expired', () => {
-    const coupon = { percent_off: 20, expires_at: '2026-12-31T00:00:00Z', max_uses: null, min_order_amount: null }
-    expect(calculateCouponDiscount(coupon, 10000, now).discount).toBe(2000)
+    const coupon = { discount_type: 'percent', percent_off: 20, expires_at: '2026-12-31T00:00:00Z', max_uses: null, min_order_amount: null }
+    expect(calculateCouponDiscount(coupon, items, 0, now).discount).toBe(2000)
   })
 
   it('rejects a coupon that has hit its usage limit', () => {
-    const coupon = { percent_off: 20, expires_at: null, max_uses: 5, used_count: 5, min_order_amount: null }
-    expect(calculateCouponDiscount(coupon, 10000, now)).toEqual({ discount: 0, coupon: null })
+    const coupon = { discount_type: 'percent', percent_off: 20, expires_at: null, max_uses: 5, used_count: 5, min_order_amount: null }
+    expect(calculateCouponDiscount(coupon, items, 0, now)).toEqual({ discount: 0, shippingDiscount: 0, coupon: null })
   })
 
   it('accepts a coupon that is under its usage limit', () => {
-    const coupon = { percent_off: 20, expires_at: null, max_uses: 5, used_count: 4, min_order_amount: null }
-    expect(calculateCouponDiscount(coupon, 10000, now).discount).toBe(2000)
+    const coupon = { discount_type: 'percent', percent_off: 20, expires_at: null, max_uses: 5, used_count: 4, min_order_amount: null }
+    expect(calculateCouponDiscount(coupon, items, 0, now).discount).toBe(2000)
   })
 
   it('rejects a coupon when the order is below the minimum', () => {
-    const coupon = { percent_off: 20, expires_at: null, max_uses: null, min_order_amount: 20000 }
-    expect(calculateCouponDiscount(coupon, 10000, now)).toEqual({ discount: 0, coupon: null })
+    const coupon = { discount_type: 'percent', percent_off: 20, expires_at: null, max_uses: null, min_order_amount: 20000 }
+    expect(calculateCouponDiscount(coupon, items, 0, now)).toEqual({ discount: 0, shippingDiscount: 0, coupon: null })
   })
 
   it('accepts a coupon when the order exactly meets the minimum', () => {
-    const coupon = { percent_off: 20, expires_at: null, max_uses: null, min_order_amount: 10000 }
-    expect(calculateCouponDiscount(coupon, 10000, now).discount).toBe(2000)
+    const coupon = { discount_type: 'percent', percent_off: 20, expires_at: null, max_uses: null, min_order_amount: 10000 }
+    expect(calculateCouponDiscount(coupon, items, 0, now).discount).toBe(2000)
+  })
+
+  describe('fixed-amount discounts', () => {
+    it('subtracts a flat amount instead of a percentage', () => {
+      const coupon = { discount_type: 'fixed', fixed_amount_off: 1500, expires_at: null, max_uses: null, min_order_amount: null }
+      expect(calculateCouponDiscount(coupon, items, 0, now).discount).toBe(1500)
+    })
+
+    it('caps a fixed discount at the eligible subtotal — it can never go negative', () => {
+      const coupon = { discount_type: 'fixed', fixed_amount_off: 50000, expires_at: null, max_uses: null, min_order_amount: null }
+      expect(calculateCouponDiscount(coupon, items, 0, now).discount).toBe(10000)
+    })
+  })
+
+  describe('free shipping', () => {
+    it('waives the shipping fee and applies zero product discount', () => {
+      const coupon = { discount_type: 'free_shipping', expires_at: null, max_uses: null, min_order_amount: null }
+      const result = calculateCouponDiscount(coupon, items, 1500, now)
+      expect(result.discount).toBe(0)
+      expect(result.shippingDiscount).toBe(1500)
+    })
+  })
+
+  describe('category restriction', () => {
+    const mixedCart = [
+      { id: 1, price: 10000, quantity: 1, category: 'bags' },
+      { id: 2, price: 5000, quantity: 1, category: 'shoes' },
+    ]
+
+    it('only discounts items in the matching category', () => {
+      const coupon = { discount_type: 'percent', percent_off: 10, applies_to_category: 'bags', expires_at: null, max_uses: null, min_order_amount: null }
+      // 10% of just the bags line (10000), not the whole 15000 cart
+      expect(calculateCouponDiscount(coupon, mixedCart, 0, now).discount).toBe(1000)
+    })
+
+    it('checks the minimum order amount against the full cart, not just the eligible category', () => {
+      const coupon = { discount_type: 'percent', percent_off: 10, applies_to_category: 'bags', expires_at: null, max_uses: null, min_order_amount: 12000 }
+      // Full cart (15000) clears the minimum even though the bags line alone (10000) would not
+      expect(calculateCouponDiscount(coupon, mixedCart, 0, now).discount).toBe(1000)
+    })
+
+    it('rejects the coupon entirely if the cart has nothing in the required category', () => {
+      const coupon = { discount_type: 'percent', percent_off: 10, applies_to_category: 'perfumes', expires_at: null, max_uses: null, min_order_amount: null }
+      expect(calculateCouponDiscount(coupon, mixedCart, 0, now)).toEqual({ discount: 0, shippingDiscount: 0, coupon: null })
+    })
   })
 })
 
@@ -163,5 +221,14 @@ describe('calculateTotal', () => {
 
   it('handles zero discount and zero shipping', () => {
     expect(calculateTotal(20000, 0, 0)).toBe(20000)
+  })
+
+  it('applies a shipping discount on top of a product discount', () => {
+    expect(calculateTotal(20000, 2000, 1500, 1500)).toBe(18000)
+  })
+
+  it('never lets a shipping discount push the shipping portion negative', () => {
+    // shippingDiscount larger than the fee itself should floor at 0, not go negative
+    expect(calculateTotal(20000, 0, 1000, 5000)).toBe(20000)
   })
 })

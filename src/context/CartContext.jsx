@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { supabase } from '../lib/supabaseClient'
+import { calculateCouponDiscount, calculateTotal } from '../../api/_lib/pricing.js'
 
 const CartContext = createContext()
 
@@ -66,9 +67,24 @@ export function CartProvider({ children }) {
     if (!data) {
       setCouponError('That code is not valid')
       setCoupon(null)
-    } else {
-      setCoupon(data)
+      return
     }
+
+    // Run the exact same validation the server will run at checkout
+    // (expiry, usage limit, minimum order, category match) so a code that
+    // won't actually do anything doesn't show as "applied" here.
+    const { coupon: validated } = calculateCouponDiscount(data, items, 0)
+    if (!validated) {
+      setCouponError(
+        data.applies_to_category && !items.some((i) => i.category === data.applies_to_category)
+          ? 'This code only applies to a category not in your cart'
+          : 'This code has expired, been used up, or your order doesn\'t meet its minimum'
+      )
+      setCoupon(null)
+      return
+    }
+
+    setCoupon(data)
   }
 
   function removeCoupon() {
@@ -81,8 +97,14 @@ export function CartProvider({ children }) {
     (sum, item) => sum + item.price * item.quantity,
     0
   )
-  const discount = coupon ? Math.round(subtotal * (coupon.percent_off / 100)) : 0
-  const totalPrice = subtotal - discount
+  // Cart page doesn't know the delivery zone yet (that's chosen at
+  // checkout), so shipping fee is 0 here — a free_shipping coupon still
+  // shows correctly (discount is 0, since there's no shipping cost yet to
+  // waive), and the actual delivery discount is applied for real once a
+  // zone is selected, by the same shared calculateCouponDiscount logic
+  // running again server-side in api/create-order.js.
+  const { discount } = calculateCouponDiscount(coupon, items, 0)
+  const totalPrice = calculateTotal(subtotal, discount, 0)
 
   return (
     <CartContext.Provider

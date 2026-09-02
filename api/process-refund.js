@@ -72,6 +72,36 @@ export default async function handler(req, res) {
       })
     }
 
+    // --- Recompute the refund amount from the ORIGINAL order, not from
+    // return_requests.items. The RLS policy for inserting a return request
+    // only checks that the order belongs to the requesting customer — it
+    // does not validate price or quantity inside the items field. So we
+    // treat that field as "which lines, how much quantity" intent only,
+    // and look up the real price and cap the quantity against the order
+    // that was actually paid for. This is what makes partial-item refunds
+    // safe to support at all. ---
+    const orderItems = order.items || []
+    const requestedItems = returnRequest.items || []
+    let refundAmount = 0
+    let returnedQuantity = 0
+    for (const requested of requestedItems) {
+      const original = orderItems.find((oi) => oi.id === requested.id)
+      if (!original) continue // not a real line item on this order — ignored, not trusted
+      const safeQuantity = Math.min(Math.max(0, Number(requested.quantity) || 0), original.quantity)
+      refundAmount += original.price * safeQuantity
+      returnedQuantity += safeQuantity
+    }
+    const totalOrderedQuantity = orderItems.reduce((sum, i) => sum + i.quantity, 0)
+    const isFullOrderReturn = totalOrderedQuantity > 0 && returnedQuantity >= totalOrderedQuantity
+    if (isFullOrderReturn) refundAmount += order.shipping_fee || 0
+    // Final sanity ceiling — the refund can never exceed what was actually
+    // paid, no matter what the math above produced.
+    refundAmount = Math.min(refundAmount, order.total)
+
+    if (refundAmount <= 0) {
+      return res.status(400).json({ error: 'Nothing in this request matches real, paid line items on the order' })
+    }
+
     // --- Atomically claim this return request before calling Paystack. If
     // two admins click Approve at the same instant, only one of these
     // updates can match the WHERE clause — the other gets zero rows back
@@ -94,7 +124,13 @@ export default async function handler(req, res) {
         Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ transaction: order.payment_reference }),
+      body: JSON.stringify({
+        transaction: order.payment_reference,
+        // Omitting `amount` would tell Paystack to refund the FULL original
+        // transaction regardless of what was actually approved here — so a
+        // partial return must always pass an explicit amount, in kobo.
+        amount: Math.round(refundAmount * 100),
+      }),
     })
     const refundJson = await refundRes.json()
 
@@ -112,18 +148,22 @@ export default async function handler(req, res) {
       .from('return_requests')
       .update({
         status: 'refunded',
-        refund_amount: order.total,
+        refund_amount: refundAmount,
         admin_notes: adminNotes || null,
         updated_at: new Date().toISOString(),
       })
       .eq('id', returnRequestId)
 
-    await supabaseAdmin
-      .from('orders')
-      .update({ payment_status: 'refunded', order_status: 'refunded' })
-      .eq('id', order.id)
+    // A partial return leaves the order itself still delivered/paid — only
+    // a full-order return moves the order's own status to refunded.
+    if (isFullOrderReturn) {
+      await supabaseAdmin
+        .from('orders')
+        .update({ payment_status: 'refunded', order_status: 'refunded' })
+        .eq('id', order.id)
+    }
 
-    return res.status(200).json({ status: 'refunded' })
+    return res.status(200).json({ status: 'refunded', refundAmount })
   } catch {
     return res.status(500).json({ error: 'Unexpected server error' })
   }

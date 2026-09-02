@@ -51,7 +51,7 @@ function Admin() {
     async function fetchReturns() {
       const { data } = await supabase
         .from('return_requests')
-        .select('*, orders(order_number, total, payment_method, payment_status, payment_reference, customer_name, customer_phone)')
+        .select('*, orders(order_number, total, payment_method, payment_status, payment_reference, customer_name, customer_phone, items, shipping_fee)')
         .order('created_at', { ascending: false })
       setReturns(data || [])
     }
@@ -121,7 +121,7 @@ function Admin() {
         {tab === 'customers' && <AdminCustomersTab orders={orders} />}
         {tab === 'categories' && <AdminCategoriesTab categories={categories} refetchCategories={refetchCategories} />}
         {tab === 'collections' && <AdminCollectionsTab collections={collections} refetchCollections={refetchCollections} products={products} />}
-        {tab === 'discounts' && <AdminDiscountsTab />}
+        {tab === 'discounts' && <AdminDiscountsTab categories={categories} />}
         {tab === 'shipping' && <AdminShippingTab />}
         {tab === 'returns' && <AdminReturnsTab returns={returns} setReturns={setReturns} />}
         {tab === 'messages' && <AdminMessagesTab messages={messages} setMessages={setMessages} />}
