@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
+import { useAuth } from '../context/AuthContext'
 import NavLogo from './NavLogo'
 import {
   Search,
@@ -57,6 +58,7 @@ function Navbar() {
   const { totalItems } = useCart()
   const { registerCartIcon, registerWishlistIcon } = useFlyToCart()
   const { items: wishlistItems } = useWishlist()
+  const { user } = useAuth()
   const location = useLocation()
 
   // On the homepage, the navbar blends directly into the cinematic Hero
@@ -135,14 +137,17 @@ function Navbar() {
           </motion.button>
 
           {/* ACCOUNT */}
-          <Link to="/account">
+          <Link to="/account" className="relative" aria-label={user ? 'Your account' : 'Sign in or track an order'}>
             <motion.div
               whileHover={{ scale: 1.15, y: -2 }}
               whileTap={{ scale: 0.9 }}
               transition={{ type: 'spring', stiffness: 400, damping: 15 }}
             >
-              <User className="w-5 h-5 cursor-pointer hover:text-gold transition-colors" />
+              <User className={`w-5 h-5 cursor-pointer transition-colors ${user ? 'text-gold' : 'hover:text-gold'}`} />
             </motion.div>
+            {user && (
+              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-gold ring-2 ring-cream dark:ring-espresso" />
+            )}
           </Link>
 
           {/* WISHLIST */}

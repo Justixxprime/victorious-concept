@@ -52,7 +52,9 @@ function Newsletter() {
           <p className="font-sans text-sm text-gold-light">You're already subscribed.</p>
         ) : (
           <form onSubmit={handleSubmit} className="flex w-full gap-2">
+            <label htmlFor="newsletter-email" className="sr-only">Your email</label>
             <input
+              id="newsletter-email"
               type="email"
               required
               placeholder="Your email"

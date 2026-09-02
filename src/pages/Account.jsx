@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import SEO from '../components/SEO'
@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext'
 import { useAddresses } from '../hooks/useAddresses'
 import { supabase } from '../lib/supabaseClient'
 import { siteImages } from '../data/siteImages'
-import { Mail, Lock, MapPin, Trash2, Plus, PackageSearch, ArrowRight, Sparkles, Heart, ScrollText } from 'lucide-react'
+import { Mail, Lock, MapPin, Trash2, Plus, PackageSearch, ArrowRight, Sparkles, Heart, ScrollText, Gift, Copy, Check } from 'lucide-react'
 
 function Account() {
   const { user, signUp, signIn, signOut } = useAuth()
@@ -89,7 +89,9 @@ function Account() {
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div className="flex items-center gap-3 border border-gold/30 rounded-xl px-4 py-3 focus-within:border-gold transition-colors">
                 <Mail className="w-4 h-4 text-gold flex-shrink-0" />
+                <label htmlFor="account-email" className="sr-only">Email</label>
                 <input
+                  id="account-email"
                   type="email"
                   placeholder="Email"
                   required
@@ -100,7 +102,9 @@ function Account() {
               </div>
               <div className="flex items-center gap-3 border border-gold/30 rounded-xl px-4 py-3 focus-within:border-gold transition-colors">
                 <Lock className="w-4 h-4 text-gold flex-shrink-0" />
+                <label htmlFor="account-password" className="sr-only">Password</label>
                 <input
+                  id="account-password"
                   type="password"
                   placeholder="Password"
                   required
@@ -163,6 +167,63 @@ function Account() {
         </Link>
       </div>
     </section>
+  )
+}
+
+function ReferralCard({ user }) {
+  const [referral, setReferral] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [copied, setCopied] = useState(false)
+
+  useEffect(() => {
+    async function fetchCode() {
+      const { data: { session } } = await supabase.auth.getSession()
+      try {
+        const res = await fetch('/api/get-referral-code', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ accessToken: session?.access_token }),
+        })
+        if (res.ok) setReferral(await res.json())
+      } catch {
+        // Silent — the referral card just won't render its content below;
+        // nothing about the rest of the account page depends on this.
+      }
+      setLoading(false)
+    }
+    fetchCode()
+  }, [user.id])
+
+  function copyCode() {
+    if (!referral) return
+    navigator.clipboard.writeText(referral.code)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  if (loading || !referral) return null
+
+  return (
+    <div className="bg-gold/5 rounded-2xl px-5 py-4">
+      <div className="flex items-center gap-2 mb-1">
+        <Gift className="w-4 h-4 text-gold flex-shrink-0" />
+        <span className="font-sans text-sm font-medium text-espresso dark:text-cream">
+          Share your code, friends save {referral.percent_off}%
+        </span>
+      </div>
+      <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 mb-3">
+        {referral.used_count > 0
+          ? `${referral.used_count} order${referral.used_count > 1 ? 's have' : ' has'} used your code so far`
+          : "It's yours to share however you like — WhatsApp, Instagram, wherever."}
+      </p>
+      <button
+        onClick={copyCode}
+        className="w-full flex items-center justify-between gap-2 bg-cream dark:bg-espresso border border-gold/30 rounded-xl px-4 py-2.5 font-sans text-sm text-espresso dark:text-cream hover:border-gold transition-colors"
+      >
+        <span className="tracking-wide font-medium">{referral.code}</span>
+        {copied ? <Check className="w-4 h-4 text-gold" /> : <Copy className="w-4 h-4 text-gold" />}
+      </button>
+    </div>
   )
 }
 
@@ -279,6 +340,11 @@ function LoggedInAccount({ user, signOut }) {
             <ArrowRight className="w-4 h-4 text-gold flex-shrink-0 group-hover:translate-x-1 transition-transform" />
           </Link>
         </motion.div>
+
+        <motion.div {...fadeUp(0.18)} className="mb-3">
+          <ReferralCard user={user} />
+        </motion.div>
+
         <motion.button
           {...fadeUp(0.2)}
           onClick={signOut}

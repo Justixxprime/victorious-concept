@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { sendConfirmationEmail } from './_lib/sendConfirmationEmail.js'
 import { generateOrderNumber, buildOrderItem, calculateSubtotal, calculateCouponDiscount, calculateTotal } from './_lib/pricing.js'
+import { captureServerException } from './_lib/monitoring.js'
 
 // This runs on Vercel's servers only — it uses the secret service-role key,
 // which must NEVER be exposed to the browser. Do not import this file or its
@@ -198,7 +199,8 @@ export default async function handler(req, res) {
       shippingZone: order.shipping_zone,
       shippingIsVariable: order.shipping_is_variable,
     })
-  } catch {
+  } catch (err) {
+    captureServerException(err)
     return res.status(500).json({ error: 'Unexpected server error' })
   }
 }

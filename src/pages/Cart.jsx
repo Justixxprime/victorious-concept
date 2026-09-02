@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { Trash2, Minus, Plus, Tag, X, ShoppingBag } from 'lucide-react'
+import { Trash2, Minus, Plus, Tag, X, ShoppingBag, UserCircle2 } from 'lucide-react'
 import { useCart } from '../context/CartContext'
+import { useAuth } from '../context/AuthContext'
 import { useProducts } from '../hooks/useProducts'
 import { formatPrice } from '../utils/formatPrice'
 import ProductCard from '../components/ProductCard'
@@ -20,6 +21,7 @@ function Cart() {
     removeCoupon,
     couponError,
   } = useCart()
+  const { user } = useAuth()
   const { products } = useProducts()
   const [code, setCode] = useState('')
 
@@ -54,9 +56,22 @@ function Cart() {
   return (
     <section className="bg-cream dark:bg-espresso transition-colors py-12 px-6 min-h-screen">
       <div className="max-w-4xl mx-auto">
-        <h1 className="font-display italic font-semibold text-3xl md:text-4xl text-espresso dark:text-cream mb-10">
+        <h1 className="font-display italic font-semibold text-3xl md:text-4xl text-espresso dark:text-cream mb-6">
           Your Cart
         </h1>
+
+        {!user && items.length > 0 && (
+          <Link
+            to="/account"
+            className="flex items-center gap-3 bg-gold/10 hover:bg-gold/15 rounded-2xl px-5 py-4 mb-8 transition-colors"
+          >
+            <UserCircle2 className="w-5 h-5 text-gold flex-shrink-0" />
+            <span className="font-sans text-xs text-espresso/70 dark:text-cream/70">
+              You're browsing as a guest — this cart only lives on this device. Sign in to keep it
+              synced everywhere, save addresses, and see your full order history.
+            </span>
+          </Link>
+        )}
 
         <div className="flex flex-col gap-6">
           {items.map((item) => (
@@ -129,7 +144,13 @@ function Cart() {
           {coupon ? (
             <div className="flex items-center justify-between bg-gold/10 rounded-xl px-4 py-3 mb-4">
               <span className="flex items-center gap-2 font-sans text-sm text-espresso dark:text-cream">
-                <Tag className="w-4 h-4 text-gold" /> {coupon.code} applied ({coupon.percent_off}% off)
+                <Tag className="w-4 h-4 text-gold" /> {coupon.code} applied (
+                {coupon.discount_type === 'fixed'
+                  ? `${formatPrice(coupon.fixed_amount_off)} off`
+                  : coupon.discount_type === 'free_shipping'
+                  ? 'free delivery'
+                  : `${coupon.percent_off}% off`}
+                {coupon.applies_to_category ? ` on ${coupon.applies_to_category}` : ''})
               </span>
               <button onClick={removeCoupon} aria-label="Remove coupon">
                 <X className="w-4 h-4 text-espresso/50 dark:text-cream/50 hover:text-gold" />

@@ -164,7 +164,9 @@ function Contact() {
               </motion.div>
             ) : (
               <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                <label htmlFor="contact-name" className="sr-only">Your name</label>
                 <input
+                  id="contact-name"
                   type="text"
                   placeholder="Your name"
                   required
@@ -172,7 +174,9 @@ function Contact() {
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream placeholder:text-espresso/40 dark:placeholder:text-cream/40 outline-none focus:border-gold transition-colors"
                 />
+                <label htmlFor="contact-email" className="sr-only">Your email</label>
                 <input
+                  id="contact-email"
                   type="email"
                   placeholder="Your email"
                   required
@@ -180,7 +184,9 @@ function Contact() {
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream placeholder:text-espresso/40 dark:placeholder:text-cream/40 outline-none focus:border-gold transition-colors"
                 />
+                <label htmlFor="contact-message" className="sr-only">Your message</label>
                 <textarea
+                  id="contact-message"
                   placeholder="Your message"
                   rows={6}
                   required

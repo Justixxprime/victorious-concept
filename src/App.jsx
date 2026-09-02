@@ -50,6 +50,7 @@ function AnimatedRoutes() {
     <AnimatePresence mode="wait" initial={false}>
       <motion.div
         key={location.pathname}
+        id="main-content"
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -8 }}
@@ -120,6 +121,12 @@ function App() {
               <ToastProvider>
                 <FlyToCartProvider>
                   <div className="min-h-screen bg-cream dark:bg-espresso transition-colors">
+                    <a
+                      href="#main-content"
+                      className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-[100] focus:bg-gold focus:text-espresso focus:font-sans focus:text-sm focus:font-medium focus:px-4 focus:py-2 focus:rounded-full"
+                    >
+                      Skip to main content
+                    </a>
                     <ScrollToTop />
                     <WelcomeNudge />
                     <OfflineBanner />

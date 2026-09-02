@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { captureServerException } from './_lib/monitoring.js'
 
 const supabaseAdmin = createClient(
   process.env.VITE_SUPABASE_URL,
@@ -135,6 +136,11 @@ export default async function handler(req, res) {
     const refundJson = await refundRes.json()
 
     if (!refundRes.ok || !refundJson.status) {
+      captureServerException(new Error(`Paystack refund rejected: ${refundJson.message || 'unknown error'}`), {
+        returnRequestId,
+        orderId: order.id,
+        refundAmount,
+      })
       // We already own this claim, so it's safe to hand it back for a retry
       // rather than leaving it stuck in "processing" forever.
       await supabaseAdmin
@@ -164,7 +170,8 @@ export default async function handler(req, res) {
     }
 
     return res.status(200).json({ status: 'refunded', refundAmount })
-  } catch {
+  } catch (err) {
+    captureServerException(err, { returnRequestId })
     return res.status(500).json({ error: 'Unexpected server error' })
   }
 }

@@ -80,7 +80,9 @@ function TrackOrder() {
       <section className="bg-cream dark:bg-espresso transition-colors py-16 px-6">
       <div className="max-w-md mx-auto">
         <form onSubmit={handleSearch} className="flex flex-col gap-4 mb-8">
+          <label htmlFor="track-order-number" className="sr-only">Order number</label>
           <input
+            id="track-order-number"
             type="text"
             placeholder="Order number (e.g. VC-260821-4732)"
             required
@@ -88,7 +90,9 @@ function TrackOrder() {
             onChange={(e) => setOrderNumber(e.target.value)}
             className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
           />
+          <label htmlFor="track-order-phone" className="sr-only">Phone number used at checkout</label>
           <input
+            id="track-order-phone"
             type="text"
             placeholder="Phone number used at checkout"
             required

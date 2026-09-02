@@ -1,4 +1,5 @@
 import { Component } from 'react'
+import { Sentry } from '../lib/monitoring'
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -12,6 +13,8 @@ class ErrorBoundary extends Component {
 
   componentDidCatch(error, info) {
     console.error('Site error caught:', error, info)
+    // No-ops safely if VITE_SENTRY_DSN isn't set — see src/lib/monitoring.js
+    Sentry.captureException(error, { extra: { componentStack: info.componentStack } })
   }
 
   render() {

@@ -329,21 +329,27 @@ function Checkout() {
         )}
 
         <div className="flex flex-col gap-4 mb-8">
+          <label htmlFor="checkout-name" className="sr-only">Full name</label>
           <input
+            id="checkout-name"
             type="text"
             placeholder="Full name"
             value={form.name}
             onChange={(e) => update('name', e.target.value)}
             className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream placeholder:text-espresso/40 dark:placeholder:text-cream/40 outline-none focus:border-gold"
           />
+          <label htmlFor="checkout-phone" className="sr-only">Phone number</label>
           <input
+            id="checkout-phone"
             type="text"
             placeholder="Phone number"
             value={form.phone}
             onChange={(e) => update('phone', e.target.value)}
             className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream placeholder:text-espresso/40 dark:placeholder:text-cream/40 outline-none focus:border-gold"
           />
+          <label htmlFor="checkout-address" className="sr-only">Delivery address</label>
           <textarea
+            id="checkout-address"
             placeholder="Delivery address"
             rows={3}
             value={form.address}

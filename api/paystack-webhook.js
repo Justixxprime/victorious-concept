@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import crypto from 'crypto'
 import { sendConfirmationEmail } from './_lib/sendConfirmationEmail.js'
+import { captureServerException } from './_lib/monitoring.js'
 
 // This must stay server-only. Vercel needs the raw request body (not
 // pre-parsed JSON) to check Paystack's signature correctly.
@@ -108,6 +109,14 @@ export default async function handler(req, res) {
     })
 
     if (confirmError) {
+      // This is the highest-value spot in the whole app to know about
+      // immediately — it means a real, Paystack-verified payment could not
+      // be recorded as paid. (This exact branch is what silently broke
+      // when order_items was missing its variant_id column earlier.)
+      captureServerException(new Error(`confirm_paid_order RPC failed: ${confirmError.message}`), {
+        orderNumber: reference,
+        orderId: order.id,
+      })
       // The database rejected the confirmation — don't tell Paystack we're
       // done, so it retries the webhook rather than silently losing this.
       return res.status(500).json({ error: 'Could not confirm payment' })
@@ -134,7 +143,8 @@ export default async function handler(req, res) {
     })
 
     return res.status(200).json({ received: true })
-  } catch {
+  } catch (err) {
+    captureServerException(err, { orderNumber: reference })
     return res.status(500).json({ error: 'Webhook processing failed' })
   }
 }
