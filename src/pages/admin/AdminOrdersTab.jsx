@@ -2,7 +2,7 @@ import { supabase } from '../../lib/supabaseClient'
 import { formatPrice } from '../../utils/formatPrice'
 import { useToast } from '../../context/ToastContext'
 import { useAdminWrite } from '../../hooks/useAdminWrite'
-import { Trash2 } from 'lucide-react'
+import { Trash2, Undo2 } from 'lucide-react'
 
 const paymentBadgeStyles = {
   paid: 'bg-green-500/10 text-green-600',
@@ -57,6 +57,24 @@ export default function AdminOrdersTab({ orders, ordersLoading, setOrders }) {
     showToast('Order marked paid', 'success')
   }
 
+  async function undoMarkPaid(order) {
+    if (!confirm(`Undo "paid" for ${order.order_number}? This restores stock, reverses any coupon usage, and puts the order back to unpaid/pending. Only do this if it was marked paid by mistake.`)) return
+
+    const { data, error } = await supabase.rpc('undo_manual_payment', { p_order_id: order.id })
+
+    if (error || data === 'no_manual_payment_found') {
+      showToast('Could not undo this — please try again', 'error')
+      return
+    }
+
+    setOrders((prev) =>
+      prev.map((o) =>
+        o.id === order.id ? { ...o, payment_status: 'unpaid', order_status: 'pending_payment' } : o
+      )
+    )
+    showToast('Payment undone — order is back to pending', 'success')
+  }
+
   async function updateStatus(order, newStatus) {
     const ok = await runWrite(
       supabase.from('orders').update({ order_status: newStatus }).eq('id', order.id),
@@ -108,6 +126,14 @@ export default function AdminOrdersTab({ orders, ordersLoading, setOrders }) {
                     className="font-sans text-xs font-medium bg-gold/20 hover:bg-gold/30 text-gold rounded-full px-3 py-1 transition-colors"
                   >
                     Mark as paid
+                  </button>
+                )}
+                {order.payment_method !== 'card' && currentPaymentStatus === 'paid' && ['processing', 'pending_payment'].includes(order.order_status) && (
+                  <button
+                    onClick={() => undoMarkPaid(order)}
+                    className="flex items-center gap-1 font-sans text-xs font-medium text-espresso/50 dark:text-cream/50 hover:text-red-500 rounded-full px-3 py-1 transition-colors"
+                  >
+                    <Undo2 className="w-3 h-3" /> Undo
                   </button>
                 )}
               </div>
