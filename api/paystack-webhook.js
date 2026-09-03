@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import crypto from 'crypto'
 import { sendConfirmationEmail } from './_lib/sendConfirmationEmail.js'
 import { captureServerException } from './_lib/monitoring.js'
+import { requireEnv } from './_lib/env.js'
 
 // This must stay server-only. Vercel needs the raw request body (not
 // pre-parsed JSON) to check Paystack's signature correctly.
@@ -12,10 +13,14 @@ export const config = {
 }
 
 const supabase = createClient(
-  process.env.VITE_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
+  requireEnv(process.env.VITE_SUPABASE_URL, 'VITE_SUPABASE_URL'),
+  requireEnv(process.env.SUPABASE_SERVICE_ROLE_KEY, 'SUPABASE_SERVICE_ROLE_KEY')
 )
 
+/**
+ * @param {import('@vercel/node').VercelRequest} req
+ * @returns {Promise<string>}
+ */
 function readRawBody(req) {
   return new Promise((resolve, reject) => {
     let data = ''
@@ -25,6 +30,10 @@ function readRawBody(req) {
   })
 }
 
+/**
+ * @param {import('@vercel/node').VercelRequest} req
+ * @param {import('@vercel/node').VercelResponse} res
+ */
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).end()
@@ -35,7 +44,7 @@ export default async function handler(req, res) {
   // --- Confirm this request really came from Paystack ---
   const signature = req.headers['x-paystack-signature']
   const expectedSignature = crypto
-    .createHmac('sha512', process.env.PAYSTACK_SECRET_KEY)
+    .createHmac('sha512', requireEnv(process.env.PAYSTACK_SECRET_KEY, 'PAYSTACK_SECRET_KEY'))
     .update(rawBody)
     .digest('hex')
 

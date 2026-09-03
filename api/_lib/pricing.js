@@ -3,8 +3,66 @@
  * rules behind pricing, discounts, and validation. api/create-order.js
  * fetches real data from Supabase, then hands it to these functions.
  * Kept separate specifically so they can be unit tested directly.
+ *
+ * Type-checked via JSDoc + tsconfig.json (checkJs) as a deliberately
+ * narrow pilot — see item 17 in the project history for why this file
+ * specifically, and why the rest of the codebase isn't included yet.
  */
 
+/**
+ * @typedef {Object} RequestedItem
+ * @property {string|number} id
+ * @property {string|number} [variantId]
+ * @property {number|string} quantity
+ * @property {string} [size]
+ */
+
+/**
+ * @typedef {Object} Product
+ * @property {string|number} id
+ * @property {string} name
+ * @property {number} price
+ * @property {number} stock
+ * @property {string} [status]
+ * @property {string} [category]
+ */
+
+/**
+ * @typedef {Object} Variant
+ * @property {string|number} id
+ * @property {number} stock
+ * @property {number} [price_override]
+ */
+
+/**
+ * @typedef {Object} OrderItem
+ * @property {string|number} id
+ * @property {string|number|null} variantId
+ * @property {string} name
+ * @property {number} price
+ * @property {number} quantity
+ * @property {string|null} size
+ * @property {string|null} category
+ */
+
+/**
+ * @typedef {Object} Coupon
+ * @property {string} code
+ * @property {'percent'|'fixed'|'free_shipping'} [discount_type]
+ * @property {number} [percent_off]
+ * @property {number} [fixed_amount_off]
+ * @property {string|null} [applies_to_category]
+ * @property {string|null} [expires_at]
+ * @property {number|null} [max_uses]
+ * @property {number} [used_count]
+ * @property {number|null} [min_order_amount]
+ */
+
+/**
+ * @param {Date} [date]
+ * @param {number} [random]
+ * @returns {string}
+ */
 export function generateOrderNumber(date = new Date(), random = Math.floor(100000 + Math.random() * 900000)) {
   const y = date.getFullYear().toString().slice(-2)
   const m = String(date.getMonth() + 1).padStart(2, '0')
@@ -15,31 +73,37 @@ export function generateOrderNumber(date = new Date(), random = Math.floor(10000
 /**
  * Validates one requested cart line against real product/variant data.
  * Returns { orderItem } on success or { error } on failure — never throws.
+ *
+ * @param {RequestedItem} requested
+ * @param {Product|null|undefined} product
+ * @param {Variant|null|undefined} variant
+ * @returns {{ ok: true, orderItem: OrderItem, error?: undefined } | { ok: false, orderItem?: undefined, error: string }}
  */
 export function buildOrderItem(requested, product, variant) {
   const quantity = Number(requested.quantity)
 
   if (!product) {
-    return { error: `Product ${requested.id} no longer exists` }
+    return { ok: false, error: `Product ${requested.id} no longer exists` }
   }
   if (requested.variantId && !variant) {
-    return { error: `Selected option for ${product.name} no longer exists` }
+    return { ok: false, error: `Selected option for ${product.name} no longer exists` }
   }
   if (product.status === 'hidden') {
-    return { error: `${product.name} is not currently available` }
+    return { ok: false, error: `${product.name} is not currently available` }
   }
   if (!Number.isInteger(quantity) || quantity < 1) {
-    return { error: `Invalid quantity for ${product.name}` }
+    return { ok: false, error: `Invalid quantity for ${product.name}` }
   }
 
   const availableStock = variant ? variant.stock : product.stock
   if (product.status !== 'preorder' && availableStock < quantity) {
-    return { error: `Not enough stock for ${product.name}` }
+    return { ok: false, error: `Not enough stock for ${product.name}` }
   }
 
   const unitPrice = variant?.price_override || product.price
 
   return {
+    ok: true,
     orderItem: {
       id: product.id,
       variantId: variant?.id || null,
@@ -55,6 +119,10 @@ export function buildOrderItem(requested, product, variant) {
   }
 }
 
+/**
+ * @param {OrderItem[]} orderItems
+ * @returns {number}
+ */
 export function calculateSubtotal(orderItems) {
   return orderItems.reduce((sum, i) => sum + i.price * i.quantity, 0)
 }
@@ -78,6 +146,12 @@ export function calculateSubtotal(orderItems) {
  * Returns { discount: 0, shippingDiscount: 0, coupon: null } for any
  * invalid/expired/exhausted/below-minimum/non-matching-category coupon —
  * callers should treat that as "no discount applied", not as an error.
+ *
+ * @param {Coupon|null|undefined} coupon
+ * @param {OrderItem[]} orderItems
+ * @param {number} [shippingFee]
+ * @param {Date} [now]
+ * @returns {{ discount: number, shippingDiscount: number, coupon: Coupon|null }}
  */
 export function calculateCouponDiscount(coupon, orderItems, shippingFee = 0, now = new Date()) {
   if (!coupon) return { discount: 0, shippingDiscount: 0, coupon: null }
@@ -85,7 +159,7 @@ export function calculateCouponDiscount(coupon, orderItems, shippingFee = 0, now
   const subtotal = calculateSubtotal(orderItems)
 
   const notExpired = !coupon.expires_at || new Date(coupon.expires_at) > now
-  const underUsageLimit = !coupon.max_uses || coupon.used_count < coupon.max_uses
+  const underUsageLimit = !coupon.max_uses || (coupon.used_count ?? 0) < coupon.max_uses
   const meetsMinOrder = !coupon.min_order_amount || subtotal >= coupon.min_order_amount
 
   if (!notExpired || !underUsageLimit || !meetsMinOrder) {
@@ -119,6 +193,13 @@ export function calculateCouponDiscount(coupon, orderItems, shippingFee = 0, now
   return { discount, shippingDiscount: 0, coupon }
 }
 
+/**
+ * @param {number} subtotal
+ * @param {number} discount
+ * @param {number} shippingFee
+ * @param {number} [shippingDiscount]
+ * @returns {number}
+ */
 export function calculateTotal(subtotal, discount, shippingFee, shippingDiscount = 0) {
   return subtotal - discount + Math.max(0, shippingFee - shippingDiscount)
 }

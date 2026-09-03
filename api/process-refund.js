@@ -1,11 +1,16 @@
 import { createClient } from '@supabase/supabase-js'
 import { captureServerException } from './_lib/monitoring.js'
+import { requireEnv } from './_lib/env.js'
 
 const supabaseAdmin = createClient(
-  process.env.VITE_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
+  requireEnv(process.env.VITE_SUPABASE_URL, 'VITE_SUPABASE_URL'),
+  requireEnv(process.env.SUPABASE_SERVICE_ROLE_KEY, 'SUPABASE_SERVICE_ROLE_KEY')
 )
 
+/**
+ * @param {import('@vercel/node').VercelRequest} req
+ * @param {import('@vercel/node').VercelResponse} res
+ */
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
@@ -23,8 +28,8 @@ export default async function handler(req, res) {
   // --- Verify the caller is really an admin, using the exact same is_admin()
   // function the database itself trusts — not a separate list that could drift. ---
   const callerClient = createClient(
-    process.env.VITE_SUPABASE_URL,
-    process.env.VITE_SUPABASE_ANON_KEY,
+    requireEnv(process.env.VITE_SUPABASE_URL, 'VITE_SUPABASE_URL'),
+    requireEnv(process.env.VITE_SUPABASE_ANON_KEY, 'VITE_SUPABASE_ANON_KEY'),
     { global: { headers: { Authorization: `Bearer ${accessToken}` } } }
   )
   const { data: isAdmin } = await callerClient.rpc('is_admin')
@@ -81,7 +86,7 @@ export default async function handler(req, res) {
     // and look up the real price and cap the quantity against the order
     // that was actually paid for. This is what makes partial-item refunds
     // safe to support at all. ---
-    const orderItems = order.items || []
+    const orderItems = /** @type {import('./_lib/pricing.js').OrderItem[]} */ (order.items || [])
     const requestedItems = returnRequest.items || []
     let refundAmount = 0
     let returnedQuantity = 0

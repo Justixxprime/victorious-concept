@@ -1,6 +1,28 @@
+/**
+ * @typedef {Object} ConfirmationEmailItem
+ * @property {string} name
+ * @property {number} price
+ * @property {number} quantity
+ */
+
+/**
+ * @typedef {Object} ConfirmationEmailOptions
+ * @property {string|null|undefined} email
+ * @property {string} orderNumber
+ * @property {ConfirmationEmailItem[]} items
+ * @property {number} total
+ * @property {number} shippingFee
+ * @property {string|null} [shippingZone]
+ * @property {boolean} [shippingIsVariable]
+ */
+
 // Shared by api/create-order.js (bank transfer / WhatsApp) and
 // api/paystack-webhook.js (card, once payment is verified). Never called
 // directly from the browser.
+/**
+ * @param {ConfirmationEmailOptions} options
+ * @returns {Promise<void>}
+ */
 export async function sendConfirmationEmail({ email, orderNumber, items, total, shippingFee, shippingZone, shippingIsVariable }) {
   if (!email) return // guest checkout with no email on file — nothing to send to
 

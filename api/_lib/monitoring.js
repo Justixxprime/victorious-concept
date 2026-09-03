@@ -6,6 +6,11 @@ import * as Sentry from '@sentry/node'
 // that breaks a real request.
 let initialized = false
 
+/**
+ * @param {unknown} error
+ * @param {Record<string, unknown>} [context]
+ * @returns {void}
+ */
 export function captureServerException(error, context = {}) {
   const dsn = process.env.SENTRY_DSN
   if (!dsn) {

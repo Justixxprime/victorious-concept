@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "types": ["node"]
+  },
+  // Expanding incrementally from the original pricing.js pilot (item 17) —
+  // now covers all of api/_lib and the three serverless functions that
+  // actually handle payments and orders. Frontend (src/) is deliberately
+  // still excluded; that's a much bigger, separate decision.
+  "include": ["api/_lib/**/*.js", "api/create-order.js", "api/paystack-webhook.js", "api/process-refund.js"],
+  "exclude": ["**/*.test.js", "node_modules"]
+}

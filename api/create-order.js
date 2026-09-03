@@ -2,15 +2,20 @@ import { createClient } from '@supabase/supabase-js'
 import { sendConfirmationEmail } from './_lib/sendConfirmationEmail.js'
 import { generateOrderNumber, buildOrderItem, calculateSubtotal, calculateCouponDiscount, calculateTotal } from './_lib/pricing.js'
 import { captureServerException } from './_lib/monitoring.js'
+import { requireEnv } from './_lib/env.js'
 
 // This runs on Vercel's servers only — it uses the secret service-role key,
 // which must NEVER be exposed to the browser. Do not import this file or its
 // env vars into anything under src/.
 const supabase = createClient(
-  process.env.VITE_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
+  requireEnv(process.env.VITE_SUPABASE_URL, 'VITE_SUPABASE_URL'),
+  requireEnv(process.env.SUPABASE_SERVICE_ROLE_KEY, 'SUPABASE_SERVICE_ROLE_KEY')
 )
 
+/**
+ * @param {import('@vercel/node').VercelRequest} req
+ * @param {import('@vercel/node').VercelResponse} res
+ */
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
@@ -76,6 +81,7 @@ export default async function handler(req, res) {
 
     // Variants (if any) also always come from the database, never the client.
     const variantIds = items.map((i) => i.variantId).filter(Boolean)
+    /** @type {Record<string, any>} */
     let variantsById = {}
     if (variantIds.length > 0) {
       const { data: variantRows } = await supabase
@@ -90,8 +96,8 @@ export default async function handler(req, res) {
       const product = products.find((p) => String(p.id) === String(requested.id))
       const variant = requested.variantId ? variantsById[String(requested.variantId)] : null
 
-      const { orderItem, error } = buildOrderItem(requested, product, variant)
-      if (error) {
+      const { ok, orderItem, error } = buildOrderItem(requested, product, variant)
+      if (!ok) {
         return res.status(400).json({ error })
       }
       orderItems.push(orderItem)
