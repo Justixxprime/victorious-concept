@@ -9,11 +9,12 @@ function FounderTeaser() {
           The Founder
         </span>
         <h2 className="font-display italic font-semibold text-3xl md:text-5xl text-espresso dark:text-cream max-w-2xl leading-tight">
-          Started at university. Built with intention.
+          A History and International Relations degree. A fashion business anyway.
         </h2>
         <p className="font-sans text-sm md:text-base text-espresso/70 dark:text-cream/70 max-w-xl">
-          It began with friends on campus asking one question — can you find me this? — and
-          Victoria saying yes, then heading to Lagos Island and Trade Fair to make it happen.
+          Obioma Victoria Sopuruchi built this while finishing her degree at Federal University
+          Otuoke, Bayelsa State — proof that what you studied and what you build don't have to be
+          the same thing.
         </p>
         <Link
           to="/about"

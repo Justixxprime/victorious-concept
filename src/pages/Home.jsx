@@ -7,7 +7,7 @@ import FounderTeaser from '../components/FounderTeaser'
 import FeaturedProducts from '../components/FeaturedProducts'
 import CustomerLove from '../components/CustomerLove'
 import ShopTheLook from '../components/ShopTheLook'
-import SourceTeaser from '../components/SourceTeaser'
+import SourceStorySection from '../components/SourceStorySection'
 import TrackOrderTeaser from '../components/TrackOrderTeaser'
 import Newsletter from '../components/Newsletter'
 import { useProducts } from '../hooks/useProducts'
@@ -34,7 +34,7 @@ function Home() {
       <FeaturedProducts />
       <CustomerLove />
       {lookProducts.length > 0 && <ShopTheLook products={lookProducts} />}
-      <SourceTeaser />
+      <SourceStorySection />
       <TrackOrderTeaser />
       <Newsletter />
     </>

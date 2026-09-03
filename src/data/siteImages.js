@@ -10,6 +10,7 @@ export const siteImages = {
   shopBanner: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=2000&q=80',
   faqBanner: 'https://images.unsplash.com/photo-1520333789090-1afc82db536a?auto=format&fit=crop&w=2000&q=80',
   shippingBanner: 'https://images.unsplash.com/photo-1580674285054-bed31e145f59?auto=format&fit=crop&w=2000&q=80',
+  sourceStoryBackdrop: 'https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=2000&q=80',
 }
 
 // Real, distinct stock photos per product category (generic placeholders —
