@@ -171,15 +171,29 @@ export default function AdminAnalyticsTab({ products, orders }) {
             Abandoned Checkouts ({abandoned.length})
           </h3>
           <p className="font-sans text-xs text-espresso/40 dark:text-cream/40 mb-3">
-            Orders created more than 24 hours ago that still haven't been paid — worth a WhatsApp
-            follow-up, from the Orders tab.
+            Orders created more than 24 hours ago that still haven't been paid. Anyone with an
+            email on file gets an automatic reminder once a day — tap an order below to nudge
+            them on WhatsApp right now instead.
           </p>
           <div className="flex flex-col gap-2">
             {abandoned.slice(0, 5).map((o) => (
-              <div key={o.id} className="flex justify-between items-center bg-red-500/5 rounded-xl px-4 py-3">
-                <span className="font-sans text-sm text-espresso dark:text-cream">{o.order_number} · {o.customer_name}</span>
+              <a
+                key={o.id}
+                href={`https://wa.me/${(o.customer_phone || '').replace(/\D/g, '')}?text=${encodeURIComponent(
+                  `Hi ${o.customer_name}, just checking in — your order ${o.order_number} (${formatPrice(o.total)}) from Victorious Concept is still waiting on payment. Let us know if you'd like to go ahead or if anything's changed!`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex justify-between items-center bg-red-500/5 hover:bg-red-500/10 rounded-xl px-4 py-3 transition-colors"
+              >
+                <span className="font-sans text-sm text-espresso dark:text-cream">
+                  {o.order_number} · {o.customer_name}
+                  {o.abandonment_reminder_sent_at && (
+                    <span className="text-espresso/40 dark:text-cream/40"> · emailed already</span>
+                  )}
+                </span>
                 <span className="font-sans text-xs text-red-500">{formatPrice(o.total)}</span>
-              </div>
+              </a>
             ))}
           </div>
         </div>

@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import crypto from 'crypto'
 import { sendConfirmationEmail } from './_lib/sendConfirmationEmail.js'
+import { notifyAdmins } from './_lib/notifyAdmins.js'
 import { captureServerException } from './_lib/monitoring.js'
 import { requireEnv } from './_lib/env.js'
 
@@ -150,6 +151,17 @@ export default async function handler(req, res) {
       shippingZone: order.shipping_zone,
       shippingIsVariable: order.shipping_is_variable,
     })
+
+    // This is the moment real money genuinely moved — a card order isn't
+    // worth an admin's attention until now (an incomplete checkout attempt
+    // would just be noise), but a confirmed payment is exactly the kind of
+    // thing worth knowing about right away.
+    await notifyAdmins(
+      `Payment confirmed — ${order.order_number}`,
+      `<h2 style="font-style: italic;">Payment Confirmed</h2>
+       <p><strong>${order.order_number}</strong> · ₦${order.total.toLocaleString()} · Card</p>
+       <p>${order.customer_name} · ${order.customer_phone}</p>`
+    )
 
     return res.status(200).json({ received: true })
   } catch (err) {

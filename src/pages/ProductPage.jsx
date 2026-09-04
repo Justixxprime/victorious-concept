@@ -45,11 +45,30 @@ function ProductPage() {
   const [selectedSize, setSelectedSize] = useState(null)
   const [variants, setVariants] = useState([])
   const [selectedVariant, setSelectedVariant] = useState(null)
+  const [frequentlyBoughtWith, setFrequentlyBoughtWith] = useState([])
   const galleryRef = useRef(null)
 
   useEffect(() => {
     if (product) addViewed(product)
   }, [product])
+
+  useEffect(() => {
+    async function fetchFrequentlyBought() {
+      const { data } = await supabase.rpc('get_frequently_bought_with', {
+        p_product_id: product.id,
+        p_limit: 4,
+      })
+      if (!data) return
+      // The RPC only returns aggregated ids + counts (never raw order/customer
+      // data) — the actual product details come from what's already loaded,
+      // no extra fetch needed.
+      const items = data
+        .map((row) => products.find((p) => String(p.id) === String(row.product_id)))
+        .filter(Boolean)
+      setFrequentlyBoughtWith(items)
+    }
+    if (product?.id) fetchFrequentlyBought()
+  }, [product?.id, products])
 
   useEffect(() => {
     if (!product) return
@@ -112,6 +131,7 @@ function ProductPage() {
   }
 
   const related = products.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 4)
+
   const recentlyViewed = (viewed || []).filter((p) => p.id !== product.id).slice(0, 4)
 
   return (
@@ -288,8 +308,18 @@ function ProductPage() {
         </div>
       </div>
 
-      {(related.length > 0 || recentlyViewed.length > 0) && (
+      {(frequentlyBoughtWith.length > 0 || related.length > 0 || recentlyViewed.length > 0) && (
         <div className="max-w-7xl mx-auto px-0 pt-16 pb-8 flex flex-col gap-16">
+          {frequentlyBoughtWith.length > 0 && (
+            <div>
+              <h2 className="font-display italic font-semibold text-2xl text-espresso dark:text-cream mb-6">
+                Frequently Bought Together
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                {frequentlyBoughtWith.map((p) => <ProductCard key={p.id} product={p} />)}
+              </div>
+            </div>
+          )}
           {related.length > 0 && (
             <div>
               <h2 className="font-display italic font-semibold text-2xl text-espresso dark:text-cream mb-6">

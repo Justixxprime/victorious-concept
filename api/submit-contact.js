@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { notifyAdmins } from './_lib/notifyAdmins.js'
 
 const supabase = createClient(
   process.env.VITE_SUPABASE_URL,
@@ -41,6 +42,13 @@ export default async function handler(req, res) {
   if (error) {
     return res.status(500).json({ error: 'Could not send your message' })
   }
+
+  await notifyAdmins(
+    `New message from ${name.trim()}`,
+    `<h2 style="font-style: italic;">New Contact Message</h2>
+     <p><strong>${name.trim()}</strong> (${email.trim()})</p>
+     <p style="white-space: pre-wrap;">${message.trim()}</p>`
+  )
 
   return res.status(200).json({ success: true })
 }

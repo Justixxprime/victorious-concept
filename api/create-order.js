@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { sendConfirmationEmail } from './_lib/sendConfirmationEmail.js'
+import { notifyAdmins } from './_lib/notifyAdmins.js'
 import { generateOrderNumber, buildOrderItem, calculateSubtotal, calculateCouponDiscount, calculateTotal } from './_lib/pricing.js'
 import { captureServerException } from './_lib/monitoring.js'
 import { requireEnv } from './_lib/env.js'
@@ -195,6 +196,19 @@ export default async function handler(req, res) {
         shippingZone: order.shipping_zone,
         shippingIsVariable: order.shipping_is_variable,
       })
+
+      // Bank transfer / WhatsApp orders need a human to actually verify the
+      // payment came in and mark it paid — nothing else will prompt that,
+      // so admins get pinged right away. Card orders don't need this here:
+      // they're only worth an admin's attention once the webhook actually
+      // confirms real money moved, not at every incomplete checkout attempt.
+      await notifyAdmins(
+        `New order ${order.order_number} — awaiting payment verification`,
+        `<h2 style="font-style: italic;">New Order</h2>
+         <p><strong>${order.order_number}</strong> · ₦${order.total.toLocaleString()} · via ${paymentMethod === 'bank_transfer' ? 'Bank Transfer' : 'WhatsApp'}</p>
+         <p>${order.customer_name} · ${order.customer_phone}</p>
+         <p style="color: #888; font-size: 13px;">Verify the payment came in, then mark it paid from the Admin Orders tab.</p>`
+      )
     }
 
     return res.status(200).json({
