@@ -11,14 +11,30 @@ import SourceStorySection from '../components/SourceStorySection'
 import TrackOrderTeaser from '../components/TrackOrderTeaser'
 import Newsletter from '../components/Newsletter'
 import { useProducts } from '../hooks/useProducts'
+import { useSiteSettings } from '../hooks/useSiteSettings'
 
 function Home() {
   const { products } = useProducts()
-  const lookProducts = products.slice(0, 3)
+  const { value: spotlightSetting } = useSiteSettings('spotlight')
+  const { value: lookSetting } = useSiteSettings('shop_the_look')
+
+  // An admin-picked product is used when set and still exists — a product
+  // getting deleted or hidden after being picked here falls straight back
+  // to the automatic "highest-priced Featured product" behavior, rather
+  // than showing a broken/missing product.
+  const pickedSpotlight = spotlightSetting?.productId
+    ? products.find((p) => String(p.id) === String(spotlightSetting.productId))
+    : null
   const featuredForSpotlight = products.filter((p) => p.isFeatured)
-  const spotlightProduct = featuredForSpotlight.length > 0
+  const autoSpotlight = featuredForSpotlight.length > 0
     ? [...featuredForSpotlight].sort((a, b) => b.price - a.price)[0]
     : null
+  const spotlightProduct = pickedSpotlight || autoSpotlight
+
+  const pickedLookProducts = (lookSetting?.productIds || [])
+    .map((id) => products.find((p) => String(p.id) === String(id)))
+    .filter(Boolean)
+  const lookProducts = pickedLookProducts.length > 0 ? pickedLookProducts : products.slice(0, 3)
 
   return (
     <>
@@ -29,11 +45,19 @@ function Home() {
       <Hero />
       <NewArrivals />
       <CategoryGrid />
-      {spotlightProduct && <EditorialFeature product={spotlightProduct} />}
+      {spotlightProduct && (
+        <EditorialFeature
+          product={spotlightProduct}
+          headline={spotlightSetting?.headline}
+          description={spotlightSetting?.description}
+        />
+      )}
       <FounderTeaser />
       <FeaturedProducts />
       <CustomerLove />
-      {lookProducts.length > 0 && <ShopTheLook products={lookProducts} />}
+      {lookProducts.length > 0 && (
+        <ShopTheLook products={lookProducts} backdropImage={lookSetting?.backdropImage} />
+      )}
       <SourceStorySection />
       <TrackOrderTeaser />
       <Newsletter />

@@ -3,7 +3,7 @@ import { ArrowRight } from 'lucide-react'
 import RevealImage from './RevealImage'
 import { formatPrice } from '../utils/formatPrice'
 
-function EditorialFeature({ product }) {
+function EditorialFeature({ product, headline, description }) {
   if (!product) return null
 
   return (
@@ -13,7 +13,7 @@ function EditorialFeature({ product }) {
           The Spotlight
         </p>
         <h2 className="font-display italic font-semibold text-3xl md:text-5xl text-center mb-16 max-w-2xl mx-auto leading-tight">
-          One piece worth stopping the scroll for
+          {headline || 'One piece worth stopping the scroll for'}
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
@@ -34,10 +34,7 @@ function EditorialFeature({ product }) {
             </div>
 
             <p className="font-sans text-cream/70 leading-relaxed">
-              This is the piece that earns its place, the one that gets asked about, the one that
-              was worth the trip to Lagos Island to find. Sourced with the same instinct that
-              started this whole business, chosen because it deserved to be chosen, not because it
-              needed to fill a rack.
+              {description || 'This is the piece that earns its place, the one that gets asked about, the one that was worth the trip to Lagos Island to find. Sourced with the same instinct that started this whole business, chosen because it deserved to be chosen, not because it needed to fill a rack.'}
             </p>
 
             <div className="flex items-center justify-between border-t border-cream/10 pt-6">

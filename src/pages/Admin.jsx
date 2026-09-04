@@ -126,7 +126,7 @@ function Admin() {
         {tab === 'returns' && <AdminReturnsTab returns={returns} setReturns={setReturns} />}
         {tab === 'messages' && <AdminMessagesTab messages={messages} setMessages={setMessages} />}
         {tab === 'testimonials' && <AdminTestimonialsTab />}
-        {tab === 'content' && <AdminContentTab />}
+        {tab === 'content' && <AdminContentTab products={products} />}
         {tab === 'business' && <AdminBusinessTab />}
         {tab === 'analytics' && <AdminAnalyticsTab products={products} orders={orders} />}
       </div>

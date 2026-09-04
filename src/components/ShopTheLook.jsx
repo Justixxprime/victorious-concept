@@ -4,7 +4,7 @@ import { formatPrice } from '../utils/formatPrice'
 import RevealImage from './RevealImage'
 import { siteImages } from '../data/siteImages'
 
-function ShopTheLook({ products }) {
+function ShopTheLook({ products, backdropImage }) {
   if (!products || products.length === 0) return null
 
   return (
@@ -19,7 +19,7 @@ function ShopTheLook({ products }) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
           <RevealImage
-            src={siteImages.lookbookHero}
+            src={backdropImage || siteImages.lookbookHero}
             alt="Styled outfit"
             className="aspect-[4/5] rounded-2xl"
           />
