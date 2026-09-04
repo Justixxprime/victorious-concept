@@ -3,7 +3,9 @@ import { MessageCircle } from 'lucide-react'
 import { useBusinessSettings } from '../context/BusinessSettingsContext'
 
 function WhatsAppButton() {
-  const { whatsappNumber } = useBusinessSettings()
+  const { whatsappNumber, loading } = useBusinessSettings()
+  if (loading || !whatsappNumber) return null
+
   return (
     <motion.a
       href={`https://wa.me/${whatsappNumber}`}

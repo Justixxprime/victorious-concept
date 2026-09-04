@@ -76,9 +76,11 @@ function Footer() {
             <a href="#" aria-label="Instagram" className="hover:text-gold transition-colors">
               <AtSign className="w-5 h-5" />
             </a>
-            <a href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="hover:text-gold transition-colors">
-              <MessageCircle className="w-5 h-5" />
-            </a>
+            {whatsappNumber && (
+              <a href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="hover:text-gold transition-colors">
+                <MessageCircle className="w-5 h-5" />
+              </a>
+            )}
             <a href="mailto:Victoriaobioma31@yahoo.com" aria-label="Email" className="hover:text-gold transition-colors">
               <Mail className="w-5 h-5" />
             </a>

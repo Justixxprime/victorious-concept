@@ -5,14 +5,17 @@ const BusinessSettingsContext = createContext(null)
 
 const SETTINGS_KEY = 'business_contact'
 
-// These match what's already configured for the business today. Once an
-// admin saves changes in the Settings panel, the database value takes over —
-// these are just the safe starting point so nothing breaks in the meantime.
+// The real values are confirmed saved in Supabase's site_settings table
+// now (under the 'business_contact' key) — these blank defaults are only
+// a brief starting point before that fetch resolves, not a fallback with
+// real business info baked into the shipped JS bundle. WhatsAppButton and
+// Footer both check for an empty whatsappNumber before rendering their
+// WhatsApp link, so a blank value here never shows a broken link.
 const DEFAULTS = {
-  whatsappNumber: '2348122470435',
-  bankAccountName: 'Sopuruchi Victoria Obioma',
-  bankAccountNumber: '8122470435',
-  bankName: 'Opay',
+  whatsappNumber: '',
+  bankAccountName: '',
+  bankAccountNumber: '',
+  bankName: '',
 }
 
 export function BusinessSettingsProvider({ children }) {
