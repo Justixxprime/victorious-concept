@@ -132,7 +132,7 @@ function Account() {
                 disabled={submitting}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="bg-gold text-espresso font-sans font-medium px-8 py-3.5 rounded-full hover:bg-gold-light transition-colors mt-2 disabled:opacity-60"
+                className="bg-gold text-espresso font-sans font-medium px-8 py-3.5 rounded-full hover:bg-gold-light transition-colors mt-2 disabled:opacity-40"
               >
                 {submitting ? 'One moment...' : mode === 'signin' ? 'Sign In' : 'Create Account'}
               </motion.button>
@@ -311,7 +311,7 @@ function LoggedInAccount({ user, signOut }) {
               whileTap={{ scale: 0.97 }}
               type="submit"
               disabled={savingProfile}
-              className="bg-gold text-espresso font-sans text-sm font-medium px-6 py-2 rounded-full hover:bg-gold-light transition-colors self-start disabled:opacity-50"
+              className="bg-gold text-espresso font-sans text-sm font-medium px-6 py-2 rounded-full hover:bg-gold-light transition-colors self-start disabled:opacity-40"
             >
               {profileSaved ? 'Saved!' : 'Save Profile'}
             </motion.button>

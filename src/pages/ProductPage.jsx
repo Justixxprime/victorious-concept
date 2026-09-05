@@ -200,7 +200,7 @@ function ProductPage() {
                     key={v.id}
                     onClick={() => setSelectedVariant(v)}
                     disabled={v.stock <= 0 && !isPreorder}
-                    className={`px-4 h-12 rounded-full border font-sans text-sm transition-colors disabled:opacity-30 ${
+                    className={`px-4 h-12 rounded-full border font-sans text-sm transition-colors disabled:opacity-40 ${
                       selectedVariant?.id === v.id
                         ? 'bg-gold border-gold text-espresso'
                         : 'border-gold/30 text-espresso dark:text-cream hover:border-gold'

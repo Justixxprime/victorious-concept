@@ -5,7 +5,7 @@ function PrivacyPolicy() {
     <section className="bg-cream dark:bg-espresso transition-colors min-h-screen py-20 px-6">
       <SEO title="Privacy Policy" description="How Victorious Concept handles your data." />
       <div className="max-w-2xl mx-auto">
-        <h1 className="font-display italic font-semibold text-4xl text-espresso dark:text-cream mb-8">
+        <h1 className="font-display italic font-semibold text-4xl md:text-5xl text-espresso dark:text-cream mb-8">
           Privacy Policy
         </h1>
         <div className="flex flex-col gap-6 font-sans text-sm text-espresso/70 dark:text-cream/70 leading-relaxed">

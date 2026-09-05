@@ -158,7 +158,7 @@ export default function AdminProductsTab({ products, loading, categories }) {
         <button
           onClick={importStarterCatalog}
           disabled={importing}
-          className="bg-gold text-espresso font-sans text-sm font-medium px-6 py-3 rounded-full hover:bg-gold-light transition-colors disabled:opacity-50 flex-shrink-0"
+          className="bg-gold text-espresso font-sans text-sm font-medium px-6 py-3 rounded-full hover:bg-gold-light transition-colors disabled:opacity-40 flex-shrink-0"
         >
           {importing ? 'Importing…' : 'Import Starter Catalog'}
         </button>

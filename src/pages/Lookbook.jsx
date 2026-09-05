@@ -16,7 +16,7 @@ function Lookbook() {
 
       <div className="max-w-5xl mx-auto text-center mb-16">
         <p className="font-sans text-xs uppercase tracking-widest text-gold mb-4">Editorial</p>
-        <h1 className="font-display italic font-semibold text-4xl md:text-6xl text-espresso dark:text-cream mb-6">
+        <h1 className="font-display italic font-semibold text-5xl md:text-6xl text-espresso dark:text-cream mb-6">
           The Lookbook
         </h1>
         <p className="font-sans text-sm md:text-base text-espresso/60 dark:text-cream/60 max-w-xl mx-auto mb-10">

@@ -35,7 +35,7 @@ function Journal() {
         <p className="font-sans text-xs uppercase tracking-widest text-gold mb-4">
           Stories &amp; Updates
         </p>
-        <h1 className="font-display italic font-semibold text-4xl text-espresso dark:text-cream mb-12">
+        <h1 className="font-display italic font-semibold text-4xl md:text-5xl text-espresso dark:text-cream mb-12">
           Journal
         </h1>
 

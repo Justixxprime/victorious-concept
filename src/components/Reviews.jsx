@@ -101,7 +101,7 @@ function Reviews({ productId }) {
           <button
             type="submit"
             disabled={submitting}
-            className="bg-gold text-espresso font-sans font-medium px-6 py-3 rounded-full hover:bg-gold-light transition-colors self-start disabled:opacity-50"
+            className="bg-gold text-espresso font-sans font-medium px-6 py-3 rounded-full hover:bg-gold-light transition-colors self-start disabled:opacity-40"
           >
             {existingReview ? 'Update Your Review' : 'Submit Review'}
           </button>

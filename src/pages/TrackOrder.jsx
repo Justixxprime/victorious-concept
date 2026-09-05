@@ -103,7 +103,7 @@ function TrackOrder() {
           <button
             type="submit"
             disabled={loading}
-            className="flex items-center justify-center gap-2 bg-gold text-espresso font-sans font-medium px-8 py-3 rounded-full hover:bg-gold-light transition-colors disabled:opacity-50"
+            className="flex items-center justify-center gap-2 bg-gold text-espresso font-sans font-medium px-8 py-3 rounded-full hover:bg-gold-light transition-colors disabled:opacity-40"
           >
             <Search className="w-4 h-4" /> {loading ? 'Searching...' : 'Track Order'}
           </button>

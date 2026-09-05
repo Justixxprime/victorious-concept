@@ -106,7 +106,7 @@ export default function AdminBusinessTab() {
       <button
         onClick={saveBusinessSettings}
         disabled={savingBusiness}
-        className="bg-gold text-espresso font-sans font-medium px-6 py-3 rounded-full hover:bg-gold-light transition-colors self-start disabled:opacity-50"
+        className="bg-gold text-espresso font-sans font-medium px-6 py-3 rounded-full hover:bg-gold-light transition-colors self-start disabled:opacity-40"
       >
         {savingBusiness ? 'Saving...' : 'Save Business Info'}
       </button>

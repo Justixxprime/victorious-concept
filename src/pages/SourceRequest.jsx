@@ -77,7 +77,7 @@ function SourceRequest() {
           <p className="font-sans text-xs uppercase tracking-[0.3em] text-gold-light">
             A Private Request
           </p>
-          <h1 className="font-display italic font-semibold text-4xl md:text-6xl leading-tight">
+          <h1 className="font-display italic font-semibold text-5xl md:text-6xl leading-tight">
             Can't find it? We'll go find it.
           </h1>
           <p className="font-sans text-sm md:text-base text-cream/70 max-w-lg">

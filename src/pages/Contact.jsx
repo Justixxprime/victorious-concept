@@ -1,6 +1,7 @@
 import { MessageCircle, Mail, Phone, ArrowRight } from 'lucide-react'
 import { motion } from 'framer-motion'
 import SEO from '../components/SEO'
+import PageHero from '../components/PageHero'
 import { siteImages } from '../data/siteImages'
 import { useState } from 'react'
 import { useBusinessSettings } from '../context/BusinessSettingsContext'
@@ -39,44 +40,12 @@ function Contact() {
       <SEO title="Contact" description="Get in touch with Victorious Concept: WhatsApp, email, or send us a message directly." />
 
       {/* CINEMATIC HERO */}
-      <section className="relative bg-espresso text-cream overflow-hidden">
-        <div className="absolute inset-0">
-          <img
-            src={siteImages.contactBanner}
-            alt=""
-            className="w-full h-full object-cover opacity-30"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-espresso via-espresso/85 to-espresso/50" />
-        </div>
-
-        <div className="relative max-w-4xl mx-auto px-6 py-28 md:py-36 flex flex-col items-start gap-6">
-          <motion.span
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="font-sans uppercase tracking-[0.3em] text-xs text-gold-light"
-          >
-            Get In Touch
-          </motion.span>
-          <motion.h1
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="font-display italic font-semibold text-5xl md:text-6xl leading-tight max-w-2xl"
-          >
-            We would love to hear from you
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="font-sans text-cream/70 max-w-lg text-base md:text-lg"
-          >
-            Questions about an order, styling advice, or a custom sourcing request. Reach us
-            however's easiest for you.
-          </motion.p>
-        </div>
-      </section>
+      <PageHero
+        label="Get In Touch"
+        title="We would love to hear from you"
+        subtitle="Questions about an order, styling advice, or a custom sourcing request. Reach us however's easiest for you."
+        image={siteImages.contactBanner}
+      />
 
       {/* CONTACT CHANNELS + FORM */}
       <section className="bg-cream dark:bg-espresso transition-colors py-20 px-6">
@@ -199,7 +168,7 @@ function Contact() {
                   disabled={status === 'loading'}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="bg-gold text-espresso font-sans font-medium px-8 py-3 rounded-full hover:bg-gold-light transition-colors self-start disabled:opacity-50"
+                  className="bg-gold text-espresso font-sans font-medium px-8 py-3 rounded-full hover:bg-gold-light transition-colors self-start disabled:opacity-40"
                 >
                   {status === 'loading' ? 'Sending...' : 'Send Message'}
                 </motion.button>

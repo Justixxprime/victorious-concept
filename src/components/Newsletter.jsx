@@ -65,7 +65,7 @@ function Newsletter() {
             <button
               type="submit"
               disabled={status === 'loading'}
-              className="bg-gold text-espresso font-sans font-medium px-6 py-3 rounded-full hover:bg-gold-light transition-colors disabled:opacity-50 flex-shrink-0"
+              className="bg-gold text-espresso font-sans font-medium px-6 py-3 rounded-full hover:bg-gold-light transition-colors disabled:opacity-40 flex-shrink-0"
             >
               Subscribe
             </button>
