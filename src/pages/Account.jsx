@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext'
 import { useAddresses } from '../hooks/useAddresses'
 import { supabase } from '../lib/supabaseClient'
 import { siteImages } from '../data/siteImages'
+import { useSiteSettings } from '../hooks/useSiteSettings'
 import { Mail, Lock, MapPin, Trash2, Plus, PackageSearch, ArrowRight, Sparkles, Heart, ScrollText, Gift, Copy, Check } from 'lucide-react'
 
 function Account() {
@@ -26,7 +27,7 @@ function Account() {
     if (mode === 'signup') {
       const { error } = await signUp(email, password)
       if (error) setError(error.message)
-      else setInfo('Almost there — check your email to confirm your account, then sign in.')
+      else setInfo('Almost there. Check your email to confirm your account, then sign in.')
     } else {
       const { error } = await signIn(email, password)
       if (error) setError(error.message)
@@ -214,7 +215,7 @@ function ReferralCard({ user }) {
       <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 mb-3">
         {referral.used_count > 0
           ? `${referral.used_count} order${referral.used_count > 1 ? 's have' : ' has'} used your code so far`
-          : "It's yours to share however you like — WhatsApp, Instagram, wherever."}
+          : "It's yours to share however you like: WhatsApp, Instagram, wherever."}
       </p>
       <button
         onClick={copyCode}
@@ -229,6 +230,11 @@ function ReferralCard({ user }) {
 
 function LoggedInAccount({ user, signOut }) {
   const { addresses, loading, addAddress, deleteAddress } = useAddresses()
+  const { value: referralSetting } = useSiteSettings('referral_program')
+  // Same "on unless explicitly turned off" default as the admin toggle,
+  // so the card doesn't flicker away for existing users the moment this
+  // shipped, before anyone's touched the setting.
+  const referralProgramEnabled = referralSetting?.enabled !== false
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState({ label: '', full_name: '', phone: '', address: '' })
   const [profileForm, setProfileForm] = useState({
@@ -341,9 +347,11 @@ function LoggedInAccount({ user, signOut }) {
           </Link>
         </motion.div>
 
-        <motion.div {...fadeUp(0.18)} className="mb-3">
-          <ReferralCard user={user} />
-        </motion.div>
+        {referralProgramEnabled && (
+          <motion.div {...fadeUp(0.18)} className="mb-3">
+            <ReferralCard user={user} />
+          </motion.div>
+        )}
 
         <motion.button
           {...fadeUp(0.2)}

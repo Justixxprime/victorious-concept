@@ -16,6 +16,6 @@
   // now covers all of api/_lib and the three serverless functions that
   // actually handle payments and orders. Frontend (src/) is deliberately
   // still excluded; that's a much bigger, separate decision.
-  "include": ["api/_lib/**/*.js", "api/create-order.js", "api/paystack-webhook.js", "api/process-refund.js", "api/send-abandonment-reminders.js"],
+  "include": ["api/_lib/**/*.js", "api/create-order.js", "api/paystack-webhook.js", "api/process-refund.js", "api/send-abandonment-reminders.js", "api/get-referral-code.js"],
   "exclude": ["**/*.test.js", "node_modules"]
 }

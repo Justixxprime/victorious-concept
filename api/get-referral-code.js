@@ -1,8 +1,9 @@
 import { createClient } from '@supabase/supabase-js'
+import { requireEnv } from './_lib/env.js'
 
 const supabaseAdmin = createClient(
-  process.env.VITE_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
+  requireEnv(process.env.VITE_SUPABASE_URL, 'VITE_SUPABASE_URL'),
+  requireEnv(process.env.SUPABASE_SERVICE_ROLE_KEY, 'SUPABASE_SERVICE_ROLE_KEY')
 )
 
 const REFERRAL_PERCENT_OFF = 10
@@ -11,9 +12,24 @@ function randomSuffix() {
   return Math.floor(1000 + Math.random() * 9000)
 }
 
+/**
+ * @param {import('@vercel/node').VercelRequest} req
+ * @param {import('@vercel/node').VercelResponse} res
+ */
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
+  }
+
+  const { data: referralSetting } = await supabaseAdmin
+    .from('site_settings')
+    .select('value')
+    .eq('key', 'referral_program')
+    .maybeSingle()
+  // Same "on unless explicitly turned off" default used everywhere else
+  // this setting is read.
+  if (referralSetting?.value?.enabled === false) {
+    return res.status(403).json({ error: 'The referral program is currently turned off' })
   }
 
   const { accessToken } = req.body
@@ -22,8 +38,8 @@ export default async function handler(req, res) {
   }
 
   const callerClient = createClient(
-    process.env.VITE_SUPABASE_URL,
-    process.env.VITE_SUPABASE_ANON_KEY,
+    requireEnv(process.env.VITE_SUPABASE_URL, 'VITE_SUPABASE_URL'),
+    requireEnv(process.env.VITE_SUPABASE_ANON_KEY, 'VITE_SUPABASE_ANON_KEY'),
     { global: { headers: { Authorization: `Bearer ${accessToken}` } } }
   )
   const { data: { user }, error: userError } = await callerClient.auth.getUser()
