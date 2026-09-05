@@ -4,7 +4,7 @@ import { formatPrice } from '../../utils/formatPrice'
 import { useAdminWrite } from '../../hooks/useAdminWrite'
 import { Trash2 } from 'lucide-react'
 
-const EMPTY_FORM = { name: '', fee: '', estimated_days: '', is_variable: false }
+const EMPTY_FORM = { name: '', fee: '', estimated_days: '', is_variable: false, variable_note: '' }
 
 export default function AdminShippingTab() {
   const runWrite = useAdminWrite()
@@ -28,6 +28,7 @@ export default function AdminShippingTab() {
         fee: Number(shippingForm.fee) || 0,
         estimated_days: shippingForm.estimated_days || null,
         is_variable: shippingForm.is_variable,
+        variable_note: shippingForm.is_variable ? (shippingForm.variable_note || null) : null,
         active: true,
       }),
       'Adding shipping zone'
@@ -73,9 +74,18 @@ export default function AdminShippingTab() {
             className="mt-1 accent-gold"
           />
           <span className="font-sans text-xs text-espresso/70 dark:text-cream/70">
-            Fee varies (e.g. road dispatch or flights where the rider/courier only quotes a price at the time). Customers can still pay by card for the order itself — you'll arrange the exact delivery cost with them directly via WhatsApp or bank transfer.
+            Fee varies (e.g. road dispatch or flights where the rider/courier only quotes a price at the time). Customers can still pay by card for the order itself. You'll arrange the exact delivery cost with them directly via WhatsApp or bank transfer.
           </span>
         </label>
+        {shippingForm.is_variable && (
+          <input
+            type="text"
+            placeholder="Why it varies, shown to the customer (e.g. Priced per kg, confirmed once we know the weight)"
+            value={shippingForm.variable_note}
+            onChange={(e) => setShippingForm({ ...shippingForm, variable_note: e.target.value })}
+            className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold -mt-2 mb-4"
+          />
+        )}
         <button onClick={addShippingZone} className="bg-gold text-espresso font-sans font-medium px-6 py-3 rounded-full hover:bg-gold-light transition-colors">Add Zone</button>
       </div>
       <div>
@@ -89,6 +99,7 @@ export default function AdminShippingTab() {
                   {z.is_variable ? (z.fee > 0 ? `From ${formatPrice(z.fee)} · confirmed via WhatsApp` : 'Confirmed via WhatsApp') : formatPrice(z.fee)}
                 </span>
                 {z.estimated_days && <span className="font-sans text-xs text-espresso/50 dark:text-cream/50 ml-2">{z.estimated_days}</span>}
+                {z.variable_note && <span className="font-sans text-xs text-espresso/40 dark:text-cream/40 block mt-1">{z.variable_note}</span>}
               </div>
               <button onClick={() => toggleShippingZone(z.id, z.active)} className={`text-xs font-sans px-3 py-1 rounded-full ${z.active ? 'bg-green-500/10 text-green-500' : 'bg-gold/10 text-espresso/50 dark:text-cream/50'}`}>
                 {z.active ? 'Active' : 'Disabled'}

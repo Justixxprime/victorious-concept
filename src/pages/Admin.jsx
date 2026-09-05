@@ -6,7 +6,7 @@ import { useCollections } from '../hooks/useCollections'
 import { supabase } from '../lib/supabaseClient'
 import {
   Tags, LayoutDashboard, BarChart3, Percent, Users, Mail,
-  Quote, Layers, Package, Truck, RotateCcw, Settings,
+  Quote, Layers, Package, Truck, RotateCcw, Settings, Star,
 } from 'lucide-react'
 import AdminProductsTab from './admin/AdminProductsTab'
 import AdminOrdersTab from './admin/AdminOrdersTab'
@@ -18,6 +18,7 @@ import AdminShippingTab from './admin/AdminShippingTab'
 import AdminReturnsTab from './admin/AdminReturnsTab'
 import AdminMessagesTab from './admin/AdminMessagesTab'
 import AdminTestimonialsTab from './admin/AdminTestimonialsTab'
+import AdminReviewsTab from './admin/AdminReviewsTab'
 import AdminContentTab from './admin/AdminContentTab'
 import AdminBusinessTab from './admin/AdminBusinessTab'
 import AdminAnalyticsTab from './admin/AdminAnalyticsTab'
@@ -83,6 +84,7 @@ function Admin() {
     { id: 'returns', label: `Returns${returns.filter((r) => r.status === 'requested').length > 0 ? ` (${returns.filter((r) => r.status === 'requested').length})` : ''}`, icon: RotateCcw },
     { id: 'messages', label: `Messages${messages.filter((m) => !m.read).length > 0 ? ` (${messages.filter((m) => !m.read).length})` : ''}`, icon: Mail },
     { id: 'testimonials', label: 'Testimonials', icon: Quote },
+    { id: 'reviews', label: 'Reviews', icon: Star },
     { id: 'content', label: 'Homepage', icon: LayoutDashboard },
     { id: 'business', label: 'Business Info', icon: Settings },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
@@ -126,6 +128,7 @@ function Admin() {
         {tab === 'returns' && <AdminReturnsTab returns={returns} setReturns={setReturns} />}
         {tab === 'messages' && <AdminMessagesTab messages={messages} setMessages={setMessages} />}
         {tab === 'testimonials' && <AdminTestimonialsTab />}
+        {tab === 'reviews' && <AdminReviewsTab />}
         {tab === 'content' && <AdminContentTab products={products} />}
         {tab === 'business' && <AdminBusinessTab />}
         {tab === 'analytics' && <AdminAnalyticsTab products={products} orders={orders} />}

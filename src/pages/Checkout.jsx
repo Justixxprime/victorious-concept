@@ -408,7 +408,8 @@ function Checkout() {
             </div>
             {selectedZone.is_variable && (
               <p className="font-sans text-xs text-gold">
-                Delivery for this option is arranged directly with you on WhatsApp once we have a rider/courier quote. You can still pay for your order by card now.
+                {selectedZone.variable_note ||
+                  "Delivery for this option is arranged directly with you on WhatsApp once we have a rider/courier quote. You can still pay for your order by card now."}
               </p>
             )}
             <p className="font-sans text-xs text-espresso/40 dark:text-cream/40">
