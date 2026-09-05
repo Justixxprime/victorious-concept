@@ -66,7 +66,7 @@ function Shop() {
       <PageHero
         label="Shop All"
         title="Every Piece, One Place"
-        subtitle="Bags, shoes, clothing, perfumes, slippers and accessories — filtered your way."
+        subtitle="Bags, shoes, clothing, perfumes, slippers and accessories, filtered your way."
         image={siteImages.shopBanner}
         compact
       />

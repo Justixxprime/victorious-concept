@@ -10,7 +10,7 @@ export async function sendAbandonmentReminderEmail({ email, orderNumber, total }
   const html = `
     <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; color: #3a2318;">
       <h1 style="font-style: italic; color: #3a2318;">Still want this?</h1>
-      <p>You started an order with us but haven't completed payment yet — it's still
+      <p>You started an order with us but haven't completed payment yet. It's still
       waiting for you, nothing's been cancelled.</p>
       <p style="color: #888; font-size: 14px;">Order Number: <strong>${orderNumber}</strong></p>
       <p style="font-size: 18px; font-weight: bold;">Total: ₦${total.toLocaleString()}</p>

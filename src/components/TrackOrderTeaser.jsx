@@ -19,7 +19,7 @@ function TrackOrderTeaser() {
           Already ordered?
         </h2>
         <p className="font-sans text-sm md:text-base text-espresso/70 dark:text-cream/70 max-w-md">
-          Drop in your order number and phone number to see exactly where things stand —
+          Drop in your order number and phone number to see exactly where things stand,
           no account needed.
         </p>
         <Link

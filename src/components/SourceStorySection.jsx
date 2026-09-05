@@ -8,12 +8,12 @@ const steps = [
   {
     icon: MessageCircle,
     label: 'You tell us',
-    text: 'A screenshot, a description, a "find me something like this" — however you want to say it.',
+    text: 'A screenshot, a description, a "find me something like this", however you want to say it.',
   },
   {
     icon: MapPin,
     label: 'We go source it',
-    text: 'Lagos Island, Trade Fair, wherever it takes — the same market runs this business was built on.',
+    text: 'Lagos Island, Trade Fair, wherever it takes. The same market this business was built on.',
   },
   {
     icon: Package,
@@ -34,7 +34,7 @@ function SourceStorySection() {
             Can't find exactly what you want?
           </h2>
           <p className="font-sans text-sm md:text-base text-cream/70 leading-relaxed max-w-lg">
-            This is literally how Victorious Concept started — a friend on campus needed a bag
+            This is literally how Victorious Concept started. A friend on campus needed a bag
             for an event, had no time to travel home to source it herself, and Victoria said yes.
             She grew up in Lagos, around the market, the real one, Lagos Island and Trade Fair,
             loud and chaotic and full of treasure if you know where to look. That one favor became

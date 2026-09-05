@@ -49,7 +49,7 @@ function AdminVariantManager({ productId, basePrice }) {
         Variants {variants.length > 0 && `(${variants.length})`}
       </p>
       <p className="font-sans text-xs text-espresso/40 dark:text-cream/40 mb-3">
-        Optional — only add these if this product comes in specific sizes/colors that need their own stock count. Otherwise the product's main stock field above is all that's needed.
+        Optional. Only add these if this product comes in specific sizes/colors that need their own stock count. Otherwise the product's main stock field above is all that's needed.
       </p>
 
       {loading ? (
@@ -70,7 +70,7 @@ function AdminVariantManager({ productId, basePrice }) {
             </div>
           ))}
           {variants.length === 0 && (
-            <p className="font-sans text-xs text-espresso/40 dark:text-cream/40">No variants yet — using the product's main stock field.</p>
+            <p className="font-sans text-xs text-espresso/40 dark:text-cream/40">No variants yet. Using the product's main stock field.</p>
           )}
         </div>
       )}

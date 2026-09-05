@@ -133,7 +133,7 @@ function Checkout() {
     if (attempt >= 15) {
       setConfirming(false)
       setErrorMessage(
-        "We're still confirming your payment. If it was successful, you'll see it in your order history shortly — no need to pay again."
+        "We're still confirming your payment. If it was successful, you'll see it in your order history shortly. No need to pay again."
       )
       return
     }
@@ -177,7 +177,7 @@ function Checkout() {
       `Address: ${form.address}`,
       ``,
       `Items:`,
-      ...data.items.map((i) => `${i.name} x${i.quantity} — ${formatPrice(i.price * i.quantity)}`),
+      ...data.items.map((i) => `${i.name} x${i.quantity}: ${formatPrice(i.price * i.quantity)}`),
       ``,
       `Delivery (${data.shippingZone}): ${data.shippingIsVariable ? 'To be confirmed' : formatPrice(data.shippingFee)}`,
       `Total: ${formatPrice(data.total)}`,
@@ -385,7 +385,7 @@ function Checkout() {
           ))}
           {shippingZones.length === 0 && (
             <p className="font-sans text-xs text-espresso/50 dark:text-cream/50">
-              Delivery locations aren't set up yet — please check back shortly.
+              Delivery locations aren't set up yet. Please check back shortly.
             </p>
           )}
         </div>
@@ -408,7 +408,7 @@ function Checkout() {
             </div>
             {selectedZone.is_variable && (
               <p className="font-sans text-xs text-gold">
-                Delivery for this option is arranged directly with you on WhatsApp once we have a rider/courier quote — you can still pay for your order by card now.
+                Delivery for this option is arranged directly with you on WhatsApp once we have a rider/courier quote. You can still pay for your order by card now.
               </p>
             )}
             <p className="font-sans text-xs text-espresso/40 dark:text-cream/40">
@@ -486,7 +486,7 @@ function Checkout() {
             ) : (
               <div className="bg-gold/5 rounded-2xl p-5">
                 <p className="font-sans text-sm text-espresso/70 dark:text-cream/70">
-                  Bank transfer details aren't set up yet — please choose WhatsApp instead and we'll sort payment directly.
+                  Bank transfer details aren't set up yet. Please choose WhatsApp instead and we'll sort payment directly.
                 </p>
               </div>
             )}

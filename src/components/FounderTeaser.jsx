@@ -13,7 +13,7 @@ function FounderTeaser() {
         </h2>
         <p className="font-sans text-sm md:text-base text-espresso/70 dark:text-cream/70 max-w-xl">
           Obioma Victoria Sopuruchi built this while finishing her degree at Federal University
-          Otuoke, Bayelsa State — proof that what you studied and what you build don't have to be
+          Otuoke, Bayelsa State, proof that what you studied and what you build don't have to be
           the same thing.
         </p>
         <Link

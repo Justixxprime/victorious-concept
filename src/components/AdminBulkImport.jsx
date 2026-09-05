@@ -38,7 +38,7 @@ function AdminBulkImport({ categories, onImported }) {
     if (row.price && isNaN(Number(row.price))) errors.push('Price must be a number')
     if (row.stock && isNaN(Number(row.stock))) errors.push('Stock must be a number')
     if (row.category && categories.length > 0 && !categories.some((c) => c.name.toLowerCase() === row.category.toLowerCase())) {
-      errors.push(`Unknown category "${row.category}" — check spelling or add it in the Categories tab first`)
+      errors.push(`Unknown category "${row.category}" (check spelling or add it in the Categories tab first)`)
     }
 
     return { index, data: row, errors, valid: errors.length === 0 }

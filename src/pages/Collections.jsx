@@ -14,7 +14,7 @@ function Collections() {
       <PageHero
         label="Curated"
         title="Collections"
-        subtitle="Pieces grouped with intention, not just category — for moments, moods, and moves."
+        subtitle="Pieces grouped with intention, not just category. For moments, moods, and moves."
         image={siteImages.lookbookHero}
         compact
       />

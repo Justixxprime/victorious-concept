@@ -36,7 +36,7 @@ function Contact() {
 
   return (
     <>
-      <SEO title="Contact" description="Get in touch with Victorious Concept — WhatsApp, email, or send us a message directly." />
+      <SEO title="Contact" description="Get in touch with Victorious Concept: WhatsApp, email, or send us a message directly." />
 
       {/* CINEMATIC HERO */}
       <section className="relative bg-espresso text-cream overflow-hidden">
@@ -72,7 +72,7 @@ function Contact() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="font-sans text-cream/70 max-w-lg text-base md:text-lg"
           >
-            Questions about an order, styling advice, or a custom sourcing request — reach us
+            Questions about an order, styling advice, or a custom sourcing request. Reach us
             however's easiest for you.
           </motion.p>
         </div>
@@ -101,7 +101,7 @@ function Contact() {
               </div>
               <div className="flex-1">
                 <p className="font-sans text-sm text-espresso dark:text-cream font-medium">WhatsApp</p>
-                <p className="font-sans text-xs text-espresso/60 dark:text-cream/60">+234 812 247 0435 — fastest reply</p>
+                <p className="font-sans text-xs text-espresso/60 dark:text-cream/60">+234 812 247 0435 (fastest reply)</p>
               </div>
               <ArrowRight className="w-4 h-4 text-gold opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
             </motion.a>

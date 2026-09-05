@@ -67,7 +67,7 @@ function Cart() {
           >
             <UserCircle2 className="w-5 h-5 text-gold flex-shrink-0" />
             <span className="font-sans text-xs text-espresso/70 dark:text-cream/70">
-              You're browsing as a guest — this cart only lives on this device. Sign in to keep it
+              You're browsing as a guest. This cart only lives on this device. Sign in to keep it
               synced everywhere, save addresses, and see your full order history.
             </span>
           </Link>
