@@ -1,6 +1,5 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, lazy, Suspense } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { usePaystackPayment } from 'react-paystack'
 import { motion } from 'framer-motion'
 import SEO from '../components/SEO'
 import { useCart } from '../context/CartContext'
@@ -11,6 +10,7 @@ import { formatPrice } from '../utils/formatPrice'
 import { siteImages } from '../data/siteImages'
 import { useBusinessSettings } from '../context/BusinessSettingsContext'
 import Receipt from '../components/Receipt'
+const PaystackCheckoutTrigger = lazy(() => import('../components/PaystackCheckoutTrigger'))
 import { Printer, CreditCard, Landmark, MessageCircle, Copy, Check, PartyPopper, Loader2 } from 'lucide-react'
 
 function Checkout() {
@@ -47,14 +47,6 @@ function Checkout() {
   }, [])
 
   const selectedZone = shippingZones.find((z) => z.id === shippingZoneId)
-
-  const paystackConfig = {
-    reference: pendingOrder?.orderNumber || '',
-    email: user?.email || guestEmail,
-    amount: pendingOrder ? Math.round(pendingOrder.total * 100) : 0,
-    publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
-  }
-  const initializePayment = usePaystackPayment(paystackConfig)
 
   function update(field, value) {
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -141,20 +133,7 @@ function Checkout() {
     setTimeout(() => pollForPaymentConfirmation(orderNumber, attempt + 1), 2000)
   }
 
-  useEffect(() => {
-    if (pendingOrder) {
-      initializePayment({
-        onSuccess: () => {
-          setConfirming(true)
-          pollForPaymentConfirmation(pendingOrder.orderNumber)
-        },
-        onClose: () => {
-          setPendingOrder(null)
-        },
-      })
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pendingOrder])
+
 
   async function handleBankTransferConfirm() {
     const data = await createOrderOnServer('bank_transfer')
@@ -521,6 +500,22 @@ function Checkout() {
           </div>
         )}
       </div>
+
+      {pendingOrder && (
+        <Suspense fallback={null}>
+          <PaystackCheckoutTrigger
+            reference={pendingOrder.orderNumber}
+            email={user?.email || guestEmail}
+            amount={Math.round(pendingOrder.total * 100)}
+            publicKey={import.meta.env.VITE_PAYSTACK_PUBLIC_KEY}
+            onSuccess={() => {
+              setConfirming(true)
+              pollForPaymentConfirmation(pendingOrder.orderNumber)
+            }}
+            onClose={() => setPendingOrder(null)}
+          />
+        </Suspense>
+      )}
     </section>
   )
 }
