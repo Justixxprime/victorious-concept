@@ -24,7 +24,7 @@ function TrackOrderTeaser() {
         </p>
         <Link
           to="/track-order"
-          className="mt-2 flex items-center gap-2 border border-gold text-espresso dark:text-cream font-sans font-medium px-8 py-3 rounded-full hover:bg-gold hover:text-espresso transition-colors"
+          className="mt-2 flex items-center gap-2 border border-gold text-espresso dark:text-cream font-sans font-medium px-8 py-4 rounded-full hover:bg-gold hover:text-espresso transition-colors"
         >
           Track My Order <ArrowRight className="w-4 h-4" />
         </Link>

@@ -65,7 +65,7 @@ function SourceStorySection() {
           <div className="flex flex-wrap items-center gap-4 mt-2">
             <Link
               to="/source"
-              className="flex items-center gap-2 bg-gold text-espresso font-sans font-medium px-8 py-3 rounded-full hover:bg-gold-light transition-colors"
+              className="flex items-center gap-2 bg-gold text-espresso font-sans font-medium px-8 py-4 rounded-full hover:bg-gold-light transition-colors"
             >
               Source It For Me <ArrowRight className="w-4 h-4" />
             </Link>

@@ -18,7 +18,7 @@ function Wishlist() {
         </p>
         <Link
           to="/shop"
-          className="mt-4 bg-gold text-espresso font-sans font-medium px-8 py-3 rounded-full hover:bg-gold-light transition-colors"
+          className="mt-4 bg-gold text-espresso font-sans font-medium px-8 py-4 rounded-full hover:bg-gold-light transition-colors"
         >
           Start Shopping
         </Link>

@@ -168,7 +168,7 @@ function Contact() {
                   disabled={status === 'loading'}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="bg-gold text-espresso font-sans font-medium px-8 py-3 rounded-full hover:bg-gold-light transition-colors self-start disabled:opacity-40"
+                  className="bg-gold text-espresso font-sans font-medium px-8 py-4 rounded-full hover:bg-gold-light transition-colors self-start disabled:opacity-40"
                 >
                   {status === 'loading' ? 'Sending...' : 'Send Message'}
                 </motion.button>

@@ -35,7 +35,7 @@ export default function AdminCategoriesTab({ categories, refetchCategories }) {
       <div className="flex gap-2 mb-8">
         <input type="text" placeholder="New category name" value={newCategoryName} onChange={(e) => setNewCategoryName(e.target.value)}
           className="flex-1 bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold" />
-        <button onClick={addCategory} className="flex items-center gap-2 bg-gold text-espresso font-sans font-medium px-5 rounded-full hover:bg-gold-light transition-colors">
+        <button onClick={addCategory} className="flex items-center gap-2 bg-gold text-espresso font-sans font-medium px-5 py-3 rounded-full hover:bg-gold-light transition-colors">
           <Plus className="w-4 h-4" /> Add
         </button>
       </div>

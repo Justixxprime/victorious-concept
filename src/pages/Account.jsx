@@ -132,7 +132,7 @@ function Account() {
                 disabled={submitting}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="bg-gold text-espresso font-sans font-medium px-8 py-3.5 rounded-full hover:bg-gold-light transition-colors mt-2 disabled:opacity-40"
+                className="bg-gold text-espresso font-sans font-medium px-8 py-4 rounded-full hover:bg-gold-light transition-colors mt-2 disabled:opacity-40"
               >
                 {submitting ? 'One moment...' : mode === 'signin' ? 'Sign In' : 'Create Account'}
               </motion.button>
@@ -356,7 +356,7 @@ function LoggedInAccount({ user, signOut }) {
         <motion.button
           {...fadeUp(0.2)}
           onClick={signOut}
-          className="w-full border border-gold/30 text-espresso dark:text-cream font-sans font-medium px-8 py-3 rounded-full hover:border-gold transition-colors mb-10"
+          className="w-full border border-gold/30 text-espresso dark:text-cream font-sans font-medium px-8 py-4 rounded-full hover:border-gold transition-colors mb-10"
         >
           Sign Out
         </motion.button>

@@ -46,13 +46,13 @@ function NotFound() {
       >
         <Link
           to="/"
-          className="flex items-center justify-center gap-2 bg-gold text-espresso font-sans font-medium px-8 py-3 rounded-full hover:bg-gold-light transition-colors"
+          className="flex items-center justify-center gap-2 bg-gold text-espresso font-sans font-medium px-8 py-4 rounded-full hover:bg-gold-light transition-colors"
         >
           Back to Home <ArrowRight className="w-4 h-4" />
         </Link>
         <Link
           to="/shop"
-          className="flex items-center justify-center gap-2 border border-gold/30 text-espresso dark:text-cream font-sans font-medium px-8 py-3 rounded-full hover:border-gold transition-colors"
+          className="flex items-center justify-center gap-2 border border-gold/30 text-espresso dark:text-cream font-sans font-medium px-8 py-4 rounded-full hover:border-gold transition-colors"
         >
           <ShoppingBag className="w-4 h-4" /> Shop Products
         </Link>

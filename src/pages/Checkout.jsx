@@ -207,7 +207,7 @@ function Checkout() {
         </h1>
         <button
           onClick={() => navigate('/shop')}
-          className="mt-4 bg-gold text-espresso font-sans font-medium px-8 py-3 rounded-full hover:bg-gold-light transition-colors"
+          className="mt-4 bg-gold text-espresso font-sans font-medium px-8 py-4 rounded-full hover:bg-gold-light transition-colors"
         >
           Start Shopping
         </button>
@@ -292,7 +292,7 @@ function Checkout() {
         <div className="print:hidden relative max-w-md mx-auto flex justify-center mt-6">
           <button
             onClick={handlePrint}
-            className="flex items-center gap-2 bg-gold text-espresso font-sans font-medium px-8 py-3 rounded-full hover:bg-gold-light transition-colors"
+            className="flex items-center gap-2 bg-gold text-espresso font-sans font-medium px-8 py-4 rounded-full hover:bg-gold-light transition-colors"
           >
             <Printer className="w-4 h-4" /> Print Receipt
           </button>

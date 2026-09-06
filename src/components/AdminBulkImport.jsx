@@ -126,7 +126,7 @@ function AdminBulkImport({ categories, onImported }) {
           <button
             onClick={handleImport}
             disabled={validCount === 0 || importing}
-            className="bg-gold text-espresso font-sans text-sm font-medium px-6 py-2.5 rounded-full hover:bg-gold-light transition-colors disabled:opacity-40"
+            className="bg-gold text-espresso font-sans text-sm font-medium px-6 py-3 rounded-full hover:bg-gold-light transition-colors disabled:opacity-40"
           >
             {importing ? 'Importing...' : `Import ${validCount} Product${validCount === 1 ? '' : 's'}`}
           </button>
