@@ -29,7 +29,7 @@ function ShopTheLook({ products, backdropImage }) {
               <Link
                 key={product.id}
                 to={`/product/${product.id}`}
-                className="group flex items-center gap-4 bg-gold/5 hover:bg-gold/10 rounded-2xl p-4 transition-colors"
+                className="group flex items-center gap-4 bg-gold/5 hover:bg-gold/10 rounded-xl p-4 transition-colors"
               >
                 <motion.div
                   whileHover={{ scale: 1.05 }}

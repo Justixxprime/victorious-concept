@@ -49,7 +49,7 @@ export default function AdminCategoriesTab({ categories, refetchCategories }) {
             </div>
             <textarea placeholder="Short introduction (optional)" rows={2} defaultValue={cat.description || ''}
               onBlur={(e) => saveCategoryDescription(cat.id, e.target.value)}
-              className="w-full bg-transparent border border-gold/20 rounded-lg px-3 py-2 font-sans text-xs text-espresso dark:text-cream outline-none focus:border-gold resize-none" />
+              className="w-full bg-transparent border border-gold/30 rounded-xl px-3 py-2 font-sans text-xs text-espresso dark:text-cream outline-none focus:border-gold resize-none" />
           </div>
         ))}
       </div>
