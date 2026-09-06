@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext'
 import { useProducts } from '../hooks/useProducts'
 import { formatPrice } from '../utils/formatPrice'
 import ProductCard from '../components/ProductCard'
+import Button from '../components/Button'
 
 function Cart() {
   const navigate = useNavigate()
@@ -45,7 +46,7 @@ function Cart() {
         </p>
         <Link
           to="/shop"
-          className="mt-4 bg-gold text-espresso font-sans font-medium px-8 py-3 rounded-full hover:bg-gold-light transition-colors"
+          className="mt-4 bg-gold text-espresso font-sans font-medium px-8 py-4 rounded-full hover:bg-gold-light transition-colors"
         >
           Start Shopping
         </Link>
@@ -193,12 +194,13 @@ function Cart() {
           </div>
         </div>
 
-        <button
+        <Button
           onClick={() => navigate('/checkout')}
-          className="w-full mt-6 bg-gold text-espresso font-sans font-medium px-8 py-4 rounded-full hover:bg-gold-light transition-colors"
+          size="large"
+          className="w-full mt-6"
         >
           Checkout
-        </button>
+        </Button>
 
         {suggestions.length > 0 && (
           <div className="mt-16 pt-10 border-t border-gold/20">

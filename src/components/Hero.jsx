@@ -103,7 +103,7 @@ function Hero() {
           <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
             <Link
               to="/shop"
-              className="bg-gold text-espresso font-sans font-medium px-8 py-3 rounded-full flex items-center gap-2 hover:bg-gold-light transition-colors"
+              className="bg-gold text-espresso font-sans font-medium px-8 py-4 rounded-full flex items-center gap-2 hover:bg-gold-light transition-colors"
             >
               Shop Now <ArrowRight className="w-4 h-4" />
             </Link>
@@ -111,7 +111,7 @@ function Hero() {
           <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
             <Link
               to="/lookbook"
-              className="border border-cream/40 text-cream font-sans font-medium px-8 py-3 rounded-full hover:border-cream transition-colors block"
+              className="border border-cream/40 text-cream font-sans font-medium px-8 py-4 rounded-full hover:border-cream transition-colors block"
             >
               Explore
             </Link>

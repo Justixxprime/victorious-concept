@@ -10,6 +10,7 @@ import { useWishlist } from '../context/WishlistContext'
 import { useRecentlyViewed } from '../hooks/useRecentlyViewed'
 import { useFlyToCart } from '../context/FlyToCartContext'
 import SEO from '../components/SEO'
+import Button from '../components/Button'
 import ProductGallery from '../components/ProductGallery'
 import Breadcrumbs from '../components/Breadcrumbs'
 import ProductCard from '../components/ProductCard'
@@ -238,17 +239,18 @@ function ProductPage() {
           )}
 
           <div className="flex gap-3">
-            <button
+            <Button
               onClick={handleAddToCart}
+              size="large"
               disabled={
                 hasVariants
                   ? !selectedVariant || outOfStock
                   : outOfStock || (product.sizes && product.sizes.length > 0 && !selectedSize)
               }
-              className="flex-1 bg-gold text-espresso font-sans font-medium px-8 py-4 rounded-full flex items-center justify-center gap-2 hover:bg-gold-light transition-colors disabled:opacity-40"
+              className="flex-1"
             >
               <ShoppingBag className="w-4 h-4" /> {isPreorder ? 'Preorder' : outOfStock ? 'Out of Stock' : 'Add to Cart'}
-            </button>
+            </Button>
             <button
               onClick={handleWishlist}
               className="w-14 h-14 rounded-full border border-gold/30 flex items-center justify-center hover:border-gold transition-colors"
