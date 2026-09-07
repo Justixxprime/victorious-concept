@@ -4,6 +4,7 @@ import { useProducts } from '../hooks/useProducts'
 import { useCategories } from '../hooks/useCategories'
 import { useCollections } from '../hooks/useCollections'
 import { supabase } from '../lib/supabaseClient'
+import SEO from '../components/SEO'
 import {
   Tags, LayoutDashboard, BarChart3, Percent, Users, Mail,
   Quote, Layers, Package, Truck, RotateCcw, Settings, Star,
@@ -66,6 +67,7 @@ function Admin() {
   if (!isAdmin) {
     return (
       <div className="min-h-screen bg-cream dark:bg-espresso flex flex-col items-center justify-center gap-4 px-6 text-center">
+        <SEO title="Admin" noindex />
         <h1 className="font-display italic text-3xl text-espresso dark:text-cream">
           This page is for the Victorious Concept team only
         </h1>
@@ -92,6 +94,7 @@ function Admin() {
 
   return (
     <section className="bg-cream dark:bg-espresso transition-colors min-h-screen py-12 px-6">
+      <SEO title="Admin" noindex />
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>

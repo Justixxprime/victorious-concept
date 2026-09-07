@@ -2,10 +2,12 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ArrowRight, ShoppingBag } from 'lucide-react'
 import AnimatedLogo from '../components/AnimatedLogo'
+import SEO from '../components/SEO'
 
 function NotFound() {
   return (
     <div className="min-h-screen bg-cream dark:bg-espresso flex flex-col items-center justify-center gap-6 px-6 text-center py-20">
+      <SEO title="Page Not Found" noindex />
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}

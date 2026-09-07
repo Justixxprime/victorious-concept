@@ -20,19 +20,22 @@ const STATIC_PAGES = [
   'faq',
   'delivery',
   'returns',
+  'collections',
 ]
 
-const CATEGORIES = ['bags', 'shoes', 'clothing', 'perfumes', 'slippers', 'accessories']
-
 export default async function handler(req, res) {
-  const { data: products } = await supabase
-    .from('products')
-    .select('id, created_at, status')
-    .neq('status', 'hidden')
+  const [{ data: products }, { data: categories }, { data: collections }] = await Promise.all([
+    supabase.from('products').select('id, created_at, status').neq('status', 'hidden'),
+    // Fetched live rather than hardcoded, so a category added via Admin
+    // shows up here automatically, without needing a code change.
+    supabase.from('categories').select('id'),
+    supabase.from('collections').select('slug'),
+  ])
 
   const urls = [
     ...STATIC_PAGES.map((path) => `${SITE_URL}/${path}`),
-    ...CATEGORIES.map((cat) => `${SITE_URL}/category/${cat}`),
+    ...(categories || []).map((c) => `${SITE_URL}/category/${c.id}`),
+    ...(collections || []).map((c) => `${SITE_URL}/collection/${c.slug}`),
     ...(products || []).map((p) => ({
       loc: `${SITE_URL}/product/${p.id}`,
       lastmod: p.created_at,

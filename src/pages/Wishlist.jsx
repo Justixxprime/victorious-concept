@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useWishlist } from '../context/WishlistContext'
 import ProductCard from '../components/ProductCard'
+import SEO from '../components/SEO'
 import { Heart } from 'lucide-react'
 
 function Wishlist() {
@@ -9,6 +10,7 @@ function Wishlist() {
   if (items.length === 0) {
     return (
       <div className="min-h-screen bg-cream dark:bg-espresso flex flex-col items-center justify-center gap-4 px-6 text-center">
+        <SEO title="Your Wishlist" noindex />
         <Heart className="w-10 h-10 text-gold" />
         <h1 className="font-display italic text-3xl text-espresso dark:text-cream">
           Your wishlist is empty
@@ -28,6 +30,7 @@ function Wishlist() {
 
   return (
     <section className="bg-cream dark:bg-espresso transition-colors py-12 px-6 min-h-screen">
+      <SEO title="Your Wishlist" noindex />
       <div className="max-w-7xl mx-auto">
         <h1 className="font-display italic font-semibold text-3xl md:text-4xl text-espresso dark:text-cream mb-10">
           Your Wishlist

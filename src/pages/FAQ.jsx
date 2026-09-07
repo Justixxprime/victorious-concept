@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ChevronDown, ShoppingBag, CreditCard, Truck, RefreshCw, ShieldCheck } from 'lucide-react'
 import PageHero from '../components/PageHero'
+import SEO from '../components/SEO'
 import { siteImages } from '../data/siteImages'
 
 const faqs = [
@@ -36,6 +37,10 @@ function FAQ() {
 
   return (
     <>
+      <SEO
+        title="FAQ"
+        description="Answers to common questions about ordering, payment, delivery, and returns at Victorious Concept."
+      />
       <PageHero
         label="Support"
         title="Questions, Answered"

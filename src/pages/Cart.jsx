@@ -7,6 +7,7 @@ import { useProducts } from '../hooks/useProducts'
 import { formatPrice } from '../utils/formatPrice'
 import ProductCard from '../components/ProductCard'
 import Button from '../components/Button'
+import SEO from '../components/SEO'
 
 function Cart() {
   const navigate = useNavigate()
@@ -37,6 +38,7 @@ function Cart() {
   if (items.length === 0) {
     return (
       <div className="min-h-screen bg-cream dark:bg-espresso flex flex-col items-center justify-center gap-4 px-6 text-center">
+        <SEO title="Your Cart" noindex />
         <ShoppingBag className="w-10 h-10 text-gold" />
         <h1 className="font-display italic text-3xl text-espresso dark:text-cream">
           Your cart is empty
@@ -56,6 +58,7 @@ function Cart() {
 
   return (
     <section className="bg-cream dark:bg-espresso transition-colors py-12 px-6 min-h-screen">
+      <SEO title="Your Cart" noindex />
       <div className="max-w-4xl mx-auto">
         <h1 className="font-display italic font-semibold text-3xl md:text-4xl text-espresso dark:text-cream mb-6">
           Your Cart

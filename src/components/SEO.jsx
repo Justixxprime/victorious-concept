@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async'
 
-function SEO({ title, description, image, url, jsonLd }) {
+function SEO({ title, description, image, url, jsonLd, noindex = false }) {
   const fullTitle = title
     ? `${title} | Victorious Concept`
     : 'Victorious Concept'
@@ -11,6 +11,7 @@ function SEO({ title, description, image, url, jsonLd }) {
     <Helmet>
       <title>{fullTitle}</title>
       <meta name="description" content={desc} />
+      {noindex && <meta name="robots" content="noindex, nofollow" />}
       {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
 
       <meta property="og:title" content={fullTitle} />

@@ -4,6 +4,7 @@ import { useCategories } from '../hooks/useCategories'
 import ProductCard from '../components/ProductCard'
 import RevealImage from '../components/RevealImage'
 import Breadcrumbs from '../components/Breadcrumbs'
+import SEO from '../components/SEO'
 import { categoryImages, siteImages } from '../data/siteImages'
 import { ShoppingBag, Footprints, Shirt, Droplet, Gem, Tag } from 'lucide-react'
 
@@ -28,6 +29,14 @@ function CategoryPage() {
 
   return (
     <section className="bg-cream dark:bg-espresso transition-colors py-12 px-6 min-h-screen">
+      <SEO
+        title={category ? category.name : 'Category'}
+        description={
+          category?.description ||
+          `Shop ${category ? category.name.toLowerCase() : 'this category'} at Victorious Concept, sourced with intention.`
+        }
+        image={categoryImages[categoryId]}
+      />
       <div className="max-w-7xl mx-auto">
         <Breadcrumbs items={[
           { label: 'Home', to: '/' },
