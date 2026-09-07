@@ -41,7 +41,7 @@ function ShopTheLook({ products, backdropImage }) {
                   <p className="font-sans text-sm text-espresso dark:text-cream group-hover:text-gold transition-colors">
                     {product.name}
                   </p>
-                  <p className="font-sans text-xs text-gold mt-0.5">{formatPrice(product.price)}</p>
+                  <p className="font-sans text-xs text-gold-deep dark:text-gold mt-0.5">{formatPrice(product.price)}</p>
                 </div>
               </Link>
             ))}

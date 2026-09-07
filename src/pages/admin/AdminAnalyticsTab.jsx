@@ -135,7 +135,7 @@ export default function AdminAnalyticsTab({ products, orders }) {
                 <span className="font-display italic text-gold text-sm w-5">{i + 1}</span>
                 <span className="flex-1 font-sans text-sm text-espresso dark:text-cream">{p.name}</span>
                 <span className="font-sans text-xs text-espresso/50 dark:text-cream/50">{p.quantity} sold</span>
-                <span className="font-sans text-sm text-gold">{formatPrice(p.revenue)}</span>
+                <span className="font-sans text-sm text-gold-deep dark:text-gold">{formatPrice(p.revenue)}</span>
               </div>
             ))}
           </div>

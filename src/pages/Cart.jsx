@@ -108,7 +108,7 @@ function Cart() {
                     </span>
                   )}
                 </h3>
-                <p className="font-sans text-sm text-gold mt-1">
+                <p className="font-sans text-sm text-gold-deep dark:text-gold mt-1">
                   {formatPrice(item.price)}
                 </p>
               </div>

@@ -6,6 +6,15 @@
   --color-espresso: #3a2318;
   --color-gold: #c58b52;
   --color-gold-light: #e8c490;
+  /* Same gold family, darkened specifically to pass WCAG AA (4.5:1) as
+     small text on the cream background — the original --color-gold only
+     hits 2.65:1 there, a real contrast failure for anyone reading things
+     like prices in light mode. Only meant for small text usage; buttons,
+     borders, and icons keep using --color-gold as before, since those
+     have different (already-passing) contrast requirements. Not needed
+     in dark mode — gold text on the espresso background already passes
+     at 5.01:1, so usages should pair this with `dark:text-gold`. */
+  --color-gold-deep: #896139;
   --font-display: "Fraunces", serif;
   --font-sans: "Outfit", sans-serif;
 }

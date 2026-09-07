@@ -53,7 +53,7 @@ export default function AdminReturnsTab({ returns, setReturns }) {
             <span className={`font-sans text-xs px-3 py-1 rounded-full capitalize ${
               r.status === 'refunded' ? 'bg-purple-500/10 text-purple-500' :
               r.status === 'rejected' ? 'bg-red-500/10 text-red-500' :
-              'bg-gold/20 text-gold'
+              'bg-gold/20 text-gold-deep dark:text-gold'
             }`}>
               {r.status}
             </span>

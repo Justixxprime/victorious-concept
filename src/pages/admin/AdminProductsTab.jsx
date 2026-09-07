@@ -232,7 +232,7 @@ export default function AdminProductsTab({ products, loading, categories }) {
                 <img src={product.image} alt={product.name} className="w-14 h-14 rounded-lg object-cover flex-shrink-0" />
                 <div className="flex-1">
                   <p className="font-sans text-sm text-espresso dark:text-cream">{product.name}</p>
-                  <p className="font-sans text-xs text-gold">{formatPrice(product.price)} · {product.category} · {product.status}</p>
+                  <p className="font-sans text-xs text-gold-deep dark:text-gold">{formatPrice(product.price)} · {product.category} · {product.status}</p>
                 </div>
                 <button
                   onClick={() => setExpandedVariants(expandedVariants === product.id ? null : product.id)}

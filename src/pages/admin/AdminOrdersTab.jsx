@@ -6,7 +6,7 @@ import { Trash2, Undo2 } from 'lucide-react'
 
 const paymentBadgeStyles = {
   paid: 'bg-green-500/10 text-green-600',
-  pending: 'bg-gold/20 text-gold',
+  pending: 'bg-gold/20 text-gold-deep dark:text-gold',
   unpaid: 'bg-espresso/10 text-espresso/60 dark:bg-cream/10 dark:text-cream/60',
   failed: 'bg-red-500/10 text-red-500',
   refunded: 'bg-purple-500/10 text-purple-500',

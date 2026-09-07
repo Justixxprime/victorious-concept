@@ -106,7 +106,7 @@ function ProductCard({ product }) {
         <h3 className="font-sans text-sm text-espresso dark:text-cream">
           {product.name}
         </h3>
-        <p className="font-sans text-sm text-gold mt-1">
+        <p className="font-sans text-sm text-gold-deep dark:text-gold mt-1">
           {formatPrice(product.price)}
         </p>
       </Link>

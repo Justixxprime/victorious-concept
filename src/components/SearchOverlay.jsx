@@ -126,7 +126,7 @@ function SearchOverlay({ onClose }) {
                   <img src={product.image} alt={product.name} className="w-14 h-14 rounded-lg object-cover flex-shrink-0" />
                   <div>
                     <p className="font-sans text-sm text-espresso dark:text-cream">{product.name}</p>
-                    <p className="font-sans text-xs text-gold">{formatPrice(product.price)}</p>
+                    <p className="font-sans text-xs text-gold-deep dark:text-gold">{formatPrice(product.price)}</p>
                   </div>
                 </Link>
               ))}

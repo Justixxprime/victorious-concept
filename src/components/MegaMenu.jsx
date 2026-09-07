@@ -118,7 +118,7 @@ function MegaMenu({ open }) {
                             <p className="font-sans text-xs text-cream truncate group-hover:text-gold-light transition-colors">
                               {product.name}
                             </p>
-                            <p className="font-sans text-[11px] text-gold">{formatPrice(product.price)}</p>
+                            <p className="font-sans text-[11px] text-gold-deep dark:text-gold">{formatPrice(product.price)}</p>
                           </div>
                         </Link>
                       </motion.div>

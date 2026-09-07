@@ -63,7 +63,7 @@ function AdminVariantManager({ productId, basePrice }) {
                 {v.sku && <span className="text-espresso/40 dark:text-cream/40"> · {v.sku}</span>}
               </span>
               <span className="text-espresso/60 dark:text-cream/60">Stock: {v.stock}</span>
-              {v.price_override && <span className="text-gold">{formatPrice(v.price_override)}</span>}
+              {v.price_override && <span className="text-gold-deep dark:text-gold">{formatPrice(v.price_override)}</span>}
               <button onClick={() => deleteVariant(v.id)} aria-label="Delete variant">
                 <Trash2 className="w-3.5 h-3.5 text-espresso/40 dark:text-cream/40 hover:text-red-500" />
               </button>

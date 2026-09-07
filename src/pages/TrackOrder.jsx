@@ -9,7 +9,7 @@ import { useBusinessSettings } from '../context/BusinessSettingsContext'
 import { Search } from 'lucide-react'
 
 const statusStyles = {
-  pending_payment: 'bg-gold/20 text-gold',
+  pending_payment: 'bg-gold/20 text-gold-deep dark:text-gold',
   processing: 'bg-blue-500/10 text-blue-500',
   shipped: 'bg-purple-500/10 text-purple-500',
   delivered: 'bg-green-500/10 text-green-500',
@@ -26,7 +26,7 @@ const orderStatusLabels = {
 
 const paymentBadgeStyles = {
   paid: 'bg-green-500/10 text-green-600',
-  pending: 'bg-gold/20 text-gold',
+  pending: 'bg-gold/20 text-gold-deep dark:text-gold',
   unpaid: 'bg-espresso/10 text-espresso/60 dark:bg-cream/10 dark:text-cream/60',
   failed: 'bg-red-500/10 text-red-500',
   refunded: 'bg-purple-500/10 text-purple-500',

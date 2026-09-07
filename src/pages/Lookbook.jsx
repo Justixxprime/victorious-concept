@@ -74,7 +74,7 @@ function Lookbook() {
                   <h3 className="font-display italic text-lg text-espresso dark:text-cream group-hover:text-gold transition-colors">
                     {product.name}
                   </h3>
-                  <span className="font-sans text-sm text-gold">{formatPrice(product.price)}</span>
+                  <span className="font-sans text-sm text-gold-deep dark:text-gold">{formatPrice(product.price)}</span>
                 </div>
               </Link>
             </motion.div>
