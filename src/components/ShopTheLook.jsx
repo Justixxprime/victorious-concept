@@ -10,7 +10,7 @@ function ShopTheLook({ products, backdropImage }) {
   return (
     <section className="bg-cream dark:bg-espresso transition-colors py-20 px-6">
       <div className="max-w-6xl mx-auto">
-        <p className="font-sans text-xs uppercase tracking-widest text-gold mb-3 text-center">
+        <p className="font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold mb-3 text-center">
           Styled Together
         </p>
         <h2 className="font-display italic font-semibold text-3xl md:text-4xl text-espresso dark:text-cream text-center mb-12">
@@ -38,10 +38,10 @@ function ShopTheLook({ products, backdropImage }) {
                   <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
                 </motion.div>
                 <div className="flex-1">
-                  <p className="font-sans text-sm text-espresso dark:text-cream group-hover:text-gold transition-colors">
+                  <p className="font-sans text-sm text-espresso dark:text-cream group-hover:text-gold-deep dark:text-gold transition-colors">
                     {product.name}
                   </p>
-                  <p className="font-sans text-xs text-gold-deep dark:text-gold mt-0.5">{formatPrice(product.price)}</p>
+                  <p className="font-sans text-xs text-gold-deep dark:text-gold-deep dark:text-gold mt-0.5">{formatPrice(product.price)}</p>
                 </div>
               </Link>
             ))}

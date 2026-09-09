@@ -35,7 +35,7 @@ function Collections() {
                   alt={col.name}
                   className="aspect-[4/3] rounded-2xl"
                 />
-                <h2 className="font-display italic text-2xl text-espresso dark:text-cream mt-4 group-hover:text-gold transition-colors">
+                <h2 className="font-display italic text-2xl text-espresso dark:text-cream mt-4 group-hover:text-gold-deep dark:text-gold transition-colors">
                   {col.name}
                 </h2>
                 {col.description && (

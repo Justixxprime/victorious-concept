@@ -105,7 +105,7 @@ export default function AdminAnalyticsTab({ products, orders }) {
       </div>
 
       <div>
-        <h3 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">Revenue, Last 14 Days</h3>
+        <h3 className="font-sans text-sm uppercase tracking-widest text-gold-deep dark:text-gold mb-4">Revenue, Last 14 Days</h3>
         <div className="h-56 -ml-2">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={revenueByDay}>
@@ -123,7 +123,7 @@ export default function AdminAnalyticsTab({ products, orders }) {
       </div>
 
       <div>
-        <h3 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">Top Products by Revenue</h3>
+        <h3 className="font-sans text-sm uppercase tracking-widest text-gold-deep dark:text-gold mb-4">Top Products by Revenue</h3>
         {loadingItems ? (
           <p className="font-sans text-sm text-espresso/50 dark:text-cream/50">Loading...</p>
         ) : topProducts.length === 0 ? (
@@ -132,10 +132,10 @@ export default function AdminAnalyticsTab({ products, orders }) {
           <div className="flex flex-col gap-2">
             {topProducts.map((p, i) => (
               <div key={p.name} className="flex items-center gap-3 bg-gold/5 rounded-xl px-4 py-3">
-                <span className="font-display italic text-gold text-sm w-5">{i + 1}</span>
+                <span className="font-display italic text-gold-deep dark:text-gold text-sm w-5">{i + 1}</span>
                 <span className="flex-1 font-sans text-sm text-espresso dark:text-cream">{p.name}</span>
                 <span className="font-sans text-xs text-espresso/50 dark:text-cream/50">{p.quantity} sold</span>
-                <span className="font-sans text-sm text-gold-deep dark:text-gold">{formatPrice(p.revenue)}</span>
+                <span className="font-sans text-sm text-gold-deep dark:text-gold-deep dark:text-gold">{formatPrice(p.revenue)}</span>
               </div>
             ))}
           </div>
@@ -143,7 +143,7 @@ export default function AdminAnalyticsTab({ products, orders }) {
       </div>
 
       <div>
-        <h3 className="font-sans text-sm uppercase tracking-widest text-gold mb-2">Checkout Funnel</h3>
+        <h3 className="font-sans text-sm uppercase tracking-widest text-gold-deep dark:text-gold mb-2">Checkout Funnel</h3>
         <p className="font-sans text-xs text-espresso/40 dark:text-cream/40 mb-4">
           The only two real signals this data supports — order created, order paid. Product views and
           add-to-cart events aren't tracked server-side, so a fuller funnel isn't available yet.
@@ -159,7 +159,7 @@ export default function AdminAnalyticsTab({ products, orders }) {
             <p className="font-sans text-xs text-espresso/50 dark:text-cream/50">Orders paid</p>
           </div>
           <div className="ml-auto text-right">
-            <p className="font-display italic font-semibold text-2xl text-gold">{conversionRate}%</p>
+            <p className="font-display italic font-semibold text-2xl text-gold-deep dark:text-gold">{conversionRate}%</p>
             <p className="font-sans text-xs text-espresso/50 dark:text-cream/50">Conversion</p>
           </div>
         </div>
@@ -167,7 +167,7 @@ export default function AdminAnalyticsTab({ products, orders }) {
 
       {abandoned.length > 0 && (
         <div>
-          <h3 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">
+          <h3 className="font-sans text-sm uppercase tracking-widest text-gold-deep dark:text-gold mb-4">
             Abandoned Checkouts ({abandoned.length})
           </h3>
           <p className="font-sans text-xs text-espresso/40 dark:text-cream/40 mb-3">
@@ -201,7 +201,7 @@ export default function AdminAnalyticsTab({ products, orders }) {
 
       {(lowStock.length > 0 || outOfStock.length > 0) && (
         <div>
-          <h3 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">Needs Attention</h3>
+          <h3 className="font-sans text-sm uppercase tracking-widest text-gold-deep dark:text-gold mb-4">Needs Attention</h3>
           <div className="flex flex-col gap-2">
             {outOfStock.map((p) => (
               <div key={p.id} className="flex justify-between items-center bg-red-500/5 rounded-xl px-4 py-3">
@@ -212,7 +212,7 @@ export default function AdminAnalyticsTab({ products, orders }) {
             {lowStock.map((p) => (
               <div key={p.id} className="flex justify-between items-center bg-gold/10 rounded-xl px-4 py-3">
                 <span className="font-sans text-sm text-espresso dark:text-cream">{p.name}</span>
-                <span className="font-sans text-xs text-gold">Only {p.stock} left</span>
+                <span className="font-sans text-xs text-gold-deep dark:text-gold">Only {p.stock} left</span>
               </div>
             ))}
           </div>

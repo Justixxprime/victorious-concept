@@ -90,21 +90,21 @@ function SourceRequest() {
 
       <div className="max-w-5xl mx-auto px-6 py-16 grid grid-cols-1 md:grid-cols-3 gap-8 border-b border-gold/10">
         <div className="flex flex-col gap-2 text-center md:text-left">
-          <span className="font-display italic text-3xl text-gold">01</span>
+          <span className="font-display italic text-3xl text-gold-deep dark:text-gold">01</span>
           <h3 className="font-sans text-sm font-medium text-espresso dark:text-cream">Tell us what you want</h3>
           <p className="font-sans text-xs text-espresso/60 dark:text-cream/60 leading-relaxed">
             A description, a photo, a vibe, whatever you've got is enough to start.
           </p>
         </div>
         <div className="flex flex-col gap-2 text-center md:text-left">
-          <span className="font-display italic text-3xl text-gold">02</span>
+          <span className="font-display italic text-3xl text-gold-deep dark:text-gold">02</span>
           <h3 className="font-sans text-sm font-medium text-espresso dark:text-cream">We go looking</h3>
           <p className="font-sans text-xs text-espresso/60 dark:text-cream/60 leading-relaxed">
             The same market instinct that started this business, now working for you specifically.
           </p>
         </div>
         <div className="flex flex-col gap-2 text-center md:text-left">
-          <span className="font-display italic text-3xl text-gold">03</span>
+          <span className="font-display italic text-3xl text-gold-deep dark:text-gold">03</span>
           <h3 className="font-sans text-sm font-medium text-espresso dark:text-cream">It reaches you</h3>
           <p className="font-sans text-xs text-espresso/60 dark:text-cream/60 leading-relaxed">
             Confirmed, priced, and delivered, the exact same way every other order works.
@@ -258,7 +258,7 @@ function SourceRequest() {
           <button
             onClick={() => setStep((s) => Math.max(0, s - 1))}
             disabled={step === 0}
-            className="flex items-center gap-2 font-sans text-sm text-espresso dark:text-cream disabled:opacity-0 hover:text-gold transition-colors"
+            className="flex items-center gap-2 font-sans text-sm text-espresso dark:text-cream disabled:opacity-0 hover:text-gold-deep dark:text-gold transition-colors"
           >
             <ArrowLeft className="w-4 h-4" /> Back
           </button>
@@ -286,19 +286,19 @@ function SourceRequest() {
       <div className="max-w-3xl mx-auto px-6 pb-20">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
           <div className="bg-gold/5 rounded-2xl p-6">
-            <p className="font-sans text-xs uppercase tracking-widest text-gold mb-2">No Middleman Markup</p>
+            <p className="font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold mb-2">No Middleman Markup</p>
             <p className="font-sans text-xs text-espresso/60 dark:text-cream/60">
               You get Victoria's real sourcing price, not an inflated finder's fee.
             </p>
           </div>
           <div className="bg-gold/5 rounded-2xl p-6">
-            <p className="font-sans text-xs uppercase tracking-widest text-gold mb-2">Real Answers Fast</p>
+            <p className="font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold mb-2">Real Answers Fast</p>
             <p className="font-sans text-xs text-espresso/60 dark:text-cream/60">
               Every request gets a real reply from a real person on WhatsApp.
             </p>
           </div>
           <div className="bg-gold/5 rounded-2xl p-6">
-            <p className="font-sans text-xs uppercase tracking-widest text-gold mb-2">Anywhere, Really</p>
+            <p className="font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold mb-2">Anywhere, Really</p>
             <p className="font-sans text-xs text-espresso/60 dark:text-cream/60">
               Lagos, anywhere in Nigeria, or internationally, if it exists, we'll try.
             </p>

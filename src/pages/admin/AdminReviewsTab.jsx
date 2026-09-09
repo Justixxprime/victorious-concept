@@ -46,7 +46,7 @@ export default function AdminReviewsTab() {
             <div className="flex items-start justify-between gap-3 mb-2">
               <div>
                 <p className="font-sans text-sm text-espresso dark:text-cream font-medium">{r.customer_name}</p>
-                <p className="font-sans text-xs text-gold">{r.products?.name || 'Product no longer exists'}</p>
+                <p className="font-sans text-xs text-gold-deep dark:text-gold">{r.products?.name || 'Product no longer exists'}</p>
               </div>
               <button onClick={() => deleteReview(r.id)} aria-label="Delete review">
                 <Trash2 className="w-4 h-4 text-espresso/40 dark:text-cream/40 hover:text-red-500" />

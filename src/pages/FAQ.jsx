@@ -58,11 +58,11 @@ function FAQ() {
                 className="flex items-center justify-between w-full text-left font-sans text-sm text-espresso dark:text-cream"
               >
                 <span className="flex items-center gap-3">
-                  <item.icon className="w-4 h-4 text-gold flex-shrink-0" />
+                  <item.icon className="w-4 h-4 text-gold-deep dark:text-gold flex-shrink-0" />
                   {item.q}
                 </span>
                 <ChevronDown
-                  className={`w-4 h-4 text-gold transition-transform ${openIndex === i ? 'rotate-180' : ''}`}
+                  className={`w-4 h-4 text-gold-deep dark:text-gold transition-transform ${openIndex === i ? 'rotate-180' : ''}`}
                 />
               </button>
               {openIndex === i && (

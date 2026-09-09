@@ -34,7 +34,7 @@ function NavLogo({ light = false, onClick, iconClassName = 'w-9 h-9 sm:w-11 sm:h
         >
           Victorious
         </span>
-        <span className="font-sans text-[9px] sm:text-[10px] uppercase tracking-[0.35em] text-gold">
+        <span className="font-sans text-[9px] sm:text-[10px] uppercase tracking-[0.35em] text-gold-deep dark:text-gold">
           Concept
         </span>
       </motion.div>

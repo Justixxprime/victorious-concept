@@ -98,7 +98,7 @@ function Admin() {
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <p className="font-sans text-xs uppercase tracking-widest text-gold mb-2">Victorious Concept</p>
+            <p className="font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold mb-2">Victorious Concept</p>
             <h1 className="font-display italic font-semibold text-4xl text-espresso dark:text-cream">Admin Dashboard</h1>
           </div>
           <div className="hidden sm:flex items-center gap-2 bg-gold/10 rounded-full px-4 py-2">

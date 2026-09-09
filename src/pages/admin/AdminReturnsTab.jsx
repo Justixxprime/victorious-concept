@@ -40,7 +40,7 @@ export default function AdminReturnsTab({ returns, setReturns }) {
 
   return (
     <div className="max-w-2xl flex flex-col gap-3">
-      <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-2">Return Requests</h2>
+      <h2 className="font-sans text-sm uppercase tracking-widest text-gold-deep dark:text-gold mb-2">Return Requests</h2>
       {returns.length === 0 && (
         <p className="font-sans text-sm text-espresso/50 dark:text-cream/50">No return requests yet.</p>
       )}
@@ -53,7 +53,7 @@ export default function AdminReturnsTab({ returns, setReturns }) {
             <span className={`font-sans text-xs px-3 py-1 rounded-full capitalize ${
               r.status === 'refunded' ? 'bg-purple-500/10 text-purple-500' :
               r.status === 'rejected' ? 'bg-red-500/10 text-red-500' :
-              'bg-gold/20 text-gold-deep dark:text-gold'
+              'bg-gold/20 text-gold-deep dark:text-gold-deep dark:text-gold'
             }`}>
               {r.status}
             </span>
@@ -62,7 +62,7 @@ export default function AdminReturnsTab({ returns, setReturns }) {
             {r.orders?.customer_name} · {r.orders?.customer_phone} · via {r.orders?.payment_method}
           </p>
           <div className="flex flex-col gap-1 mb-2 border-y border-gold/10 py-2">
-            <p className="font-sans text-xs uppercase tracking-widest text-gold/70">
+            <p className="font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold/70">
               Returning {r.items?.length === (r.orders?.items?.length ?? r.items?.length) ? '(whole order)' : '(partial)'}
             </p>
             {(r.items || []).map((item) => (
@@ -71,7 +71,7 @@ export default function AdminReturnsTab({ returns, setReturns }) {
                 <span>{formatPrice(item.price * item.quantity)}</span>
               </div>
             ))}
-            <div className="flex justify-between font-sans text-xs text-gold pt-1 mt-1 border-t border-gold/10">
+            <div className="flex justify-between font-sans text-xs text-gold-deep dark:text-gold pt-1 mt-1 border-t border-gold/10">
               <span>Estimated refund</span>
               <span>
                 {formatPrice(

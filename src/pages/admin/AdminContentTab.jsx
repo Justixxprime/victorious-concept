@@ -54,7 +54,7 @@ export default function AdminContentTab({ products }) {
     <div className="max-w-lg flex flex-col gap-12">
       {heroForm && (
         <div>
-          <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-2">Hero Section</h2>
+          <h2 className="font-sans text-sm uppercase tracking-widest text-gold-deep dark:text-gold mb-2">Hero Section</h2>
           <div className="flex flex-col gap-4">
             <input type="text" placeholder="Small label" value={heroForm.label} onChange={(e) => setHeroForm({ ...heroForm, label: e.target.value })}
               className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold" />
@@ -73,7 +73,7 @@ export default function AdminContentTab({ products }) {
 
       {spotlightForm && (
         <div>
-          <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-2">The Spotlight</h2>
+          <h2 className="font-sans text-sm uppercase tracking-widest text-gold-deep dark:text-gold mb-2">The Spotlight</h2>
           <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 mb-4">
             The single featured product on the homepage. Its own photos are what show here — pick
             which product, no separate upload needed. Leave the dropdown on "Auto-select" to fall
@@ -105,7 +105,7 @@ export default function AdminContentTab({ products }) {
 
       {lookForm && (
         <div>
-          <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-2">Shop The Look</h2>
+          <h2 className="font-sans text-sm uppercase tracking-widest text-gold-deep dark:text-gold mb-2">Shop The Look</h2>
           <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 mb-4">
             Pick up to 3 products to feature together, and a backdrop photo. Leave a product on
             "None" to fall back to the default (the first products in the catalog).

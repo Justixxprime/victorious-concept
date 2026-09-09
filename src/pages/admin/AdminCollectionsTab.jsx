@@ -57,7 +57,7 @@ export default function AdminCollectionsTab({ collections, refetchCollections, p
   return (
     <div className="max-w-2xl flex flex-col gap-8">
       <div className="bg-gold/5 rounded-2xl p-6">
-        <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">{editingCollection ? 'Edit Collection' : 'New Collection'}</h2>
+        <h2 className="font-sans text-sm uppercase tracking-widest text-gold-deep dark:text-gold mb-4">{editingCollection ? 'Edit Collection' : 'New Collection'}</h2>
         <div className="flex flex-col gap-3 mb-4">
           <input type="text" placeholder="Collection name" value={collectionForm.name} onChange={(e) => setCollectionForm({ ...collectionForm, name: e.target.value })}
             className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold" />
@@ -66,7 +66,7 @@ export default function AdminCollectionsTab({ collections, refetchCollections, p
           <input type="text" placeholder="Cover image URL (optional)" value={collectionForm.image} onChange={(e) => setCollectionForm({ ...collectionForm, image: e.target.value })}
             className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold" />
         </div>
-        <p className="font-sans text-xs uppercase tracking-widest text-gold mb-3">Select Products</p>
+        <p className="font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold mb-3">Select Products</p>
         <div className="flex flex-col gap-2 max-h-64 overflow-y-auto mb-4">
           {products.map((p) => (
             <label key={p.id} className="flex items-center gap-3 border border-gold/10 rounded-lg p-2">
@@ -81,7 +81,7 @@ export default function AdminCollectionsTab({ collections, refetchCollections, p
         </button>
       </div>
       <div>
-        <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">Existing Collections</h2>
+        <h2 className="font-sans text-sm uppercase tracking-widest text-gold-deep dark:text-gold mb-4">Existing Collections</h2>
         <div className="flex flex-col gap-2">
           {collections.map((col) => (
             <div key={col.id} className="flex items-center gap-3 border border-gold/20 rounded-xl p-4">

@@ -15,7 +15,7 @@ function Lookbook() {
       <SEO title="Lookbook" description="Editorial styling from Victorious Concept." />
 
       <div className="max-w-5xl mx-auto text-center mb-16">
-        <p className="font-sans text-xs uppercase tracking-widest text-gold mb-4">Editorial</p>
+        <p className="font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold mb-4">Editorial</p>
         <h1 className="font-display italic font-semibold text-5xl md:text-6xl text-espresso dark:text-cream mb-6">
           The Lookbook
         </h1>
@@ -71,10 +71,10 @@ function Lookbook() {
                   </div>
                 </div>
                 <div className="pt-4 flex items-center justify-between">
-                  <h3 className="font-display italic text-lg text-espresso dark:text-cream group-hover:text-gold transition-colors">
+                  <h3 className="font-display italic text-lg text-espresso dark:text-cream group-hover:text-gold-deep dark:text-gold transition-colors">
                     {product.name}
                   </h3>
-                  <span className="font-sans text-sm text-gold-deep dark:text-gold">{formatPrice(product.price)}</span>
+                  <span className="font-sans text-sm text-gold-deep dark:text-gold-deep dark:text-gold">{formatPrice(product.price)}</span>
                 </div>
               </Link>
             </motion.div>

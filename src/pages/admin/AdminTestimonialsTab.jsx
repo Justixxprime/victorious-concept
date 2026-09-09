@@ -37,7 +37,7 @@ export default function AdminTestimonialsTab() {
   return (
     <div className="max-w-lg flex flex-col gap-8">
       <div className="bg-gold/5 rounded-2xl p-6">
-        <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">Add a Real Testimonial</h2>
+        <h2 className="font-sans text-sm uppercase tracking-widest text-gold-deep dark:text-gold mb-4">Add a Real Testimonial</h2>
         <div className="flex flex-col gap-3 mb-4">
           <input type="text" placeholder="Customer name" value={testimonialForm.customer_name} onChange={(e) => setTestimonialForm({ ...testimonialForm, customer_name: e.target.value })}
             className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold" />

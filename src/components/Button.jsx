@@ -20,7 +20,7 @@ const sizeClasses = {
 const variantClasses = {
   primary: 'bg-gold text-espresso hover:bg-gold-light',
   outline: 'border border-gold/30 text-espresso dark:text-cream hover:border-gold',
-  ghost: 'text-gold hover:underline',
+  ghost: 'text-gold-deep dark:text-gold hover:underline',
 }
 
 function Button({

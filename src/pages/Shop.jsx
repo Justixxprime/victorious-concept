@@ -262,7 +262,7 @@ function Shop() {
 
                 {/* Category */}
 
-                <p className="font-sans text-xs uppercase tracking-widest text-gold mb-3">
+                <p className="font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold mb-3">
                   Category
                 </p>
 
@@ -301,7 +301,7 @@ function Shop() {
 
                 {allSizes.length > 0 && (
                   <>
-                    <p className="font-sans text-xs uppercase tracking-widest text-gold mb-3">
+                    <p className="font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold mb-3">
                       Size
                     </p>
 
@@ -330,7 +330,7 @@ function Shop() {
 
                 {/* Price */}
 
-                <p className="font-sans text-xs uppercase tracking-widest text-gold mb-3">
+                <p className="font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold mb-3">
                   Price
                 </p>
 
@@ -364,7 +364,7 @@ function Shop() {
 
                 {/* Sort */}
 
-                <p className="font-sans text-xs uppercase tracking-widest text-gold mb-3">
+                <p className="font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold mb-3">
                   Sort By
                 </p>
 

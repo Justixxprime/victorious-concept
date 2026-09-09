@@ -32,7 +32,7 @@ function CustomerLove() {
   return (
     <section className="bg-gold/5 py-20 px-6">
       <div className="max-w-6xl mx-auto">
-        <p className="font-sans text-xs uppercase tracking-widest text-gold mb-3 text-center">
+        <p className="font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold mb-3 text-center">
           Real Words, Real Customers
         </p>
         <h2 className="font-display italic font-semibold text-3xl md:text-4xl text-espresso dark:text-cream text-center mb-12">
@@ -47,7 +47,7 @@ function CustomerLove() {
                   {[1, 2, 3, 4, 5].map((n) => (
                     <Star
                       key={n}
-                      className={`w-4 h-4 ${n <= item.rating ? 'fill-gold text-gold' : 'text-gold/20'}`}
+                      className={`w-4 h-4 ${n <= item.rating ? 'fill-gold text-gold-deep dark:text-gold' : 'text-gold-deep dark:text-gold/20'}`}
                     />
                   ))}
                 </div>
@@ -60,7 +60,7 @@ function CustomerLove() {
                   {item.name}
                 </p>
                 {item.sub && (
-                  <p className="font-sans text-xs text-gold/70">
+                  <p className="font-sans text-xs text-gold-deep dark:text-gold/70">
                     {item.sub}
                   </p>
                 )}

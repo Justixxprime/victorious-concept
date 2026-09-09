@@ -20,9 +20,9 @@ export default function AdminMessagesTab({ messages, setMessages }) {
             <div className="flex justify-between items-start mb-2">
               <div>
                 <p className="font-sans text-sm text-espresso dark:text-cream">{m.name}</p>
-                <p className="font-sans text-xs text-gold">{m.email}</p>
+                <p className="font-sans text-xs text-gold-deep dark:text-gold">{m.email}</p>
               </div>
-              {!m.read && <button onClick={() => markRead(m.id)} className="font-sans text-xs text-gold hover:underline">Mark read</button>}
+              {!m.read && <button onClick={() => markRead(m.id)} className="font-sans text-xs text-gold-deep dark:text-gold hover:underline">Mark read</button>}
             </div>
             <p className="font-sans text-sm text-espresso/70 dark:text-cream/70">{m.message}</p>
           </div>

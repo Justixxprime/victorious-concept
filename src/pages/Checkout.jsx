@@ -197,7 +197,7 @@ function Checkout() {
   if (confirming) {
     return (
       <div className="min-h-screen bg-cream dark:bg-espresso flex flex-col items-center justify-center gap-4 px-6 text-center">
-        <Loader2 className="w-8 h-8 text-gold animate-spin" />
+        <Loader2 className="w-8 h-8 text-gold-deep dark:text-gold animate-spin" />
         <h1 className="font-display italic text-2xl text-espresso dark:text-cream">
           Confirming your payment
         </h1>
@@ -290,7 +290,7 @@ function Checkout() {
 
         {addresses.length > 0 && (
           <div className="mb-6">
-            <p className="font-sans text-xs uppercase tracking-widest text-gold mb-3">
+            <p className="font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold mb-3">
               Use a saved address
             </p>
             <div className="flex flex-col gap-2">
@@ -337,7 +337,7 @@ function Checkout() {
           />
         </div>
 
-        <p className="font-sans text-xs uppercase tracking-widest text-gold mb-3">
+        <p className="font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold mb-3">
           Delivery Location
         </p>
         <div className="flex flex-col gap-2 mb-8">
@@ -386,7 +386,7 @@ function Checkout() {
               </span>
             </div>
             {selectedZone.is_variable && (
-              <p className="font-sans text-xs text-gold">
+              <p className="font-sans text-xs text-gold-deep dark:text-gold">
                 {selectedZone.variable_note ||
                   "Delivery for this option is arranged directly with you on WhatsApp once we have a rider/courier quote. You can still pay for your order by card now."}
               </p>
@@ -403,7 +403,7 @@ function Checkout() {
           </div>
         )}
 
-        <p className="font-sans text-xs uppercase tracking-widest text-gold mb-3">
+        <p className="font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold mb-3">
           Payment Method
         </p>
         <div className="grid grid-cols-3 gap-2 mb-6">
@@ -456,7 +456,7 @@ function Checkout() {
                 <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 mt-2">Account Number</p>
                 <div className="flex items-center justify-between">
                   <p className="font-sans text-sm text-espresso dark:text-cream">{bankAccountNumber}</p>
-                  <button onClick={copyAccount} className="text-gold" aria-label="Copy account number">
+                  <button onClick={copyAccount} className="text-gold-deep dark:text-gold" aria-label="Copy account number">
                     {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                   </button>
                 </div>

@@ -79,7 +79,7 @@ function AdminBulkImport({ categories, onImported }) {
 
   return (
     <div className="bg-gold/5 rounded-2xl p-6">
-      <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-2">Bulk Import from CSV</h2>
+      <h2 className="font-sans text-sm uppercase tracking-widest text-gold-deep dark:text-gold mb-2">Bulk Import from CSV</h2>
       <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 mb-4">
         For adding many real products at once. Your CSV needs these columns: <strong>name, price, category, image, stock</strong>.
         The image column should be a direct link to a photo you have the rights to use (e.g. one you've uploaded and copied the link for).

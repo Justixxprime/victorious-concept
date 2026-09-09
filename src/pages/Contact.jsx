@@ -53,7 +53,7 @@ function Contact() {
 
           {/* LEFT: direct channels */}
           <div className="flex flex-col gap-4">
-            <p className="font-sans text-xs uppercase tracking-widest text-gold mb-2">
+            <p className="font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold mb-2">
               Reach Us Directly
             </p>
 
@@ -114,7 +114,7 @@ function Contact() {
 
           {/* RIGHT: form */}
           <div>
-            <p className="font-sans text-xs uppercase tracking-widest text-gold mb-4">
+            <p className="font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold mb-4">
               Or Send A Message
             </p>
 

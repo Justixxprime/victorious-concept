@@ -18,7 +18,7 @@ const Receipt = forwardRef(function Receipt({ order }, ref) {
             <AnimatedLogo className="w-full h-full" />
           </div>
           <span className="font-display italic font-semibold text-lg text-espresso">Victorious</span>
-          <span className="font-sans text-[9px] uppercase tracking-[0.35em] text-gold -mt-0.5">Concept</span>
+          <span className="font-sans text-[9px] uppercase tracking-[0.35em] text-gold-deep dark:text-gold -mt-0.5">Concept</span>
 
           <div className="flex items-center gap-1.5 mt-4 bg-green-500/10 text-green-700 rounded-full px-3 py-1">
             <CheckCircle2 className="w-3.5 h-3.5" />

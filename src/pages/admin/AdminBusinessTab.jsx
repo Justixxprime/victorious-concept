@@ -43,7 +43,7 @@ export default function AdminBusinessTab() {
   return (
     <div className="max-w-md flex flex-col gap-6">
       <div>
-        <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-2">WhatsApp Number</h2>
+        <h2 className="font-sans text-sm uppercase tracking-widest text-gold-deep dark:text-gold mb-2">WhatsApp Number</h2>
         <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 mb-3">
           Used across the whole site: floating button, checkout, product questions, order help. Digits only, with country code, no + or spaces (e.g. 2348122470435).
         </p>
@@ -56,7 +56,7 @@ export default function AdminBusinessTab() {
       </div>
 
       <div>
-        <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-2">Bank Transfer Details</h2>
+        <h2 className="font-sans text-sm uppercase tracking-widest text-gold-deep dark:text-gold mb-2">Bank Transfer Details</h2>
         <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 mb-3">
           Shown to customers who choose "Bank Transfer" at checkout.
         </p>
@@ -86,7 +86,7 @@ export default function AdminBusinessTab() {
       </div>
 
       <div>
-        <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-2">Referral Program</h2>
+        <h2 className="font-sans text-sm uppercase tracking-widest text-gold-deep dark:text-gold mb-2">Referral Program</h2>
         <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 mb-3">
           When on, every signed-in customer gets a personal referral code on their Account page to
           share. Turning this off hides that card for everyone going forward. Codes already shared

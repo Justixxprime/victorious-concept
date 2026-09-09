@@ -64,7 +64,7 @@ function About() {
       <SEO title="About" description="The story of Victorious Concept, from Lagos Island and Trade Fair market runs to a full fashion brand." />
 
       <div className="max-w-3xl mx-auto px-6 py-20">
-        <p className="font-sans text-xs uppercase tracking-widest text-gold mb-4">
+        <p className="font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold mb-4">
           Our Story
         </p>
         <h1 className="font-display italic font-semibold text-4xl md:text-5xl text-espresso dark:text-cream mb-10 leading-tight">
@@ -114,7 +114,7 @@ function About() {
 
       <div className="bg-espresso dark:bg-cream/5 text-cream dark:text-espresso py-16 px-6">
         <div className="max-w-3xl mx-auto text-center">
-          <p className="font-sans text-xs uppercase tracking-widest text-gold-light dark:text-gold mb-4">
+          <p className="font-sans text-xs uppercase tracking-widest text-gold-light dark:text-gold-deep dark:text-gold mb-4">
             The Next Chapter
           </p>
           <h2 className="font-display italic font-semibold text-3xl md:text-4xl leading-tight">
@@ -126,7 +126,7 @@ function About() {
             name you actually know, a real storefront, a real catalogue, a real brand built the same way it
             started: with taste, with hustle, and with zero patience for anything less than good.
           </p>
-          <p className="font-display italic text-xl mt-6 text-gold-light dark:text-gold">
+          <p className="font-display italic text-xl mt-6 text-gold-light dark:text-gold-deep dark:text-gold">
             Welcome to the next chapter. It has better lighting.
           </p>
         </div>
@@ -138,14 +138,14 @@ function About() {
             <div key={step.label} className="flex gap-6">
               <div className="flex flex-col items-center">
                 <div className="w-8 h-8 rounded-full bg-gold/10 flex items-center justify-center flex-shrink-0">
-                  <step.icon className="w-4 h-4 text-gold" />
+                  <step.icon className="w-4 h-4 text-gold-deep dark:text-gold" />
                 </div>
                 {i !== timeline.length - 1 && (
                   <div className="w-px flex-1 bg-gold/30 mt-2" />
                 )}
               </div>
               <div className="pb-4">
-                <h3 className="font-sans text-xs uppercase tracking-widest text-gold mb-2">
+                <h3 className="font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold mb-2">
                   {step.label}
                 </h3>
                 <p className="font-sans text-sm text-espresso/70 dark:text-cream/70 max-w-xl">
@@ -171,7 +171,7 @@ function About() {
       </div>
 
       <div className="max-w-5xl mx-auto px-6 py-20 border-t border-gold/20">
-        <p className="font-sans text-xs uppercase tracking-widest text-gold mb-2 text-center">
+        <p className="font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold mb-2 text-center">
           Before The Website, There Was Us
         </p>
         <p className="font-sans text-sm text-espresso/60 dark:text-cream/60 text-center mb-12 max-w-xl mx-auto">
@@ -184,7 +184,7 @@ function About() {
               <p className="font-display italic text-lg text-espresso dark:text-cream leading-relaxed">
                 "{t.quote}"
               </p>
-              <p className="font-sans text-xs uppercase tracking-widest text-gold">
+              <p className="font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold">
                 {t.name}, {t.relation}
               </p>
             </div>
@@ -193,7 +193,7 @@ function About() {
       </div>
 
       <div className="max-w-3xl mx-auto px-6 pb-24">
-        <p className="font-sans text-xs uppercase tracking-widest text-gold mb-2 text-center">
+        <p className="font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold mb-2 text-center">
           What We Actually Believe
         </p>
         <p className="font-sans text-sm text-espresso/60 dark:text-cream/60 text-center mb-12">

@@ -92,7 +92,7 @@ function Navbar() {
               >
                 <Link
                   to={link.to}
-                  className="relative hover:text-gold transition-colors group/nav"
+                  className="relative hover:text-gold-deep dark:text-gold transition-colors group/nav"
                 >
                   {link.label}
                   <span className="absolute -bottom-1 left-0 w-0 h-px bg-gold group-hover/nav:w-full transition-all duration-300 ease-out" />
@@ -102,7 +102,7 @@ function Navbar() {
               <Link
                 key={link.label}
                 to={link.to}
-                className="relative hover:text-gold transition-colors group/nav"
+                className="relative hover:text-gold-deep dark:text-gold transition-colors group/nav"
               >
                 {link.label}
                 <span className="absolute -bottom-1 left-0 w-0 h-px bg-gold group-hover/nav:w-full transition-all duration-300 ease-out" />
@@ -113,7 +113,7 @@ function Navbar() {
             onMouseEnter={() => setExploreOpen(true)}
             onMouseLeave={() => setExploreOpen(false)}
           >
-            <button className="relative flex items-center gap-1.5 hover:text-gold transition-colors group/nav">
+            <button className="relative flex items-center gap-1.5 hover:text-gold-deep dark:text-gold transition-colors group/nav">
               <Layers className="w-3.5 h-3.5" />
               Explore
               <span className="absolute -bottom-1 left-0 w-0 h-px bg-gold group-hover/nav:w-full transition-all duration-300 ease-out" />
@@ -262,7 +262,7 @@ function Navbar() {
                 key={link.label}
                 to={link.to}
                 onClick={() => setMenuOpen(false)}
-                className="hover:text-gold transition-colors"
+                className="hover:text-gold-deep dark:text-gold transition-colors"
               >
                 {link.label}
               </Link>
@@ -271,7 +271,7 @@ function Navbar() {
 
           <div className="h-px bg-gold/20 mb-6" />
 
-          <p className="font-sans text-[11px] uppercase tracking-[0.3em] text-gold mb-4">
+          <p className="font-sans text-[11px] uppercase tracking-[0.3em] text-gold-deep dark:text-gold mb-4">
             Explore
           </p>
           <nav className="flex flex-col gap-4 mb-8">
@@ -282,9 +282,9 @@ function Navbar() {
                   key={link.label}
                   to={link.to}
                   onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-3 font-sans text-base text-espresso dark:text-cream hover:text-gold transition-colors"
+                  className="flex items-center gap-3 font-sans text-base text-espresso dark:text-cream hover:text-gold-deep dark:text-gold transition-colors"
                 >
-                  <span className="w-8 h-8 rounded-full bg-gold/10 flex items-center justify-center flex-shrink-0 text-gold">
+                  <span className="w-8 h-8 rounded-full bg-gold/10 flex items-center justify-center flex-shrink-0 text-gold-deep dark:text-gold">
                     <Icon className="w-4 h-4" />
                   </span>
                   {link.label}

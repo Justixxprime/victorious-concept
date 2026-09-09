@@ -74,7 +74,7 @@ export default function AdminDiscountsTab({ categories }) {
   return (
     <div className="max-w-lg flex flex-col gap-8">
       <div className="bg-gold/5 rounded-2xl p-6">
-        <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">New Discount Code</h2>
+        <h2 className="font-sans text-sm uppercase tracking-widest text-gold-deep dark:text-gold mb-4">New Discount Code</h2>
 
         <div className="flex flex-col gap-3 mb-3">
           <input type="text" placeholder="CODE" value={couponForm.code} onChange={(e) => setCouponForm({ ...couponForm, code: e.target.value })}
@@ -130,12 +130,12 @@ export default function AdminDiscountsTab({ categories }) {
         <button onClick={addCoupon} className="bg-gold text-espresso font-sans font-medium px-6 py-3 rounded-full hover:bg-gold-light transition-colors">Create Code</button>
       </div>
       <div>
-        <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">All Codes</h2>
+        <h2 className="font-sans text-sm uppercase tracking-widest text-gold-deep dark:text-gold mb-4">All Codes</h2>
         <div className="flex flex-col gap-2">
           {coupons.map((c) => (
             <div key={c.id} className="flex flex-col gap-2 border border-gold/20 rounded-xl p-4">
               <div className="flex items-center gap-3">
-                <span className="flex-1 font-sans text-sm text-espresso dark:text-cream">{c.code} <span className="text-gold">({describeCoupon(c)})</span></span>
+                <span className="flex-1 font-sans text-sm text-espresso dark:text-cream">{c.code} <span className="text-gold-deep dark:text-gold">({describeCoupon(c)})</span></span>
                 <button onClick={() => toggleCoupon(c.id, c.active)} className={`text-xs font-sans px-3 py-1 rounded-full ${c.active ? 'bg-green-500/10 text-green-500' : 'bg-gold/10 text-espresso/50 dark:text-cream/50'}`}>
                   {c.active ? 'Active' : 'Disabled'}
                 </button>

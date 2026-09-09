@@ -53,7 +53,7 @@ function Reviews({ productId }) {
           Reviews
         </h2>
         {average && (
-          <span className="flex items-center gap-1 font-sans text-sm text-gold">
+          <span className="flex items-center gap-1 font-sans text-sm text-gold-deep dark:text-gold">
             <Star className="w-4 h-4 fill-gold" /> {average} ({reviews.length})
           </span>
         )}
@@ -132,7 +132,7 @@ function Reviews({ productId }) {
                   {r.customer_name}
                 </span>
                 {r.verified_purchase && (
-                  <span className="flex items-center gap-1 font-sans text-xs text-gold">
+                  <span className="flex items-center gap-1 font-sans text-xs text-gold-deep dark:text-gold">
                     <BadgeCheck className="w-3 h-3" /> Verified Purchase
                   </span>
                 )}

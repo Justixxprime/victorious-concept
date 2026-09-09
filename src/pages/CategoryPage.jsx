@@ -68,7 +68,7 @@ function CategoryPage() {
 
         {newInCategory.length > 0 && (
           <div className="mb-16">
-            <h2 className="font-sans text-xs uppercase tracking-widest text-gold mb-6">
+            <h2 className="font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold mb-6">
               New In {category?.name}
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -81,7 +81,7 @@ function CategoryPage() {
 
         {featuredInCategory.length > 0 && (
           <div className="mb-16">
-            <h2 className="font-sans text-xs uppercase tracking-widest text-gold mb-6">
+            <h2 className="font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold mb-6">
               Best of {category?.name}
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -92,7 +92,7 @@ function CategoryPage() {
           </div>
         )}
 
-        <h2 className="font-sans text-xs uppercase tracking-widest text-gold mb-6">
+        <h2 className="font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold mb-6">
           All {category?.name}
         </h2>
 
@@ -115,7 +115,7 @@ function CategoryPage() {
 
         {relatedCategories.length > 0 && (
           <div className="mt-16 pt-10 border-t border-gold/20">
-            <p className="font-sans text-xs uppercase tracking-widest text-gold mb-4">
+            <p className="font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold mb-4">
               Explore More
             </p>
             <div className="flex flex-wrap gap-2">
@@ -123,7 +123,7 @@ function CategoryPage() {
                 <Link
                   key={cat.id}
                   to={`/category/${cat.id}`}
-                  className="px-4 py-2 rounded-full text-xs font-sans uppercase tracking-wide border border-gold/30 text-espresso dark:text-cream hover:border-gold hover:text-gold transition-colors"
+                  className="px-4 py-2 rounded-full text-xs font-sans uppercase tracking-wide border border-gold/30 text-espresso dark:text-cream hover:border-gold hover:text-gold-deep dark:text-gold transition-colors"
                 >
                   {cat.name}
                 </Link>

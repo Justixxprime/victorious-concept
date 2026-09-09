@@ -20,7 +20,7 @@ function NotFound() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3, duration: 0.6 }}
-        className="font-display italic font-semibold text-7xl md:text-8xl text-gold"
+        className="font-display italic font-semibold text-7xl md:text-8xl text-gold-deep dark:text-gold"
       >
         404
       </motion.p>

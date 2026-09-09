@@ -122,7 +122,7 @@ function Account() {
                 </motion.p>
               )}
               {info && (
-                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="font-sans text-xs text-gold">
+                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="font-sans text-xs text-gold-deep dark:text-gold">
                   {info}
                 </motion.p>
               )}
@@ -142,7 +142,7 @@ function Account() {
 
         <button
           onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setError(''); setInfo('') }}
-          className="w-full text-center font-sans text-sm text-gold hover:underline mt-6"
+          className="w-full text-center font-sans text-sm text-gold-deep dark:text-gold hover:underline mt-6"
         >
           {mode === 'signin' ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
         </button>
@@ -289,7 +289,7 @@ function LoggedInAccount({ user, signOut }) {
         </motion.div>
 
         <motion.div {...fadeUp(0.05)} className="mb-8">
-          <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">
+          <h2 className="font-sans text-sm uppercase tracking-widest text-gold-deep dark:text-gold mb-4">
             Profile
           </h2>
           <form onSubmit={handleProfileSave} className="bg-gold/5 rounded-2xl p-5 flex flex-col gap-3">
@@ -363,10 +363,10 @@ function LoggedInAccount({ user, signOut }) {
 
         <motion.div {...fadeUp(0.25)}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-sans text-sm uppercase tracking-widest text-gold">
+            <h2 className="font-sans text-sm uppercase tracking-widest text-gold-deep dark:text-gold">
               Saved Addresses
             </h2>
-            <button onClick={() => setShowForm(!showForm)} className="text-gold" aria-label="Add address">
+            <button onClick={() => setShowForm(!showForm)} className="text-gold-deep dark:text-gold" aria-label="Add address">
               <Plus className="w-5 h-5" />
             </button>
           </div>
@@ -435,7 +435,7 @@ function LoggedInAccount({ user, signOut }) {
                   <MapPin className="w-4 h-4 text-gold flex-shrink-0 mt-1" />
                   <div className="flex-1">
                     {addr.label && (
-                      <p className="font-sans text-xs uppercase tracking-widest text-gold mb-1">{addr.label}</p>
+                      <p className="font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold mb-1">{addr.label}</p>
                     )}
                     <p className="font-sans text-sm text-espresso dark:text-cream">{addr.full_name}</p>
                     <p className="font-sans text-xs text-espresso/60 dark:text-cream/60">{addr.phone}</p>

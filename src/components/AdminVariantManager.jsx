@@ -45,7 +45,7 @@ function AdminVariantManager({ productId, basePrice }) {
 
   return (
     <div className="border-t border-gold/10 mt-3 pt-3">
-      <p className="font-sans text-xs uppercase tracking-widest text-gold mb-2">
+      <p className="font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold mb-2">
         Variants {variants.length > 0 && `(${variants.length})`}
       </p>
       <p className="font-sans text-xs text-espresso/40 dark:text-cream/40 mb-3">
@@ -63,7 +63,7 @@ function AdminVariantManager({ productId, basePrice }) {
                 {v.sku && <span className="text-espresso/40 dark:text-cream/40"> · {v.sku}</span>}
               </span>
               <span className="text-espresso/60 dark:text-cream/60">Stock: {v.stock}</span>
-              {v.price_override && <span className="text-gold-deep dark:text-gold">{formatPrice(v.price_override)}</span>}
+              {v.price_override && <span className="text-gold-deep dark:text-gold-deep dark:text-gold">{formatPrice(v.price_override)}</span>}
               <button onClick={() => deleteVariant(v.id)} aria-label="Delete variant">
                 <Trash2 className="w-3.5 h-3.5 text-espresso/40 dark:text-cream/40 hover:text-red-500" />
               </button>
@@ -87,7 +87,7 @@ function AdminVariantManager({ productId, basePrice }) {
         <input type="number" placeholder={`Price override (default ${formatPrice(basePrice)})`} value={form.price_override} onChange={(e) => setForm({ ...form, price_override: e.target.value })}
           className="col-span-2 bg-transparent border border-gold/30 rounded-lg px-3 py-2 font-sans text-xs text-espresso dark:text-cream outline-none focus:border-gold" />
       </div>
-      <button onClick={addVariant} className="flex items-center gap-1 font-sans text-xs text-gold hover:text-gold-light">
+      <button onClick={addVariant} className="flex items-center gap-1 font-sans text-xs text-gold-deep dark:text-gold hover:text-gold-light">
         <Plus className="w-3.5 h-3.5" /> Add Variant
       </button>
     </div>

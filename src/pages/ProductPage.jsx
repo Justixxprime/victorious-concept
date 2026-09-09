@@ -175,13 +175,13 @@ function ProductPage() {
 
         <div className="flex flex-col gap-6">
           <div>
-            <p className="font-sans text-xs uppercase tracking-widest text-gold mb-2">
+            <p className="font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold mb-2">
               {product.category}
             </p>
             <h1 className="font-display italic font-semibold text-3xl md:text-4xl text-espresso dark:text-cream">
               {product.name}
             </h1>
-            <p className="font-sans text-xl text-gold mt-3">
+            <p className="font-sans text-xl text-gold-deep dark:text-gold-deep dark:text-gold mt-3">
               {formatPrice(effectivePrice)}
             </p>
           </div>
@@ -264,7 +264,7 @@ function ProductPage() {
             href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Hi, I have a question about the ${product.name} (${formatPrice(product.price)})`)}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 font-sans text-sm text-gold hover:underline"
+            className="flex items-center justify-center gap-2 font-sans text-sm text-gold-deep dark:text-gold hover:underline"
           >
             <MessageCircle className="w-4 h-4" /> Ask a question about this piece
           </a>
@@ -286,11 +286,11 @@ function ProductPage() {
 
           <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gold/20">
             <div>
-              <p className="font-sans text-xs uppercase tracking-widest text-gold mb-2">Category</p>
+              <p className="font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold mb-2">Category</p>
               <p className="font-sans text-sm text-espresso dark:text-cream capitalize">{product.category}</p>
             </div>
             <div>
-              <p className="font-sans text-xs uppercase tracking-widest text-gold mb-2">Availability</p>
+              <p className="font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold mb-2">Availability</p>
               <p className="font-sans text-sm text-espresso dark:text-cream">
                 {isPreorder ? 'Available for preorder' : product.stock > 0 ? 'In stock, ready to ship' : 'Currently unavailable'}
               </p>
@@ -298,7 +298,7 @@ function ProductPage() {
           </div>
 
           <div className="pt-4 border-t border-gold/20">
-            <p className="font-sans text-xs uppercase tracking-widest text-gold mb-3">
+            <p className="font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold mb-3">
               Care & Handling
             </p>
             <p className="font-sans text-sm text-espresso/70 dark:text-cream/70 leading-relaxed">

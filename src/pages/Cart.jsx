@@ -69,7 +69,7 @@ function Cart() {
             to="/account"
             className="flex items-center gap-3 bg-gold/10 hover:bg-gold/15 rounded-2xl px-5 py-4 mb-8 transition-colors"
           >
-            <UserCircle2 className="w-5 h-5 text-gold flex-shrink-0" />
+            <UserCircle2 className="w-5 h-5 text-gold-deep dark:text-gold flex-shrink-0" />
             <span className="font-sans text-xs text-espresso/70 dark:text-cream/70">
               You're browsing as a guest. This cart only lives on this device. Sign in to keep it
               synced everywhere, save addresses, and see your full order history.
@@ -108,7 +108,7 @@ function Cart() {
                     </span>
                   )}
                 </h3>
-                <p className="font-sans text-sm text-gold-deep dark:text-gold mt-1">
+                <p className="font-sans text-sm text-gold-deep dark:text-gold-deep dark:text-gold mt-1">
                   {formatPrice(item.price)}
                 </p>
               </div>
@@ -136,7 +136,7 @@ function Cart() {
               <button
                 onClick={() => removeFromCart(item.id, item.variantId || null)}
                 aria-label="Remove item"
-                className="text-espresso/40 dark:text-cream/40 hover:text-gold transition-colors"
+                className="text-espresso/40 dark:text-cream/40 hover:text-gold-deep dark:text-gold transition-colors"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
@@ -186,7 +186,7 @@ function Cart() {
             <span>{formatPrice(subtotal)}</span>
           </div>
           {discount > 0 && (
-            <div className="flex justify-between font-sans text-sm text-gold mb-2">
+            <div className="flex justify-between font-sans text-sm text-gold-deep dark:text-gold mb-2">
               <span>Discount</span>
               <span>-{formatPrice(discount)}</span>
             </div>

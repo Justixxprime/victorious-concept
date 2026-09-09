@@ -69,10 +69,10 @@ function SearchOverlay({ onClose }) {
             {recentSearches.length > 0 && (
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <p className="font-sans text-xs uppercase tracking-widest text-gold flex items-center gap-2">
+                  <p className="font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold flex items-center gap-2">
                     <Clock className="w-3 h-3" /> Recent Searches
                   </p>
-                  <button onClick={clearRecent} className="font-sans text-xs text-espresso/40 dark:text-cream/40 hover:text-gold">
+                  <button onClick={clearRecent} className="font-sans text-xs text-espresso/40 dark:text-cream/40 hover:text-gold-deep dark:text-gold">
                     Clear
                   </button>
                 </div>
@@ -91,7 +91,7 @@ function SearchOverlay({ onClose }) {
             )}
 
             <div>
-              <p className="font-sans text-xs uppercase tracking-widest text-gold mb-3 flex items-center gap-2">
+              <p className="font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold mb-3 flex items-center gap-2">
                 <TrendingUp className="w-3 h-3" /> Popular Categories
               </p>
               <div className="flex flex-wrap gap-2">
@@ -126,7 +126,7 @@ function SearchOverlay({ onClose }) {
                   <img src={product.image} alt={product.name} className="w-14 h-14 rounded-lg object-cover flex-shrink-0" />
                   <div>
                     <p className="font-sans text-sm text-espresso dark:text-cream">{product.name}</p>
-                    <p className="font-sans text-xs text-gold-deep dark:text-gold">{formatPrice(product.price)}</p>
+                    <p className="font-sans text-xs text-gold-deep dark:text-gold-deep dark:text-gold">{formatPrice(product.price)}</p>
                   </div>
                 </Link>
               ))}
@@ -149,7 +149,7 @@ function SearchOverlay({ onClose }) {
                 <p className="font-sans text-sm text-espresso dark:text-cream">
                   {product.name}
                 </p>
-                <p className="font-sans text-xs text-gold">
+                <p className="font-sans text-xs text-gold-deep dark:text-gold">
                   {formatPrice(product.price)}
                 </p>
               </div>

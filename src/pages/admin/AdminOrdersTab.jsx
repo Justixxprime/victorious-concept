@@ -6,7 +6,7 @@ import { Trash2, Undo2 } from 'lucide-react'
 
 const paymentBadgeStyles = {
   paid: 'bg-green-500/10 text-green-600',
-  pending: 'bg-gold/20 text-gold-deep dark:text-gold',
+  pending: 'bg-gold/20 text-gold-deep dark:text-gold-deep dark:text-gold',
   unpaid: 'bg-espresso/10 text-espresso/60 dark:bg-cream/10 dark:text-cream/60',
   failed: 'bg-red-500/10 text-red-500',
   refunded: 'bg-purple-500/10 text-purple-500',
@@ -123,7 +123,7 @@ export default function AdminOrdersTab({ orders, ordersLoading, setOrders }) {
                 {canManuallyVerify && (
                   <button
                     onClick={() => markPaid(order)}
-                    className="font-sans text-xs font-medium bg-gold/20 hover:bg-gold/30 text-gold rounded-full px-3 py-1 transition-colors"
+                    className="font-sans text-xs font-medium bg-gold/20 hover:bg-gold/30 text-gold-deep dark:text-gold rounded-full px-3 py-1 transition-colors"
                   >
                     Mark as paid
                   </button>

@@ -32,7 +32,7 @@ function Journal() {
     <section className="bg-cream dark:bg-espresso transition-colors py-16 px-6 min-h-screen">
       <SEO title="Journal" description="Stories, styling tips and updates from Victorious Concept." />
       <div className="max-w-4xl mx-auto">
-        <p className="font-sans text-xs uppercase tracking-widest text-gold mb-4">
+        <p className="font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold mb-4">
           Stories &amp; Updates
         </p>
         <h1 className="font-display italic font-semibold text-4xl md:text-5xl text-espresso dark:text-cream mb-12">
@@ -54,7 +54,7 @@ function Journal() {
                 alt={post.title}
                 className="aspect-video rounded-2xl mb-5"
               />
-              <span className="inline-block font-sans text-xs uppercase tracking-widest text-gold mb-3">
+              <span className="inline-block font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold mb-3">
                 {post.topic}
               </span>
               <h2 className="font-display italic text-2xl text-espresso dark:text-cream mb-2">

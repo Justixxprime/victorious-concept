@@ -148,7 +148,7 @@ export default function AdminProductsTab({ products, loading, categories }) {
 
       <div className="bg-gold/5 rounded-2xl p-6 mb-6 mt-6 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-1">
+          <h2 className="font-sans text-sm uppercase tracking-widest text-gold-deep dark:text-gold mb-1">
             Starter Catalog
           </h2>
           <p className="font-sans text-xs text-espresso/60 dark:text-cream/60">
@@ -165,7 +165,7 @@ export default function AdminProductsTab({ products, loading, categories }) {
       </div>
 
       <div className="bg-gold/5 rounded-2xl p-6 mb-12">
-        <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">
+        <h2 className="font-sans text-sm uppercase tracking-widest text-gold-deep dark:text-gold mb-4">
           {editing ? 'Edit Product' : 'Add New Product'}
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -216,12 +216,12 @@ export default function AdminProductsTab({ products, loading, categories }) {
             <Plus className="w-4 h-4" /> {editing ? 'Save Changes' : 'Add Product'}
           </button>
           {editing && (
-            <button onClick={resetForm} className="font-sans text-sm text-espresso/60 dark:text-cream/60 hover:text-gold">Cancel</button>
+            <button onClick={resetForm} className="font-sans text-sm text-espresso/60 dark:text-cream/60 hover:text-gold-deep dark:text-gold">Cancel</button>
           )}
         </div>
       </div>
 
-      <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">All Products ({products.length})</h2>
+      <h2 className="font-sans text-sm uppercase tracking-widest text-gold-deep dark:text-gold mb-4">All Products ({products.length})</h2>
       {loading ? (
         <p className="font-sans text-sm text-espresso/60 dark:text-cream/60">Loading...</p>
       ) : (
@@ -232,11 +232,11 @@ export default function AdminProductsTab({ products, loading, categories }) {
                 <img src={product.image} alt={product.name} className="w-14 h-14 rounded-lg object-cover flex-shrink-0" />
                 <div className="flex-1">
                   <p className="font-sans text-sm text-espresso dark:text-cream">{product.name}</p>
-                  <p className="font-sans text-xs text-gold-deep dark:text-gold">{formatPrice(product.price)} · {product.category} · {product.status}</p>
+                  <p className="font-sans text-xs text-gold-deep dark:text-gold-deep dark:text-gold">{formatPrice(product.price)} · {product.category} · {product.status}</p>
                 </div>
                 <button
                   onClick={() => setExpandedVariants(expandedVariants === product.id ? null : product.id)}
-                  className="font-sans text-xs text-espresso/50 dark:text-cream/50 hover:text-gold underline"
+                  className="font-sans text-xs text-espresso/50 dark:text-cream/50 hover:text-gold-deep dark:text-gold underline"
                 >
                   Variants
                 </button>

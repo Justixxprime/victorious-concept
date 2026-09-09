@@ -57,7 +57,7 @@ export default function AdminShippingTab() {
   return (
     <div className="max-w-lg flex flex-col gap-8">
       <div className="bg-gold/5 rounded-2xl p-6">
-        <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">New Shipping Zone</h2>
+        <h2 className="font-sans text-sm uppercase tracking-widest text-gold-deep dark:text-gold mb-4">New Shipping Zone</h2>
         <div className="flex flex-col gap-3 mb-3">
           <input type="text" placeholder="Zone name (e.g. Lagos, Interstate by road, By air)" value={shippingForm.name} onChange={(e) => setShippingForm({ ...shippingForm, name: e.target.value })}
             className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold" />
@@ -89,13 +89,13 @@ export default function AdminShippingTab() {
         <button onClick={addShippingZone} className="bg-gold text-espresso font-sans font-medium px-6 py-3 rounded-full hover:bg-gold-light transition-colors">Add Zone</button>
       </div>
       <div>
-        <h2 className="font-sans text-sm uppercase tracking-widest text-gold mb-4">All Zones</h2>
+        <h2 className="font-sans text-sm uppercase tracking-widest text-gold-deep dark:text-gold mb-4">All Zones</h2>
         <div className="flex flex-col gap-2">
           {shippingZones.map((z) => (
             <div key={z.id} className="flex items-center gap-3 border border-gold/20 rounded-xl p-4">
               <div className="flex-1">
                 <span className="font-sans text-sm text-espresso dark:text-cream">{z.name}</span>
-                <span className="font-sans text-xs text-gold ml-2">
+                <span className="font-sans text-xs text-gold-deep dark:text-gold-deep dark:text-gold ml-2">
                   {z.is_variable ? (z.fee > 0 ? `From ${formatPrice(z.fee)} · confirmed via WhatsApp` : 'Confirmed via WhatsApp') : formatPrice(z.fee)}
                 </span>
                 {z.estimated_days && <span className="font-sans text-xs text-espresso/50 dark:text-cream/50 ml-2">{z.estimated_days}</span>}
