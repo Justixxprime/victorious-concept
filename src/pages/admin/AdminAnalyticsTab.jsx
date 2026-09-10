@@ -127,7 +127,7 @@ export default function AdminAnalyticsTab({ products, orders }) {
         {loadingItems ? (
           <p className="font-sans text-sm text-espresso/50 dark:text-cream/50">Loading...</p>
         ) : topProducts.length === 0 ? (
-          <p className="font-sans text-sm text-espresso/50 dark:text-cream/50">No paid orders yet — this fills in once orders are confirmed.</p>
+          <p className="font-sans text-sm text-espresso/50 dark:text-cream/50">No paid orders yet. This fills in once orders are confirmed.</p>
         ) : (
           <div className="flex flex-col gap-2">
             {topProducts.map((p, i) => (
@@ -145,7 +145,7 @@ export default function AdminAnalyticsTab({ products, orders }) {
       <div>
         <h3 className="font-sans text-sm uppercase tracking-widest text-gold-deep dark:text-gold mb-2">Checkout Funnel</h3>
         <p className="font-sans text-xs text-espresso/40 dark:text-cream/40 mb-4">
-          The only two real signals this data supports — order created, order paid. Product views and
+          The only two real signals this data supports: order created, order paid. Product views and
           add-to-cart events aren't tracked server-side, so a fuller funnel isn't available yet.
         </p>
         <div className="flex items-center gap-4 bg-gold/5 rounded-2xl p-5">
@@ -172,7 +172,7 @@ export default function AdminAnalyticsTab({ products, orders }) {
           </h3>
           <p className="font-sans text-xs text-espresso/40 dark:text-cream/40 mb-3">
             Orders created more than 24 hours ago that still haven't been paid. Anyone with an
-            email on file gets an automatic reminder once a day — tap an order below to nudge
+            email on file gets an automatic reminder once a day. Tap an order below to nudge
             them on WhatsApp right now instead.
           </p>
           <div className="flex flex-col gap-2">
@@ -180,7 +180,7 @@ export default function AdminAnalyticsTab({ products, orders }) {
               <a
                 key={o.id}
                 href={`https://wa.me/${(o.customer_phone || '').replace(/\D/g, '')}?text=${encodeURIComponent(
-                  `Hi ${o.customer_name}, just checking in — your order ${o.order_number} (${formatPrice(o.total)}) from Victorious Concept is still waiting on payment. Let us know if you'd like to go ahead or if anything's changed!`
+                  `Hi ${o.customer_name}, just checking in. Your order ${o.order_number} (${formatPrice(o.total)}) from Victorious Concept is still waiting on payment. Let us know if you'd like to go ahead or if anything's changed!`
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"

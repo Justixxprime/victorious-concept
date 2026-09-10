@@ -190,13 +190,13 @@ export default function AdminProductsTab({ products, loading, categories }) {
             className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold" />
           <input type="number" placeholder="Price (Naira)" value={form.price} onChange={(e) => update('price', e.target.value)}
             className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold" />
-          <select value={form.category} onChange={(e) => update('category', e.target.value)}
+          <select value={form.category} aria-label="Product category" onChange={(e) => update('category', e.target.value)}
             className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold">
             {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
           <input type="number" placeholder="Stock quantity" value={form.stock} onChange={(e) => update('stock', e.target.value)}
             className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold" />
-          <select value={form.status} onChange={(e) => update('status', e.target.value)}
+          <select value={form.status} aria-label="Product status" onChange={(e) => update('status', e.target.value)}
             className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold md:col-span-2">
             <option value="active">Active (visible, normal sale)</option>
             <option value="preorder">Preorder (visible, orderable even at 0 stock)</option>

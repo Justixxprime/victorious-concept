@@ -36,6 +36,25 @@ export default async function handler(req, res) {
   if (!isAdmin) {
     return res.status(403).json({ error: 'Admin access required' })
   }
+  const { data: { user: callerUser } } = await callerClient.auth.getUser()
+
+  /**
+   * @param {string} action
+   * @param {Record<string, unknown>} metadata
+   */
+  async function logRefundAction(action, metadata) {
+    try {
+      await supabaseAdmin.from('audit_logs').insert({
+        actor_email: callerUser?.email || null,
+        action,
+        entity: 'return_request',
+        entity_id: String(returnRequestId),
+        metadata,
+      })
+    } catch (err) {
+      captureServerException(err, { context: 'audit_log_write_failed', returnRequestId })
+    }
+  }
 
   try {
     const { data: returnRequest } = await supabaseAdmin
@@ -68,6 +87,7 @@ export default async function handler(req, res) {
       if (!rejected) {
         return res.status(409).json({ error: 'This request was just decided by someone else' })
       }
+      await logRefundAction('return_rejected', { order_number: order.order_number })
       return res.status(200).json({ status: 'rejected' })
     }
 
@@ -173,6 +193,12 @@ export default async function handler(req, res) {
         .update({ payment_status: 'refunded', order_status: 'refunded' })
         .eq('id', order.id)
     }
+
+    await logRefundAction('return_approved_refunded', {
+      order_number: order.order_number,
+      refund_amount: refundAmount,
+      full_order: isFullOrderReturn,
+    })
 
     return res.status(200).json({ status: 'refunded', refundAmount })
   } catch (err) {

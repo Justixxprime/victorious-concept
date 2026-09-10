@@ -49,6 +49,7 @@ export default function AdminBusinessTab() {
         </p>
         <input
           type="text"
+          aria-label="WhatsApp number"
           value={businessForm.whatsappNumber}
           onChange={(e) => setBusinessForm({ ...businessForm, whatsappNumber: e.target.value.replace(/[^0-9]/g, '') })}
           className="w-full bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"

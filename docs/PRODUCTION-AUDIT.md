@@ -168,14 +168,10 @@ category) — only price and stock changes are diffed and logged, since
 those are the fields with real financial/inventory consequence; logging
 every field on every save would make the log noisy rather than useful.
 
-**Remaining gap:** the refund/return log entry is written client-side
-after a successful API response, not from inside `api/process-refund.js`
-itself. This is consistent with how every other admin action in this
-codebase is logged, but a server-side log write (inside the same
-transaction as the refund) would be marginally more tamper-resistant.
-Low priority given the refund itself is already fully server-authoritative
-and idempotent — the log is a convenience/accountability record, not a
-security control.
+**Remaining gap:** none. Refund/return log entries are written from inside
+`api/process-refund.js` itself, in the same server-side flow as the refund
+decision, using the verified caller's own email as the actor — not from
+the client after the fact.
 
 ---
 
@@ -254,23 +250,42 @@ admin-facing copy that earlier dash-removal passes had missed (3 in
 
 ---
 
+## Returns & Refunds — 🟢 GOOD (corrected from an earlier draft of this doc)
+
+An earlier version of this document, written today, incorrectly listed
+partial-item returns as not yet built. That was wrong — re-verified
+directly against `OrderHistory.jsx` and `api/process-refund.js` rather
+than assumed. **What actually exists:** the customer-facing return form
+(`OrderHistory.jsx`) defaults every line item to selected but lets the
+customer uncheck any they're keeping, so a return can cover the whole
+order or just part of it. `api/process-refund.js` recomputes the refund
+amount server-side from the *original* order's real line-item prices, not
+from whatever the `return_requests.items` field claims, capping the
+returned quantity against what was actually ordered — so a tampered
+`items` payload can't inflate a refund. Shipping is only refunded when
+every line item on the order is being returned (`isFullOrderReturn`);
+a genuinely partial return only refunds the value of the items coming
+back. This is a materially more careful implementation than "partial
+returns" usually means — it's not just a UI checkbox, the money math is
+server-authoritative all the way through.
+
+---
+
 ## Genuinely open items (not yet built, in rough priority order)
 
 1. **Full keyboard-nav/ARIA audit of the admin panel itself** — the
    customer-facing site got this treatment; the admin panel did not,
    since it's internal-only tooling. Low priority unless the business
    grows to more than the two current admin users.
-2. **Partial-item returns** — a return request currently covers a whole
-   order, not individual line items within it.
-3. **TypeScript coverage** is a pilot (JSDoc-based, not a full migration),
+2. **TypeScript coverage** is a pilot (JSDoc-based, not a full migration),
    currently scoped to `api/_lib/**` plus the payment/order serverless
    handlers. Expanding further is a judgment call, not a defect.
-4. **Server-side (rather than client-side) audit log writes for refunds**
-   — see §10's noted gap. Low priority, not a security issue.
-5. **Deeper Phase 3/4/5 creative work and Phase 10 final polish** from the
+3. **Deeper Phase 3/4/5 creative work and Phase 10 final polish** from the
    master redesign brief are substantially complete (cursor experience,
    richer Lookbook/Journal storytelling, site-images-from-admin, design
    system consistency); anything further here is refinement, not a gap.
 
 Nothing in this list is a security or correctness defect. Everything
-flagged 🔴 or 🟠 in the original 2026-08-28 audit is now 🟢.
+flagged 🔴 or 🟠 in the original 2026-08-28 audit is now 🟢. Audit log
+writes for refunds moved server-side this session (§10) and are no longer
+listed here.

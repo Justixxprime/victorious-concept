@@ -111,10 +111,14 @@ function Admin() {
           </div>
         </div>
 
-        <div className="flex gap-2 mb-10 overflow-x-auto pb-2">
+        <div role="tablist" aria-label="Admin sections" className="flex gap-2 mb-10 overflow-x-auto pb-2">
           {tabs.map((t) => (
             <button
               key={t.id}
+              id={`admin-tab-${t.id}`}
+              role="tab"
+              aria-selected={tab === t.id}
+              aria-controls="admin-tabpanel"
               onClick={() => setTab(t.id)}
               className={`flex items-center gap-2 px-5 py-2 rounded-full text-xs font-sans uppercase tracking-wide border whitespace-nowrap transition-colors ${
                 tab === t.id ? 'bg-gold text-espresso border-gold' : 'border-gold/30 text-espresso dark:text-cream'
@@ -125,6 +129,7 @@ function Admin() {
           ))}
         </div>
 
+        <div id="admin-tabpanel" role="tabpanel" aria-labelledby={`admin-tab-${tab}`}>
         {tab === 'products' && <AdminProductsTab products={products} loading={loading} categories={categories} />}
         {tab === 'orders' && <AdminOrdersTab orders={orders} ordersLoading={ordersLoading} setOrders={setOrders} />}
         {tab === 'customers' && <AdminCustomersTab orders={orders} />}
@@ -141,6 +146,7 @@ function Admin() {
         {tab === 'business' && <AdminBusinessTab />}
         {tab === 'analytics' && <AdminAnalyticsTab products={products} orders={orders} />}
         {tab === 'audit' && <AdminAuditLogTab />}
+        </div>
       </div>
     </section>
   )

@@ -153,6 +153,7 @@ export default function AdminOrdersTab({ orders, ordersLoading, setOrders }) {
 
               <select
                 value={order.order_status || 'pending_payment'}
+                aria-label={`Order status for ${order.order_number}`}
                 onChange={(e) => updateStatus(order, e.target.value)}
                 className="bg-transparent border border-gold/30 rounded-full px-3 py-1 font-sans text-xs text-espresso dark:text-cream outline-none focus:border-gold mb-3"
               >

@@ -218,7 +218,7 @@ function OrderHistory() {
                           {returnItemIds.length > 0 && (
                             <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 mt-2">
                               Estimated refund: {formatPrice(order.items.filter((i) => returnItemIds.includes(i.id)).reduce((sum, i) => sum + i.price * i.quantity, 0) + (returnItemIds.length === order.items.length ? order.shipping_fee : 0))}
-                              {returnItemIds.length === order.items.length ? ' (includes delivery fee, since this returns the whole order)' : ' — delivery fee isn\'t refunded on a partial return'}
+                              {returnItemIds.length === order.items.length ? ' (includes delivery fee, since this returns the whole order)' : ' (delivery fee isn\'t refunded on a partial return)'}
                             </p>
                           )}
                         </div>

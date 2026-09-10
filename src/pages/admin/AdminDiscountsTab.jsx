@@ -86,7 +86,7 @@ export default function AdminDiscountsTab({ categories }) {
           <input type="text" placeholder="CODE" value={couponForm.code} onChange={(e) => setCouponForm({ ...couponForm, code: e.target.value })}
             className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold" />
 
-          <select value={couponForm.discount_type} onChange={(e) => setCouponForm({ ...couponForm, discount_type: e.target.value })}
+          <select value={couponForm.discount_type} aria-label="Discount type" onChange={(e) => setCouponForm({ ...couponForm, discount_type: e.target.value })}
             className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold">
             <option value="percent">Percentage off</option>
             <option value="fixed">Fixed amount off</option>
@@ -102,7 +102,7 @@ export default function AdminDiscountsTab({ categories }) {
               className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold" />
           )}
 
-          <select value={couponForm.applies_to_category} onChange={(e) => setCouponForm({ ...couponForm, applies_to_category: e.target.value })}
+          <select value={couponForm.applies_to_category} aria-label="Applies to category" onChange={(e) => setCouponForm({ ...couponForm, applies_to_category: e.target.value })}
             className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold">
             <option value="">Applies to the whole order</option>
             {categories.map((cat) => (
@@ -111,26 +111,26 @@ export default function AdminDiscountsTab({ categories }) {
           </select>
           {couponForm.discount_type === 'free_shipping' && couponForm.applies_to_category && (
             <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 -mt-1">
-              With free delivery, this just means the order needs at least one item from this category to qualify — the whole delivery fee is still waived.
+              With free delivery, this just means the order needs at least one item from this category to qualify. The whole delivery fee is still waived.
             </p>
           )}
         </div>
 
         <div className="flex flex-col gap-2 mb-4">
-          <label className="font-sans text-xs text-espresso/50 dark:text-cream/50">
-            Expires on (optional — leave blank for no expiry)
+          <label htmlFor="coupon-expires-at" className="font-sans text-xs text-espresso/50 dark:text-cream/50">
+            Expires on (optional, leave blank for no expiry)
           </label>
-          <input type="date" value={couponForm.expires_at} onChange={(e) => setCouponForm({ ...couponForm, expires_at: e.target.value })}
+          <input id="coupon-expires-at" type="date" value={couponForm.expires_at} onChange={(e) => setCouponForm({ ...couponForm, expires_at: e.target.value })}
             className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold" />
-          <label className="font-sans text-xs text-espresso/50 dark:text-cream/50 mt-2">
-            Maximum total uses (optional — leave blank for unlimited)
+          <label htmlFor="coupon-max-uses" className="font-sans text-xs text-espresso/50 dark:text-cream/50 mt-2">
+            Maximum total uses (optional, leave blank for unlimited)
           </label>
-          <input type="number" placeholder="e.g. 50" value={couponForm.max_uses} onChange={(e) => setCouponForm({ ...couponForm, max_uses: e.target.value })}
+          <input id="coupon-max-uses" type="number" placeholder="e.g. 50" value={couponForm.max_uses} onChange={(e) => setCouponForm({ ...couponForm, max_uses: e.target.value })}
             className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold" />
-          <label className="font-sans text-xs text-espresso/50 dark:text-cream/50 mt-2">
-            Minimum order amount, in Naira (optional) — checked against the whole cart, even for a category-restricted code
+          <label htmlFor="coupon-min-order" className="font-sans text-xs text-espresso/50 dark:text-cream/50 mt-2">
+            Minimum order amount, in Naira (optional). Checked against the whole cart, even for a category-restricted code
           </label>
-          <input type="number" placeholder="e.g. 20000" value={couponForm.min_order_amount} onChange={(e) => setCouponForm({ ...couponForm, min_order_amount: e.target.value })}
+          <input id="coupon-min-order" type="number" placeholder="e.g. 20000" value={couponForm.min_order_amount} onChange={(e) => setCouponForm({ ...couponForm, min_order_amount: e.target.value })}
             className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold" />
         </div>
         <button onClick={addCoupon} className="bg-gold text-espresso font-sans font-medium px-6 py-3 rounded-full hover:bg-gold-light transition-colors">Create Code</button>

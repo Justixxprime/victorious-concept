@@ -129,6 +129,7 @@ export default function AdminContentTab({ products }) {
           <div className="flex flex-col gap-4">
             <select
               value={spotlightForm.productId}
+              aria-label="Spotlight product"
               onChange={(e) => setSpotlightForm({ ...spotlightForm, productId: e.target.value })}
               className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
             >
@@ -162,6 +163,7 @@ export default function AdminContentTab({ products }) {
               <select
                 key={i}
                 value={lookForm.productIds[i] || ''}
+                aria-label={`Shop the look, item ${i + 1}`}
                 onChange={(e) => updateLookProductId(i, e.target.value)}
                 className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
               >
@@ -234,6 +236,7 @@ export default function AdminContentTab({ products }) {
                   <select
                     key={productIndex}
                     value={productId}
+                    aria-label={`Look ${lookIndex + 1}, item ${productIndex + 1}`}
                     onChange={(e) => updateLookProduct(lookIndex, productIndex, e.target.value)}
                     className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold"
                   >

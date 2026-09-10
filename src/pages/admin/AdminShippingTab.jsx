@@ -108,7 +108,7 @@ export default function AdminShippingTab() {
             </div>
           ))}
           {shippingZones.length === 0 && (
-            <p className="font-sans text-sm text-espresso/50 dark:text-cream/50">No shipping zones yet — checkout won't be able to calculate delivery until at least one is added.</p>
+            <p className="font-sans text-sm text-espresso/50 dark:text-cream/50">No shipping zones yet. Checkout won't be able to calculate delivery until at least one is added.</p>
           )}
         </div>
       </div>
