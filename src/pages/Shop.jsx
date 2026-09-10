@@ -9,10 +9,11 @@ import ProductCardSkeleton from '../components/ProductCardSkeleton'
 import Breadcrumbs from '../components/Breadcrumbs'
 import { useSearchParams } from 'react-router-dom'
 import PageHero from '../components/PageHero'
-import { siteImages } from '../data/siteImages'
+import { useSiteImages } from '../hooks/useSiteImages'
 import { useFocusTrap } from '../hooks/useFocusTrap'
 
 function Shop() {
+  const { siteImages } = useSiteImages()
   const { products, loading, error } = useProducts()
   const { categories } = useCategories()
   const [searchParams, setSearchParams] = useSearchParams()

@@ -17,7 +17,7 @@ function JournalPost() {
         <h1 className="font-display italic text-3xl text-espresso dark:text-cream">
           Story not found
         </h1>
-        <Link to="/journal" className="text-gold hover:underline">
+        <Link to="/journal" className="text-gold-deep dark:text-gold hover:underline">
           Back to Journal
         </Link>
       </div>

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import SEO from '../components/SEO'
 import PageHero from '../components/PageHero'
-import { siteImages } from '../data/siteImages'
+import { useSiteImages } from '../hooks/useSiteImages'
 import { supabase } from '../lib/supabaseClient'
 import { formatPrice } from '../utils/formatPrice'
 import { useBusinessSettings } from '../context/BusinessSettingsContext'
@@ -41,6 +41,7 @@ const paymentStatusLabels = {
 }
 
 function TrackOrder() {
+  const { siteImages } = useSiteImages()
   const { whatsappNumber } = useBusinessSettings()
   const [orderNumber, setOrderNumber] = useState('')
   const [phone, setPhone] = useState('')

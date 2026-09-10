@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useCategories } from '../hooks/useCategories'
 import { ShoppingBag, Footprints, Shirt, Droplet, Gem, Tag } from 'lucide-react'
-import { categoryImages } from '../data/siteImages'
+import { useSiteImages } from '../hooks/useSiteImages'
 
 const iconMap = {
   bags: ShoppingBag,
@@ -14,6 +14,7 @@ const iconMap = {
 }
 
 function CategoryGrid() {
+  const { categoryImages } = useSiteImages()
   const { categories } = useCategories()
 
   return (

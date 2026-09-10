@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ArrowRight, MessageCircle, MapPin, Package } from 'lucide-react'
 import RevealImage from './RevealImage'
-import { siteImages } from '../data/siteImages'
+import { useSiteImages } from '../hooks/useSiteImages'
 
 const steps = [
   {
@@ -23,6 +23,7 @@ const steps = [
 ]
 
 function SourceStorySection() {
+  const { siteImages } = useSiteImages()
   return (
     <section className="relative bg-espresso text-cream py-24 px-6 overflow-hidden">
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">

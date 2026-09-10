@@ -7,7 +7,7 @@ import { supabase } from '../lib/supabaseClient'
 import SEO from '../components/SEO'
 import {
   Tags, LayoutDashboard, BarChart3, Percent, Users, Mail,
-  Quote, Layers, Package, Truck, RotateCcw, Settings, Star,
+  Quote, Layers, Package, Truck, RotateCcw, Settings, Star, Image,
 } from 'lucide-react'
 import AdminProductsTab from './admin/AdminProductsTab'
 import AdminOrdersTab from './admin/AdminOrdersTab'
@@ -21,6 +21,7 @@ import AdminMessagesTab from './admin/AdminMessagesTab'
 import AdminTestimonialsTab from './admin/AdminTestimonialsTab'
 import AdminReviewsTab from './admin/AdminReviewsTab'
 import AdminContentTab from './admin/AdminContentTab'
+import AdminImagesTab from './admin/AdminImagesTab'
 import AdminBusinessTab from './admin/AdminBusinessTab'
 import AdminAnalyticsTab from './admin/AdminAnalyticsTab'
 
@@ -88,6 +89,7 @@ function Admin() {
     { id: 'testimonials', label: 'Testimonials', icon: Quote },
     { id: 'reviews', label: 'Reviews', icon: Star },
     { id: 'content', label: 'Homepage', icon: LayoutDashboard },
+    { id: 'images', label: 'Site Images', icon: Image },
     { id: 'business', label: 'Business Info', icon: Settings },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
   ]
@@ -133,6 +135,7 @@ function Admin() {
         {tab === 'testimonials' && <AdminTestimonialsTab />}
         {tab === 'reviews' && <AdminReviewsTab />}
         {tab === 'content' && <AdminContentTab products={products} />}
+        {tab === 'images' && <AdminImagesTab />}
         {tab === 'business' && <AdminBusinessTab />}
         {tab === 'analytics' && <AdminAnalyticsTab products={products} orders={orders} />}
       </div>

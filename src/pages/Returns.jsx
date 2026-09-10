@@ -1,9 +1,10 @@
 import SEO from '../components/SEO'
 import PageHero from '../components/PageHero'
-import { siteImages } from '../data/siteImages'
+import { useSiteImages } from '../hooks/useSiteImages'
 import { RefreshCw, ShieldCheck, MessageCircle } from 'lucide-react'
 
 function Returns() {
+  const { siteImages } = useSiteImages()
   return (
     <>
       <SEO title="Returns" description="Returns and exchange policy for Victorious Concept." />

@@ -2,11 +2,12 @@ import { MessageCircle, Mail, Phone, ArrowRight } from 'lucide-react'
 import { motion } from 'framer-motion'
 import SEO from '../components/SEO'
 import PageHero from '../components/PageHero'
-import { siteImages } from '../data/siteImages'
+import { useSiteImages } from '../hooks/useSiteImages'
 import { useState } from 'react'
 import { useBusinessSettings } from '../context/BusinessSettingsContext'
 
 function Contact() {
+  const { siteImages } = useSiteImages()
   const { whatsappNumber } = useBusinessSettings()
   const [form, setForm] = useState({ name: '', email: '', message: '' })
   const [status, setStatus] = useState('idle')

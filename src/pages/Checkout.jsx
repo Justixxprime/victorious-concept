@@ -7,13 +7,14 @@ import { useAuth } from '../context/AuthContext'
 import { useAddresses } from '../hooks/useAddresses'
 import { supabase } from '../lib/supabaseClient'
 import { formatPrice } from '../utils/formatPrice'
-import { siteImages } from '../data/siteImages'
+import { useSiteImages } from '../hooks/useSiteImages'
 import { useBusinessSettings } from '../context/BusinessSettingsContext'
 import Receipt from '../components/Receipt'
 const PaystackCheckoutTrigger = lazy(() => import('../components/PaystackCheckoutTrigger'))
 import { Printer, CreditCard, Landmark, MessageCircle, Copy, Check, PartyPopper, Loader2 } from 'lucide-react'
 
 function Checkout() {
+  const { siteImages } = useSiteImages()
   const { items, coupon, clearCart } = useCart()
   const { user } = useAuth()
   const { addresses } = useAddresses()

@@ -5,7 +5,7 @@ import ProductCard from '../components/ProductCard'
 import RevealImage from '../components/RevealImage'
 import Breadcrumbs from '../components/Breadcrumbs'
 import SEO from '../components/SEO'
-import { categoryImages, siteImages } from '../data/siteImages'
+import { useSiteImages } from '../hooks/useSiteImages'
 import { ShoppingBag, Footprints, Shirt, Droplet, Gem, Tag } from 'lucide-react'
 
 const iconMap = {
@@ -18,6 +18,7 @@ const iconMap = {
 }
 
 function CategoryPage() {
+  const { siteImages, categoryImages } = useSiteImages()
   const { categoryId } = useParams()
   const { products } = useProducts()
   const { categories } = useCategories()

@@ -3,9 +3,10 @@ import SEO from '../components/SEO'
 import PageHero from '../components/PageHero'
 import { useCollections } from '../hooks/useCollections'
 import RevealImage from '../components/RevealImage'
-import { siteImages } from '../data/siteImages'
+import { useSiteImages } from '../hooks/useSiteImages'
 
 function Collections() {
+  const { siteImages } = useSiteImages()
   const { collections, loading } = useCollections()
 
   return (

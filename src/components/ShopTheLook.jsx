@@ -2,9 +2,10 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { formatPrice } from '../utils/formatPrice'
 import RevealImage from './RevealImage'
-import { siteImages } from '../data/siteImages'
+import { useSiteImages } from '../hooks/useSiteImages'
 
 function ShopTheLook({ products, backdropImage }) {
+  const { siteImages } = useSiteImages()
   if (!products || products.length === 0) return null
 
   return (

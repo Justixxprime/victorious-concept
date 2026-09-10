@@ -1,9 +1,10 @@
 import SEO from '../components/SEO'
 import PageHero from '../components/PageHero'
-import { siteImages } from '../data/siteImages'
+import { useSiteImages } from '../hooks/useSiteImages'
 import { Truck, Globe, Package } from 'lucide-react'
 
 function Delivery() {
+  const { siteImages } = useSiteImages()
   return (
     <>
       <SEO title="Delivery" description="Delivery information for Victorious Concept orders." />

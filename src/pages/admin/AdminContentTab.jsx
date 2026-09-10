@@ -122,7 +122,7 @@ export default function AdminContentTab({ products }) {
         <div>
           <h2 className="font-sans text-sm uppercase tracking-widest text-gold-deep dark:text-gold mb-2">The Spotlight</h2>
           <p className="font-sans text-xs text-espresso/50 dark:text-cream/50 mb-4">
-            The single featured product on the homepage. Its own photos are what show here — pick
+            The single featured product on the homepage. Its own photos are what show here, just pick
             which product, no separate upload needed. Leave the dropdown on "Auto-select" to fall
             back to whichever Featured product costs the most (the old behavior).
           </p>
@@ -137,10 +137,10 @@ export default function AdminContentTab({ products }) {
                 <option key={p.id} value={p.id}>{p.name}</option>
               ))}
             </select>
-            <input type="text" placeholder="Headline (optional — leave blank for the default)" value={spotlightForm.headline}
+            <input type="text" placeholder="Headline (optional, leave blank for the default)" value={spotlightForm.headline}
               onChange={(e) => setSpotlightForm({ ...spotlightForm, headline: e.target.value })}
               className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold" />
-            <textarea placeholder="Description (optional — leave blank for the default)" rows={3} value={spotlightForm.description}
+            <textarea placeholder="Description (optional, leave blank for the default)" rows={3} value={spotlightForm.description}
               onChange={(e) => setSpotlightForm({ ...spotlightForm, description: e.target.value })}
               className="bg-transparent border border-gold/30 rounded-xl px-4 py-3 font-sans text-sm text-espresso dark:text-cream outline-none focus:border-gold resize-none" />
             <button onClick={() => updateSpotlight(spotlightForm)} className="bg-gold text-espresso font-sans font-medium px-6 py-3 rounded-full hover:bg-gold-light transition-colors self-start">

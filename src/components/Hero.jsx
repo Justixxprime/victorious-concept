@@ -3,13 +3,12 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import AnimatedLogo from './AnimatedLogo'
 import { useSiteSettings } from '../hooks/useSiteSettings'
-import { siteImages } from '../data/siteImages'
+import { useSiteImages } from '../hooks/useSiteImages'
 
-const defaults = {
+const baseDefaults = {
   label: 'The Next Chapter',
   headline: "Victorious isn't a size. It's a state of mind.",
   subtext: 'Sourced with intention, worn with confidence. Bags, shoes, clothing and accessories for the next chapter.',
-  backdropImage: siteImages.heroBackdrop,
 }
 
 const fadeUp = {
@@ -23,6 +22,8 @@ const fadeUp = {
 
 function Hero() {
   const { value } = useSiteSettings('hero')
+  const { siteImages } = useSiteImages()
+  const defaults = { ...baseDefaults, backdropImage: siteImages.heroBackdrop }
   const hero = value || defaults
 
   return (

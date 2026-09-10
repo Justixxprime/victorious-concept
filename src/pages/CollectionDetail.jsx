@@ -4,9 +4,10 @@ import PageHero from '../components/PageHero'
 import { useCollections } from '../hooks/useCollections'
 import { useProducts } from '../hooks/useProducts'
 import ProductCard from '../components/ProductCard'
-import { siteImages } from '../data/siteImages'
+import { useSiteImages } from '../hooks/useSiteImages'
 
 function CollectionDetail() {
+  const { siteImages } = useSiteImages()
   const { slug } = useParams()
   const { collections } = useCollections()
   const { products } = useProducts()

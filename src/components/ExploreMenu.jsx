@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { siteImages } from '../data/siteImages'
+import { useSiteImages } from '../hooks/useSiteImages'
 import {
   BookOpen,
   Sparkles,
@@ -26,6 +26,7 @@ const pages = [
 ]
 
 function ExploreMenu({ open, onNavigate, containerRef }) {
+  const { siteImages } = useSiteImages()
   return (
     <AnimatePresence>
       {open && (

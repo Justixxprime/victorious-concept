@@ -5,11 +5,12 @@ import SEO from '../components/SEO'
 import { useAuth } from '../context/AuthContext'
 import { useAddresses } from '../hooks/useAddresses'
 import { supabase } from '../lib/supabaseClient'
-import { siteImages } from '../data/siteImages'
+import { useSiteImages } from '../hooks/useSiteImages'
 import { useSiteSettings } from '../hooks/useSiteSettings'
 import { Mail, Lock, MapPin, Trash2, Plus, PackageSearch, ArrowRight, Sparkles, Heart, ScrollText, Gift, Copy, Check } from 'lucide-react'
 
 function Account() {
+  const { siteImages } = useSiteImages()
   const { user, signUp, signIn, signOut } = useAuth()
   const navigate = useNavigate()
   const [mode, setMode] = useState('signin')

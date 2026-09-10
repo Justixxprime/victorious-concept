@@ -1,6 +1,6 @@
 import SEO from '../components/SEO'
 import RevealImage from '../components/RevealImage'
-import { siteImages } from '../data/siteImages'
+import { useSiteImages } from '../hooks/useSiteImages'
 import { GraduationCap, MapPin, Users, TrendingUp, Award, Sparkles } from 'lucide-react'
 
 const timeline = [
@@ -59,6 +59,7 @@ const values = [
 ]
 
 function About() {
+  const { siteImages } = useSiteImages()
   return (
     <section className="bg-cream dark:bg-espresso transition-colors">
       <SEO title="About" description="The story of Victorious Concept, from Lagos Island and Trade Fair market runs to a full fashion brand." />

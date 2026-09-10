@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { ChevronDown, ShoppingBag, CreditCard, Truck, RefreshCw, ShieldCheck } from 'lucide-react'
 import PageHero from '../components/PageHero'
 import SEO from '../components/SEO'
-import { siteImages } from '../data/siteImages'
+import { useSiteImages } from '../hooks/useSiteImages'
 
 const faqs = [
   {
@@ -33,6 +33,7 @@ const faqs = [
 ]
 
 function FAQ() {
+  const { siteImages } = useSiteImages()
   const [openIndex, setOpenIndex] = useState(null)
 
   return (

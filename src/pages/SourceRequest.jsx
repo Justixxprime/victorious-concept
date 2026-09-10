@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import SEO from '../components/SEO'
 import { ArrowRight, ArrowLeft, Upload, Check } from 'lucide-react'
-import { siteImages } from '../data/siteImages'
+import { useSiteImages } from '../hooks/useSiteImages'
 import { useBusinessSettings } from '../context/BusinessSettingsContext'
 
 const steps = ['What', 'References', 'Budget', 'You']
 
 function SourceRequest() {
+  const { siteImages } = useSiteImages()
   const { whatsappNumber } = useBusinessSettings()
   const [step, setStep] = useState(0)
   const [form, setForm] = useState({

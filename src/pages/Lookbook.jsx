@@ -6,7 +6,7 @@ import { useProducts } from '../hooks/useProducts'
 import { useSiteSettings } from '../hooks/useSiteSettings'
 import { formatPrice } from '../utils/formatPrice'
 import RevealImage from '../components/RevealImage'
-import { siteImages } from '../data/siteImages'
+import { useSiteImages } from '../hooks/useSiteImages'
 import { ArrowUpRight } from 'lucide-react'
 import { useEditorialCursor } from '../context/CursorContext'
 
@@ -80,6 +80,7 @@ function StyledLook({ look, products, cursor }) {
 function Lookbook() {
   const { products } = useProducts()
   const { value: looks } = useSiteSettings('lookbook_looks')
+  const { siteImages } = useSiteImages()
   const cursor = useEditorialCursor()
 
   return (

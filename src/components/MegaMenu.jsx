@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ShoppingBag, Footprints, Shirt, Droplet, Gem, Tag, ArrowRight, Sparkles, TrendingUp } from 'lucide-react'
 import { useCategories } from '../hooks/useCategories'
 import { useProducts } from '../hooks/useProducts'
-import { categoryImages, siteImages } from '../data/siteImages'
+import { useSiteImages } from '../hooks/useSiteImages'
 import { formatPrice } from '../utils/formatPrice'
 
 const iconMap = {
@@ -16,6 +16,7 @@ const iconMap = {
 }
 
 function MegaMenu({ open, containerRef }) {
+  const { siteImages, categoryImages } = useSiteImages()
   const { categories } = useCategories()
   const { products } = useProducts()
   const trending = products.filter((p) => p.isFeatured).slice(0, 3)
