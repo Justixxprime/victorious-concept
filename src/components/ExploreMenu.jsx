@@ -25,11 +25,14 @@ const pages = [
   { label: 'Contact', to: '/contact', icon: MessageCircle, blurb: 'Talk to a real person' },
 ]
 
-function ExploreMenu({ open, onNavigate }) {
+function ExploreMenu({ open, onNavigate, containerRef }) {
   return (
     <AnimatePresence>
       {open && (
         <motion.div
+          ref={containerRef}
+          role="menu"
+          aria-label="Explore Victorious Concept"
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}

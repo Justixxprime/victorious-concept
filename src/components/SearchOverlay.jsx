@@ -4,12 +4,14 @@ import { X, Search as SearchIcon, Clock, TrendingUp } from 'lucide-react'
 import { useProducts } from '../hooks/useProducts'
 import { useCategories } from '../hooks/useCategories'
 import { formatPrice } from '../utils/formatPrice'
+import { useFocusTrap } from '../hooks/useFocusTrap'
 
 const RECENT_KEY = 'vc-recent-searches'
 
 function SearchOverlay({ onClose }) {
   const { products } = useProducts()
   const { categories } = useCategories()
+  const trapRef = useFocusTrap(true, onClose)
   const [query, setQuery] = useState('')
   const [recentSearches, setRecentSearches] = useState(() => {
     const saved = localStorage.getItem(RECENT_KEY)
@@ -44,7 +46,13 @@ function SearchOverlay({ onClose }) {
   const featured = products.filter((p) => p.isFeatured).slice(0, 4)
 
   return (
-    <div className="fixed inset-0 bg-cream dark:bg-espresso z-50 flex flex-col px-6 pt-6 pb-10 overflow-y-auto">
+    <div
+      ref={trapRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Search"
+      className="fixed inset-0 bg-cream dark:bg-espresso z-50 flex flex-col px-6 pt-6 pb-10 overflow-y-auto"
+    >
       <div className="max-w-2xl mx-auto w-full">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3 flex-1 border-b border-gold/30 pb-3">

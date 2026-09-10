@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { useFocusTrap } from '../hooks/useFocusTrap'
 import { motion } from 'framer-motion'
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
@@ -61,6 +62,10 @@ function Navbar() {
   const { user } = useAuth()
   const location = useLocation()
 
+  const mobileMenuRef = useFocusTrap(menuOpen, () => setMenuOpen(false))
+  const megaMenuRef = useFocusTrap(megaMenuOpen, () => setMegaMenuOpen(false))
+  const exploreMenuRef = useFocusTrap(exploreOpen, () => setExploreOpen(false))
+
   // On the homepage, the navbar blends directly into the cinematic Hero
   // below it instead of sitting on a mismatched cream/espresso bar.
   const isHome = location.pathname === '/'
@@ -92,6 +97,9 @@ function Navbar() {
               >
                 <Link
                   to={link.to}
+                  onFocus={() => setMegaMenuOpen(true)}
+                  aria-expanded={megaMenuOpen}
+                  aria-haspopup="true"
                   className="relative hover:text-gold-deep dark:text-gold transition-colors group/nav"
                 >
                   {link.label}
@@ -113,7 +121,12 @@ function Navbar() {
             onMouseEnter={() => setExploreOpen(true)}
             onMouseLeave={() => setExploreOpen(false)}
           >
-            <button className="relative flex items-center gap-1.5 hover:text-gold-deep dark:text-gold transition-colors group/nav">
+            <button
+              onFocus={() => setExploreOpen(true)}
+              aria-expanded={exploreOpen}
+              aria-haspopup="true"
+              className="relative flex items-center gap-1.5 hover:text-gold-deep dark:text-gold transition-colors group/nav"
+            >
               <Layers className="w-3.5 h-3.5" />
               Explore
               <span className="absolute -bottom-1 left-0 w-0 h-px bg-gold group-hover/nav:w-full transition-all duration-300 ease-out" />
@@ -225,21 +238,33 @@ function Navbar() {
       <div
         onMouseEnter={() => setMegaMenuOpen(true)}
         onMouseLeave={() => setMegaMenuOpen(false)}
+        onBlur={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget)) setMegaMenuOpen(false)
+        }}
       >
-        <MegaMenu open={megaMenuOpen} />
+        <MegaMenu open={megaMenuOpen} containerRef={megaMenuRef} />
       </div>
 
       {/* EXPLORE MENU */}
       <div
         onMouseEnter={() => setExploreOpen(true)}
         onMouseLeave={() => setExploreOpen(false)}
+        onBlur={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget)) setExploreOpen(false)
+        }}
       >
-        <ExploreMenu open={exploreOpen} onNavigate={() => setExploreOpen(false)} />
+        <ExploreMenu open={exploreOpen} onNavigate={() => setExploreOpen(false)} containerRef={exploreMenuRef} />
       </div>
 
       {/* MOBILE MENU */}
       {menuOpen && (
-        <div className="fixed inset-0 bg-cream dark:bg-espresso z-50 flex flex-col p-6 overflow-y-auto">
+        <div
+          ref={mobileMenuRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Site menu"
+          className="fixed inset-0 bg-cream dark:bg-espresso z-50 flex flex-col p-6 overflow-y-auto"
+        >
 
           {/* MOBILE MENU HEADER */}
           <div className="flex justify-between items-center mb-10">

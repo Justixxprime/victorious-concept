@@ -15,7 +15,7 @@ const iconMap = {
   accessories: Gem,
 }
 
-function MegaMenu({ open }) {
+function MegaMenu({ open, containerRef }) {
   const { categories } = useCategories()
   const { products } = useProducts()
   const trending = products.filter((p) => p.isFeatured).slice(0, 3)
@@ -24,6 +24,9 @@ function MegaMenu({ open }) {
     <AnimatePresence>
       {open && (
         <motion.div
+          ref={containerRef}
+          role="menu"
+          aria-label="Shop by category"
           initial={{ opacity: 0, y: -14, filter: 'blur(6px)' }}
           animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
           exit={{ opacity: 0, y: -14, filter: 'blur(6px)' }}

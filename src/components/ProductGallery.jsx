@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useFocusTrap } from '../hooks/useFocusTrap'
 
 function ProductGallery({ images, alt, videoUrl }) {
   const [active, setActive] = useState(0)
   const [fullscreen, setFullscreen] = useState(false)
+  const trapRef = useFocusTrap(fullscreen, () => setFullscreen(false))
 
   function next() {
     setActive((i) => (i + 1) % images.length)
@@ -15,9 +17,11 @@ function ProductGallery({ images, alt, videoUrl }) {
 
   return (
     <div>
-      <div
-        className="relative aspect-square rounded-2xl overflow-hidden bg-gold/10 cursor-zoom-in"
+      <button
+        type="button"
         onClick={() => setFullscreen(true)}
+        aria-label="View full-screen image"
+        className="relative aspect-square rounded-2xl overflow-hidden bg-gold/10 cursor-zoom-in w-full block"
       >
         <AnimatePresence mode="wait">
           <motion.img
@@ -32,7 +36,7 @@ function ProductGallery({ images, alt, videoUrl }) {
             transition={{ duration: 0.3 }}
           />
         </AnimatePresence>
-      </div>
+      </button>
 
       {videoUrl && (
         <div className="mt-4">
@@ -61,11 +65,19 @@ function ProductGallery({ images, alt, videoUrl }) {
       <AnimatePresence>
         {fullscreen && (
           <motion.div
+            ref={trapRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label={`${alt} full-screen image`}
             className="fixed inset-0 bg-espresso/95 z-[70] flex items-center justify-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setFullscreen(false)}
+            onKeyDown={(e) => {
+              if (images.length > 1 && e.key === 'ArrowLeft') prev()
+              if (images.length > 1 && e.key === 'ArrowRight') next()
+            }}
           >
             <button
               onClick={() => setFullscreen(false)}

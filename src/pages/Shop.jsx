@@ -10,6 +10,7 @@ import Breadcrumbs from '../components/Breadcrumbs'
 import { useSearchParams } from 'react-router-dom'
 import PageHero from '../components/PageHero'
 import { siteImages } from '../data/siteImages'
+import { useFocusTrap } from '../hooks/useFocusTrap'
 
 function Shop() {
   const { products, loading, error } = useProducts()
@@ -23,6 +24,7 @@ function Shop() {
   const [maxPrice, setMaxPrice] = useState('')
   const [sizeFilter, setSizeFilter] = useState('')
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false)
+  const filterDrawerRef = useFocusTrap(filterDrawerOpen, () => setFilterDrawerOpen(false))
 
   let filtered =
     activeCategory === 'all'
@@ -233,6 +235,10 @@ function Shop() {
               {/* Drawer */}
 
               <motion.div
+                ref={filterDrawerRef}
+                role="dialog"
+                aria-modal="true"
+                aria-label="Filters and sort"
                 initial={{ y: '100%' }}
                 animate={{ y: 0 }}
                 exit={{ y: '100%' }}
