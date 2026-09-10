@@ -1,9 +1,26 @@
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { motion, useScroll, useTransform } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 import RevealImage from './RevealImage'
 import { formatPrice } from '../utils/formatPrice'
+import { useEditorialCursor } from '../context/CursorContext'
 
 function EditorialFeature({ product, headline, description }) {
+  const cursor = useEditorialCursor()
+  const imageWrapRef = useRef(null)
+  const [parallaxEnabled, setParallaxEnabled] = useState(false)
+  const { scrollYProgress } = useScroll({
+    target: imageWrapRef,
+    offset: ['start end', 'end start'],
+  })
+  const rawY = useTransform(scrollYProgress, [0, 1], [-24, 24])
+  const y = useTransform(rawY, (v) => (parallaxEnabled ? v : 0))
+
+  useEffect(() => {
+    setParallaxEnabled(!window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+  }, [])
+
   if (!product) return null
 
   return (
@@ -17,11 +34,20 @@ function EditorialFeature({ product, headline, description }) {
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-          <RevealImage
-            src={product.images?.[0] || product.image}
-            alt={product.name}
-            className="aspect-[4/5] rounded-2xl"
-          />
+          <motion.div ref={imageWrapRef} style={{ y }}>
+            <Link
+              to={`/product/${product.id}`}
+              onMouseEnter={() => cursor.show('View Piece')}
+              onMouseLeave={cursor.hide}
+              className="block"
+            >
+              <RevealImage
+                src={product.images?.[0] || product.image}
+                alt={product.name}
+                className="aspect-[4/5] rounded-2xl"
+              />
+            </Link>
+          </motion.div>
 
           <div className="flex flex-col gap-6">
             <div>

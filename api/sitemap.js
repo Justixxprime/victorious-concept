@@ -23,6 +23,15 @@ const STATIC_PAGES = [
   'collections',
 ]
 
+// Journal posts are code-defined content (src/data/journalPosts.js), not
+// admin-editable via the database, so their slugs are listed here directly
+// alongside the other static pages rather than fetched live.
+const JOURNAL_SLUGS = [
+  'from-lagos-island-to-your-doorstep',
+  'how-to-style-one-bag-three-ways',
+  'why-we-source-instead-of-just-stock',
+]
+
 export default async function handler(req, res) {
   const [{ data: products }, { data: categories }, { data: collections }] = await Promise.all([
     supabase.from('products').select('id, created_at, status').neq('status', 'hidden'),
@@ -34,6 +43,7 @@ export default async function handler(req, res) {
 
   const urls = [
     ...STATIC_PAGES.map((path) => `${SITE_URL}/${path}`),
+    ...JOURNAL_SLUGS.map((slug) => `${SITE_URL}/journal/${slug}`),
     ...(categories || []).map((c) => `${SITE_URL}/category/${c.id}`),
     ...(collections || []).map((c) => `${SITE_URL}/collection/${c.slug}`),
     ...(products || []).map((p) => ({

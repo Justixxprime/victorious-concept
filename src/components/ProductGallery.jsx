@@ -2,11 +2,13 @@ import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useFocusTrap } from '../hooks/useFocusTrap'
+import { useEditorialCursor } from '../context/CursorContext'
 
 function ProductGallery({ images, alt, videoUrl }) {
   const [active, setActive] = useState(0)
   const [fullscreen, setFullscreen] = useState(false)
   const trapRef = useFocusTrap(fullscreen, () => setFullscreen(false))
+  const cursor = useEditorialCursor()
 
   function next() {
     setActive((i) => (i + 1) % images.length)
@@ -19,7 +21,12 @@ function ProductGallery({ images, alt, videoUrl }) {
     <div>
       <button
         type="button"
-        onClick={() => setFullscreen(true)}
+        onClick={() => {
+          cursor.hide()
+          setFullscreen(true)
+        }}
+        onMouseEnter={() => cursor.show('Expand')}
+        onMouseLeave={cursor.hide}
         aria-label="View full-screen image"
         className="relative aspect-square rounded-2xl overflow-hidden bg-gold/10 cursor-zoom-in w-full block"
       >

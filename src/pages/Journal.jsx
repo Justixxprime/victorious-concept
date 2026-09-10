@@ -1,33 +1,14 @@
 import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
+import { ArrowUpRight } from 'lucide-react'
 import SEO from '../components/SEO'
 import RevealImage from '../components/RevealImage'
-import { siteImages, categoryImages } from '../data/siteImages'
-
-const posts = [
-  {
-    title: 'From Lagos Island to Your Doorstep',
-    excerpt:
-      'Victorious Concept started the way most real things do. Small, and out of necessity. While still in school, our founder began sourcing bags and shoes from Lagos Island market for friends on campus who wanted something specific and couldn\'t find it themselves. What started as favors between friends grew into a business built on the same instinct: go find the exact thing someone actually wants, and bring it back.',
-    topic: 'Founder Journey',
-    image: siteImages.aboutStory,
-  },
-  {
-    title: 'How to Style One Bag Three Ways',
-    excerpt:
-      'A great bag earns its place by working harder than one outfit. Wear it structured with tailored pieces for the office, sling it crossbody over a simple dress for errands, or let it anchor an all-black look for a night out. The trick is choosing a piece with a shape confident enough to move between all three, which is exactly what we look for before anything gets listed.',
-    topic: 'Style Tips',
-    image: categoryImages.bags,
-  },
-  {
-    title: 'Why We Source Instead of Just Stock',
-    excerpt:
-      'Most stores stock whatever\'s already available. We do the opposite. Someone tells us what they\'re picturing, and we go looking until we find it, wherever that takes us. It\'s slower, and it means every item on this site was chosen on purpose, not picked from a catalog. That philosophy is also why Source It For Me exists as its own feature, because sourcing was never a side function here, it was the whole starting point.',
-    topic: 'Behind the Brand',
-    image: siteImages.aboutMosaic1,
-  },
-]
+import { journalPosts, estimateReadMinutes } from '../data/journalPosts'
+import { useEditorialCursor } from '../context/CursorContext'
 
 function Journal() {
+  const cursor = useEditorialCursor()
+
   return (
     <section className="bg-cream dark:bg-espresso transition-colors py-16 px-6 min-h-screen">
       <SEO title="Journal" description="Stories, styling tips and updates from Victorious Concept." />
@@ -40,29 +21,47 @@ function Journal() {
         </h1>
 
         <div className="flex flex-col gap-10">
-          {posts.map((post, i) => (
+          {journalPosts.map((post, i) => (
             <motion.article
-              key={post.title}
+              key={post.slug}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-80px' }}
               transition={{ duration: 0.6, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
               className="border-b border-gold/20 pb-10"
             >
-              <RevealImage
-                src={post.image}
-                alt={post.title}
-                className="aspect-video rounded-2xl mb-5"
-              />
-              <span className="inline-block font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold mb-3">
-                {post.topic}
-              </span>
-              <h2 className="font-display italic text-2xl text-espresso dark:text-cream mb-2">
-                {post.title}
-              </h2>
-              <p className="font-sans text-sm text-espresso/60 dark:text-cream/60 leading-relaxed">
-                {post.excerpt}
-              </p>
+              <Link
+                to={`/journal/${post.slug}`}
+                onMouseEnter={() => cursor.show('Read Story')}
+                onMouseLeave={cursor.hide}
+                className="group block"
+              >
+                <div className="relative">
+                  <RevealImage
+                    src={post.image}
+                    alt={post.title}
+                    className="aspect-video rounded-2xl mb-5"
+                  />
+                  <div className="absolute bottom-4 right-4 w-8 h-8 rounded-full bg-cream/90 flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                    <ArrowUpRight className="w-4 h-4 text-espresso" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="inline-block font-sans text-xs uppercase tracking-widest text-gold-deep dark:text-gold">
+                    {post.topic}
+                  </span>
+                  <span className="w-1 h-1 rounded-full bg-espresso/30 dark:bg-cream/30" />
+                  <span className="font-sans text-xs text-espresso/50 dark:text-cream/50">
+                    {estimateReadMinutes(post)} min read
+                  </span>
+                </div>
+                <h2 className="font-display italic text-2xl text-espresso dark:text-cream mb-2 group-hover:text-gold-deep dark:group-hover:text-gold transition-colors">
+                  {post.title}
+                </h2>
+                <p className="font-sans text-sm text-espresso/60 dark:text-cream/60 leading-relaxed">
+                  {post.excerpt}
+                </p>
+              </Link>
             </motion.article>
           ))}
         </div>

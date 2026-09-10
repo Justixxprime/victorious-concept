@@ -15,6 +15,7 @@ import { useEffect } from 'react'
 import { useToast } from './context/ToastContext'
 import CartReminder from './components/CartReminder'
 import { FlyToCartProvider } from './context/FlyToCartContext'
+import { CursorProvider } from './context/CursorContext'
 import ErrorBoundary from './components/ErrorBoundary'
 
 
@@ -31,6 +32,7 @@ const Delivery = lazy(() => import('./pages/Delivery'))
 const Returns = lazy(() => import('./pages/Returns'))
 const Lookbook = lazy(() => import('./pages/Lookbook'))
 const Journal = lazy(() => import('./pages/Journal'))
+const JournalPost = lazy(() => import('./pages/JournalPost'))
 const SourceRequest = lazy(() => import('./pages/SourceRequest'))
 const Checkout = lazy(() => import('./pages/Checkout'))
 const Account = lazy(() => import('./pages/Account'))
@@ -75,6 +77,7 @@ function AnimatedRoutes() {
             <Route path="/returns" element={<Returns />} />
             <Route path="/lookbook" element={<Lookbook />} />
             <Route path="/journal" element={<Journal />} />
+            <Route path="/journal/:slug" element={<JournalPost />} />
             <Route path="/source" element={<SourceRequest />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/account" element={<Account />} />
@@ -120,6 +123,7 @@ function App() {
             <WishlistProvider>
               <ToastProvider>
                 <FlyToCartProvider>
+                  <CursorProvider>
                   <div className="min-h-screen bg-cream dark:bg-espresso transition-colors">
                     <a
                       href="#main-content"
@@ -136,6 +140,7 @@ function App() {
                     <WhatsAppButton />
                     <CartReminder />
                   </div>
+                  </CursorProvider>
                 </FlyToCartProvider>
               </ToastProvider>
             </WishlistProvider>
