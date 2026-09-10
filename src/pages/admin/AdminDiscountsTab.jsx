@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabaseClient'
 import { formatPrice } from '../../utils/formatPrice'
 import { useAdminWrite } from '../../hooks/useAdminWrite'
+import { logAdminAction } from '../../utils/auditLog'
 import { Trash2 } from 'lucide-react'
 
 const EMPTY_FORM = {
@@ -51,6 +52,9 @@ export default function AdminDiscountsTab({ categories }) {
       'Adding discount code'
     )
     if (!ok) return
+    logAdminAction('coupon_created', 'coupon', couponForm.code.trim().toUpperCase(), {
+      discount_type: couponForm.discount_type,
+    })
     setCouponForm(EMPTY_FORM)
     refetch()
   }
@@ -61,6 +65,7 @@ export default function AdminDiscountsTab({ categories }) {
       'Updating discount code'
     )
     if (!ok) return
+    logAdminAction(active ? 'coupon_disabled' : 'coupon_enabled', 'coupon', id)
     refetch()
   }
 
@@ -68,6 +73,7 @@ export default function AdminDiscountsTab({ categories }) {
     if (!confirm('Delete this discount code?')) return
     const ok = await runWrite(supabase.from('coupons').delete().eq('id', id), 'Deleting discount code')
     if (!ok) return
+    logAdminAction('coupon_deleted', 'coupon', id)
     refetch()
   }
 

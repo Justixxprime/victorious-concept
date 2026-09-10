@@ -254,7 +254,7 @@ function ProductPage() {
             <button
               onClick={handleWishlist}
               className="w-14 h-14 rounded-full border border-gold/30 flex items-center justify-center hover:border-gold transition-colors"
-              aria-label="Add to wishlist"
+              aria-label={saved ? 'Remove from wishlist' : 'Add to wishlist'}
             >
               <Heart className={`w-5 h-5 ${saved ? 'fill-gold text-gold' : 'text-espresso dark:text-cream'}`} />
             </button>

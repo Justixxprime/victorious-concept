@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { supabase } from '../../lib/supabaseClient'
 import { formatPrice } from '../../utils/formatPrice'
 import { useToast } from '../../context/ToastContext'
+import { logAdminAction } from '../../utils/auditLog'
 
 export default function AdminReturnsTab({ returns, setReturns }) {
   const { showToast } = useToast()
@@ -25,6 +26,7 @@ export default function AdminReturnsTab({ returns, setReturns }) {
         showToast(data.error || 'Could not process this return', 'error')
       } else {
         showToast(decision === 'approve' ? 'Refund issued' : 'Return rejected', 'success')
+        logAdminAction(decision === 'approve' ? 'return_approved_refunded' : 'return_rejected', 'return_request', returnRequestId)
         const { data: refreshed } = await supabase
           .from('return_requests')
           .select('*, orders(order_number, total, payment_method, payment_status, payment_reference, customer_name, customer_phone, items, shipping_fee)')

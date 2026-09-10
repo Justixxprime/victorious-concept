@@ -79,7 +79,7 @@ function ProductCard({ product }) {
         onClick={handleWishlist}
         whileTap={{ scale: 0.8 }}
         className="absolute top-3 right-3 w-9 h-9 rounded-full bg-cream/90 flex items-center justify-center hover:bg-cream transition-colors"
-        aria-label="Add to wishlist"
+        aria-label={saved ? 'Remove from wishlist' : 'Add to wishlist'}
       >
         <motion.div
           key={saved ? 'saved' : 'unsaved'}

@@ -7,7 +7,7 @@ import { supabase } from '../lib/supabaseClient'
 import SEO from '../components/SEO'
 import {
   Tags, LayoutDashboard, BarChart3, Percent, Users, Mail,
-  Quote, Layers, Package, Truck, RotateCcw, Settings, Star, Image,
+  Quote, Layers, Package, Truck, RotateCcw, Settings, Star, Image, ScrollText,
 } from 'lucide-react'
 import AdminProductsTab from './admin/AdminProductsTab'
 import AdminOrdersTab from './admin/AdminOrdersTab'
@@ -22,6 +22,7 @@ import AdminTestimonialsTab from './admin/AdminTestimonialsTab'
 import AdminReviewsTab from './admin/AdminReviewsTab'
 import AdminContentTab from './admin/AdminContentTab'
 import AdminImagesTab from './admin/AdminImagesTab'
+import AdminAuditLogTab from './admin/AdminAuditLogTab'
 import AdminBusinessTab from './admin/AdminBusinessTab'
 import AdminAnalyticsTab from './admin/AdminAnalyticsTab'
 
@@ -92,6 +93,7 @@ function Admin() {
     { id: 'images', label: 'Site Images', icon: Image },
     { id: 'business', label: 'Business Info', icon: Settings },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+    { id: 'audit', label: 'Audit Log', icon: ScrollText },
   ]
 
   return (
@@ -138,6 +140,7 @@ function Admin() {
         {tab === 'images' && <AdminImagesTab />}
         {tab === 'business' && <AdminBusinessTab />}
         {tab === 'analytics' && <AdminAnalyticsTab products={products} orders={orders} />}
+        {tab === 'audit' && <AdminAuditLogTab />}
       </div>
     </section>
   )

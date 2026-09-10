@@ -2,6 +2,7 @@ import { supabase } from '../../lib/supabaseClient'
 import { formatPrice } from '../../utils/formatPrice'
 import { useToast } from '../../context/ToastContext'
 import { useAdminWrite } from '../../hooks/useAdminWrite'
+import { logAdminAction } from '../../utils/auditLog'
 import { Trash2, Undo2 } from 'lucide-react'
 
 const paymentBadgeStyles = {
@@ -27,6 +28,7 @@ export default function AdminOrdersTab({ orders, ordersLoading, setOrders }) {
     if (!confirm('Delete this order permanently? This cannot be undone.')) return
     const ok = await runWrite(supabase.from('orders').delete().eq('id', id), 'Deleting order')
     if (!ok) return
+    logAdminAction('order_deleted', 'order', id)
     setOrders((prev) => prev.filter((o) => o.id !== id))
   }
 
@@ -45,10 +47,15 @@ export default function AdminOrdersTab({ orders, ordersLoading, setOrders }) {
     })
 
     if (error) {
-      showToast('Could not confirm this payment — please try again', 'error')
+      showToast('Could not confirm this payment, please try again', 'error')
       return
     }
 
+    logAdminAction('order_marked_paid', 'order', order.id, {
+      order_number: order.order_number,
+      amount: order.total,
+      method: order.payment_method,
+    })
     setOrders((prev) =>
       prev.map((o) =>
         o.id === order.id ? { ...o, payment_status: 'paid', order_status: 'processing' } : o
@@ -63,16 +70,17 @@ export default function AdminOrdersTab({ orders, ordersLoading, setOrders }) {
     const { data, error } = await supabase.rpc('undo_manual_payment', { p_order_id: order.id })
 
     if (error || data === 'no_manual_payment_found') {
-      showToast('Could not undo this — please try again', 'error')
+      showToast('Could not undo this, please try again', 'error')
       return
     }
 
+    logAdminAction('order_payment_undone', 'order', order.id, { order_number: order.order_number })
     setOrders((prev) =>
       prev.map((o) =>
         o.id === order.id ? { ...o, payment_status: 'unpaid', order_status: 'pending_payment' } : o
       )
     )
-    showToast('Payment undone — order is back to pending', 'success')
+    showToast('Payment undone, order is back to pending', 'success')
   }
 
   async function updateStatus(order, newStatus) {
@@ -81,6 +89,11 @@ export default function AdminOrdersTab({ orders, ordersLoading, setOrders }) {
       'Updating order status'
     )
     if (!ok) return
+    logAdminAction('order_status_changed', 'order', order.id, {
+      order_number: order.order_number,
+      from: order.order_status,
+      to: newStatus,
+    })
     setOrders((prev) => prev.map((o) => (o.id === order.id ? { ...o, order_status: newStatus } : o)))
   }
 

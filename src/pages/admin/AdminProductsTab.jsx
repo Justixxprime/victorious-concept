@@ -5,6 +5,7 @@ import { starterCatalog } from '../../data/starterCatalog'
 import { useToast } from '../../context/ToastContext'
 import { useAdminWrite } from '../../hooks/useAdminWrite'
 import { compressImage } from '../../utils/compressImage'
+import { logAdminAction } from '../../utils/auditLog'
 import AdminVariantManager from '../../components/AdminVariantManager'
 import AdminBulkImport from '../../components/AdminBulkImport'
 import { Trash2, Pencil, Plus, Upload } from 'lucide-react'
@@ -72,7 +73,7 @@ export default function AdminProductsTab({ products, loading, categories }) {
     }
 
     if (failures.length > 0) {
-      showToast(`${failures.length} photo${failures.length > 1 ? 's' : ''} couldn't be uploaded - ${failures[0]}`, 'error')
+      showToast(`${failures.length} photo${failures.length > 1 ? 's' : ''} couldn't be uploaded: ${failures[0]}`, 'error')
     }
 
     if (uploadedUrls.length > 0) {
@@ -102,9 +103,23 @@ export default function AdminProductsTab({ products, loading, categories }) {
     }
     let ok
     if (editing) {
+      const before = products.find((p) => p.id === editing)
       ok = await runWrite(supabase.from('products').update(payload).eq('id', editing), 'Saving product')
+      if (ok && before) {
+        if (Number(before.price) !== Number(form.price)) {
+          logAdminAction('product_price_changed', 'product', editing, {
+            name: form.name, from: before.price, to: form.price,
+          })
+        }
+        if (Number(before.stock) !== Number(form.stock)) {
+          logAdminAction('product_stock_changed', 'product', editing, {
+            name: form.name, from: before.stock, to: form.stock,
+          })
+        }
+      }
     } else {
       ok = await runWrite(supabase.from('products').insert(payload), 'Adding product')
+      if (ok) logAdminAction('product_created', 'product', form.name, { price: form.price, stock: form.stock })
     }
     setSaving(false)
     if (!ok) return
@@ -114,8 +129,10 @@ export default function AdminProductsTab({ products, loading, categories }) {
 
   async function handleDelete(id) {
     if (!confirm('Delete this product permanently?')) return
+    const product = products.find((p) => p.id === id)
     const ok = await runWrite(supabase.from('products').delete().eq('id', id), 'Deleting product')
     if (!ok) return
+    logAdminAction('product_deleted', 'product', id, { name: product?.name })
     window.location.reload()
   }
 
@@ -138,7 +155,7 @@ export default function AdminProductsTab({ products, loading, categories }) {
       if (ok) added++
     }
     setImporting(false)
-    showToast(`Import finished - added ${added}, skipped ${skipped} (already existed)`, added > 0 ? 'success' : 'error')
+    showToast(`Import finished. Added ${added}, skipped ${skipped} (already existed)`, added > 0 ? 'success' : 'error')
     window.location.reload()
   }
 

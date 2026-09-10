@@ -139,7 +139,7 @@ function Reviews({ productId }) {
               </div>
               <p className="font-sans text-sm text-espresso/80 dark:text-cream/80 mb-3">{r.comment}</p>
               {r.image_url && (
-                <img src={r.image_url} alt="Customer photo" className="w-24 h-24 rounded-xl object-cover" />
+                <img src={r.image_url} alt="Customer photo" loading="lazy" className="w-24 h-24 rounded-xl object-cover" />
               )}
             </div>
           ))}

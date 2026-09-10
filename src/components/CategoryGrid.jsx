@@ -43,6 +43,7 @@ function CategoryGrid() {
                     <img
                       src={categoryImages[cat.id]}
                       alt={cat.name}
+                      loading="lazy"
                       className="absolute inset-0 w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-700 ease-out"
                     />
                   )}

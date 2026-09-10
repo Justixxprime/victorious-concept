@@ -47,7 +47,7 @@ is the changelog subset of it.
 | `shipping_zones` | Delivery fees per zone, with `is_variable` for road/plane quote-on-request |
 | `return_requests` | Return/refund requests, tied to `process-refund.js` |
 | `restock_waitlist` | Customers waiting on an out-of-stock product |
-| `site_settings` | Key/value store: Hero content, WhatsApp number, bank details |
+| `site_settings` | Key/value store: `hero`, `spotlight`, `shop_the_look`, `lookbook_looks`, `site_images`, `business_contact`, `referral_program` |
 
 ## Functions (10)
 
